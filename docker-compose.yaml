@@ -1,0 +1,17 @@
+version: '3'
+services:
+  cosi-db:
+    image: rust:latest
+    environment:
+      - MONGODB_CONNSTRING=mongodb://cosi_test_db:testdatabasepass@mongodb
+    ports:
+      - 3000:3000
+      - 8000:8000
+    volumes:
+      - .:/mnt/cosi
+    command: bash -c "cd /mnt/cosi && cargo run"
+  mongodb:
+    image: mongo:5.0
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=cosi_test_db
+      - MONGO_INITDB_ROOT_PASSWORD=testdatabasepass
