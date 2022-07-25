@@ -1,61 +1,22 @@
-#  COSI DB
+# COSI Database
 
-## Design Specifications
+A database used for capturing ministry and community life within, usually, a church setting!
 
-A church is composed of many people.
-Each person can be grouped by relations like a family tree.
-The family tree can have relationships both past and present.
+## Requirements
 
-Groups form the basis of multiple relationships.
+* Rust `1.62.1`
+* MongoDB `v6.0.0`
 
-### Group Tables
+## Build and Setup
 
-#### Groups
+### Docker
 
-Good for capturing co-eccentric ministry hubs.
+Only available on Linux platforms. More info to come!
 
+### Native Install
+
+You must have the proper MongoDB version installed. Then:
+
+```bash
+cargo run
 ```
-groups {
-    group_id: xxx,
-    group_name: "Small Groups",
-    group_description: "Our usual meetings."
-}
-```
-
-#### Group Relations
-
-```
-group_relations {
-    person_id: xxx,
-    group_id: xxx,
-    role: "member"
-}
-```
-
-#### Events Table
-
-A group of people can meet at specific times and events.
-
-```
-events {
-    meeting_days: [0, 1, 3],
-    start_time: date
-    end_time: date | NA
-    start_date: date
-    end_date: date
-    reoccuring: Bool
-}
-```
-
-#### Household
-
-Captures the family dynamic.
-
-```
-household {
-    house_name: xxx
-    group_id: xxx
-    persons: [xxx, yyy]
-}
-```
-

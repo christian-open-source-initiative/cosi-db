@@ -1,0 +1,43 @@
+body, * {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+body {
+    background-color: #131516;
+    color: white;
+}
+
+#status {
+    color: #77dd77;
+    padding: 2rem;
+}
+
+#data-table {
+    border-collapse: collapse;
+    margin: auto;
+    overflow:hidden;
+    border-radius: 10px 10px 0 0;
+}
+
+#data-table th {
+    background-color: #1B2430;
+    color: #e9e9d8;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+#data-table td {
+    color: #d4d4b6;
+    border: 1px solid #1B2430;
+    padding: 15px;
+    min-width: 3rem;
+}
+#data-table tr {
+    background-color: #323550;
+}
+#data-table tr:nth-child(odd) {
+    background-color: #534261;
+}
+
+th:first-child { border-top-left-radius: 10px; }
+th:last-child { border-top-right-radius: 10px; }

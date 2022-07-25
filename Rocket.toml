@@ -1,1 +1,2 @@
 [default]
+template_dir = "templates"
