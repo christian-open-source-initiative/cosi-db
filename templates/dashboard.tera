@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>COSI DB</title>
+  <meta name="description" content="COSI Dashboard Dashboard Interface">
+  <link rel="stylesheet" href="public/css/index.css"/>
+  <script src="public/js/jquery.js"></script>
+  <script src="public/js/dashboard.js"></script>
+</head>
+<body>
+    <h1>COSI DB</h1>
+
+    <button type="button" id="gen-people">Generate Data</button>
+    <div id="status"></div>
+
+    <div id="loading">Now loading...</div>
+    <table id="data-table"></table>
+</body>
+</html>

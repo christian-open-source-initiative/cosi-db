@@ -1,51 +1,94 @@
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
-use rocket::{Rocket, Build};
-use mongodb::{bson::doc};
+// Rocket
+use rocket::response::content::{RawHtml, RawJson};
+use rocket::{fs::FileServer, Build, Rocket};
+use rocket_dyn_templates::{context, Template};
 
+// Mongo
+use mongodb::{bson::doc, options::FindOptions};
+use rocket::futures::TryStreamExt;
+
+// serde
+use serde_json;
+
+// COSI
 mod cosi_db;
-use cosi_db::connection::{MongoConnection, CosiDB};
-use cosi_db::person::{Person, Sex};
+use cosi_db::common::PaginateData;
+use cosi_db::connection::{CosiDB, MongoConnection};
+use cosi_db::person::{Generator, Person, Sex};
 
-#[cfg(test)] mod tests;
-
-#[get("/")]
-fn index() -> &'static str {
-    "hello COSI"
+async fn get_connection() -> CosiDB {
+    CosiDB::new("admin", "admin", None).await.unwrap()
 }
 
 #[get("/")]
-async fn generate_data() -> String {
+fn index() -> RawHtml<Template> {
+    RawHtml(Template::render("dashboard", context! {}))
+}
+
+#[get("/gen_people/<total>")]
+async fn generate_people(total: u8) -> RawJson<String> {
     #[cfg(debug_assertions)]
     {
-        let connection = CosiDB::new(
-            "admin",
-            "admin",
-            None
-        ).await.unwrap();
+        let connection = get_connection().await;
+        let person_data = Person::generate(total as u32);
 
-        let person_col = connection.client.database("cosi_db").collection::<Person>("person");
-        let p = Person { 
-            first_name: "hello".to_string(),
-            middle_name: "world".to_string(),
-            last_name: "lastname".to_string(),
-            nicks: Vec::new(),
-            dob: None,
-            age: None,
-            sex: Sex::Male
-        };
+        let person_col = connection
+            .client
+            .database("cosi_db")
+            .collection::<Person>("person");
         person_col.drop(None).await;
-        person_col.insert_one(p, None).await;
-        let fetched_name = person_col.find_one(doc! {"first_name": "hello"}, None).await.unwrap().unwrap().middle_name;
-        let total = person_col.count_documents(doc!{}, None).await.unwrap();
-        format!("{} Count {}", fetched_name, total)
+        person_col.insert_many(person_data, None).await;
+
+        let total = person_col.estimated_document_count(None).await.unwrap();
+        return RawJson(format!("{{\"total\": {}}}", total));
     }
+    {
+        return RawJson("{}".to_string());
+    }
+}
+
+// Hardcoded return max of 100.
+#[get("/get_people?<page>")]
+async fn get_people(page: Option<u64>) -> RawJson<String> {
+    let page = page.unwrap_or(0);
+
+    let connection = get_connection().await;
+    let person_col = connection
+        .client
+        .database("cosi_db")
+        .collection::<Person>("person");
+
+    // Page calculate.
+    let total_people: u64 = person_col.estimated_document_count(None).await.unwrap();
+    let batch_size: u32 = 100;
+    let total_pages: u64 = (total_people as f64 / batch_size as f64).ceil() as u64;
+
+    let find_options = FindOptions::builder()
+        .batch_size(batch_size)
+        .skip(batch_size as u64 * page)
+        .build();
+    let data_cursor = person_col.find(doc! {}, Some(find_options)).await.unwrap();
+    let data: Vec<Person> = data_cursor.try_collect().await.unwrap();
+
+    RawJson(
+        serde_json::to_string(&PaginateData {
+            page: page,
+            total_pages: total_pages,
+            data: data,
+        })
+        .unwrap(),
+    )
 }
 
 #[launch]
 async fn rocket() -> Rocket<Build> {
-    let rocket_build = rocket::build().mount("/", routes![index])
-                                      .mount("/debug", routes![generate_data]);
+    let rocket_build = rocket::build()
+        .mount("/public", FileServer::from("public"))
+        .mount("/", routes![index, generate_people, get_people])
+        .attach(Template::fairing());
 
     rocket_build
 }
