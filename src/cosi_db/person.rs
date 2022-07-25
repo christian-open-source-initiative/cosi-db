@@ -1,18 +1,20 @@
 // Houses person to person interactions.
 use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum Sex {
     Male,
     Female
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Person {
-    firstname: String,
-    middlename: String,
-    lastname: String,
-    nicks: Vec<String>,
-    dob: Option<NaiveDate>,
-    age: Option<u8>,
-    sex: Sex
+    pub first_name: String,
+    pub middle_name: String,
+    pub last_name: String,
+    pub nicks: Vec<String>,
+    pub dob: Option<NaiveDate>,
+    pub age: Option<u8>,
+    pub sex: Sex
 }
-
