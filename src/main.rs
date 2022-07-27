@@ -17,7 +17,8 @@ use serde_json;
 mod cosi_db;
 use cosi_db::common::PaginateData;
 use cosi_db::connection::{CosiDB, MongoConnection};
-use cosi_db::person::{Generator, Person, Sex};
+use cosi_db::person::{Person};
+use cosi_db::generator::{Generator};
 
 async fn get_connection() -> CosiDB {
     CosiDB::new("admin", "admin", None).await.unwrap()
