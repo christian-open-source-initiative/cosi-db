@@ -12,7 +12,7 @@ use rocket::futures::TryStreamExt;
 use crate::cosi_db::common::PaginateData;
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
 use crate::cosi_db::generator::Generator;
-use crate::cosi_db::person::Person;
+use crate::cosi_db::model::person::Person;
 
 async fn get_connection() -> CosiDB {
     CosiDB::new("admin", "admin", None).await.unwrap()

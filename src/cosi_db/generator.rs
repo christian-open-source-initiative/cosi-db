@@ -6,7 +6,7 @@ use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
 // COSI
-use super::person::{Person, Sex};
+use super::model::person::{Person, Sex};
 
 pub trait Generator<T> {
     fn generate(size: u32) -> Vec<T>;
