@@ -1,0 +1,13 @@
+#!/bin/bash
+
+{
+    echo "Formatting code.";
+    cargo fmt;
+    git add --all;
+} || { 
+    rustup component add rustfmt;
+    cargo fmt;
+    git add --all;
+} || {
+    echo "Is Rust installed yet on this machine? Skipping auto-formatting.";
+}

@@ -29,3 +29,16 @@ You must have the proper MongoDB version installed. Then:
 ```bash
 cargo run
 ```
+
+## Develop
+
+### Setup Auto Formatting
+
+Our team uses `cargo fmt` to format incoming code.
+Please execute the following to set-up auto formatting:
+
+```bash
+tools/install.py
+```
+
+This will setup the necessary scripts for your local development environment.
