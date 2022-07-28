@@ -1,12 +1,12 @@
 extern crate rand;
 
 use chrono::NaiveDate;
+use names::Name;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
-use names::Name;
 
 // COSI
-use super::person::{Sex, Person};
+use super::person::{Person, Sex};
 
 pub trait Generator<T> {
     fn generate(size: u32) -> Vec<T>;

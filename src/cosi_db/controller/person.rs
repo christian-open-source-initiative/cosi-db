@@ -2,17 +2,17 @@
 use serde_json;
 
 // rocket
-use rocket::response::content::{RawJson};
+use rocket::response::content::RawJson;
 
 // mongo
 use mongodb::{bson::doc, options::FindOptions};
 use rocket::futures::TryStreamExt;
 
 // cosi_db
-use crate::cosi_db::person::{Person};
-use crate::cosi_db::generator::{Generator};
 use crate::cosi_db::common::PaginateData;
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
+use crate::cosi_db::generator::Generator;
+use crate::cosi_db::person::Person;
 
 async fn get_connection() -> CosiDB {
     CosiDB::new("admin", "admin", None).await.unwrap()
