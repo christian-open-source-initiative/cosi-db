@@ -11,7 +11,16 @@ A database used for capturing ministry and community life within, usually, a chu
 
 ### Docker
 
-Only available on Linux platforms. More info to come!
+Only available on Linux platforms. Windows and Mac, try at your own risk as subnetworking can be inconsistent.
+You should have docker and docker compose plugin installed.
+
+```bash
+docker compose up
+```
+
+Then navigate to `127.0.0.1:8000`.
+
+**Note that docker deployment is useful for testing. However, can be noticeably slow. Docker runs in debug build by default.**
 
 ### Native Install
 
