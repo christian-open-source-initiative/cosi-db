@@ -7,6 +7,7 @@ pub struct CosiDBConfigs {
     pub ip: String,
     pub port: String,
     pub db_name: String,
+    pub auth_src: String,
 }
 
 impl Default for CosiDBConfigs {
@@ -15,6 +16,7 @@ impl Default for CosiDBConfigs {
             ip: "localhost".to_string(),
             port: "27017".to_string(),
             db_name: "cosi_db".to_string(),
+            auth_src: "admin".to_string(),
         }
     }
 }
@@ -42,8 +44,8 @@ impl MongoConnection for CosiDB {
         let c = config.unwrap_or_default();
 
         let mut client_options = ClientOptions::parse(format!(
-            "mongodb://{}:{}@{}:{}/{}",
-            user, pass, c.ip, c.port, c.db_name
+            "mongodb://{}:{}@{}:{}/{}?authSource={}",
+            user, pass, c.ip, c.port, c.db_name, c.auth_src
         ))
         .await?;
 
