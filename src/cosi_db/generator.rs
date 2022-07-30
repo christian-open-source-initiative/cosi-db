@@ -1,9 +1,11 @@
 extern crate rand;
 
 use chrono::NaiveDate;
-use names::Name;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
+
+use names::Name;
+use lipsum::lipsum;
 
 // COSI
 use super::model::person::{Person, Sex};
@@ -25,6 +27,28 @@ impl Generator<Sex> for Sex {
                 _ => Sex::Undefined,
             };
             result.push(pick);
+        }
+
+        return result;
+    }
+}
+
+impl Generator<Address> for Address {
+    fn generate(size: u32) -> Vec<Address> {
+        let mut result = Vec::new();
+
+        // TODO: Generate optional.
+        for i in 0..size {
+            result.push(Address {
+                line_one: lipsum(8),
+                line_two: lipsum(8),
+                line_three: lipsum(8),
+                city: lipsum(1),
+                region: lipsum(1),
+                postal_code: Some(lipsum(1)),
+                county: Some(lipsum(2)),
+                country: Some(lipsum(3))
+            });
         }
 
         return result;
