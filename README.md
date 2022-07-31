@@ -22,6 +22,18 @@ Then navigate to `127.0.0.1:8000`.
 
 **Note that docker deployment is useful for testing. However, can be noticeably slow. Docker runs in debug build by default.**
 
+#### Recaching Rust Builds
+
+By default `Dockerfile` is setup in such a way as to auto-cache dependency building *as long as dependencies were not modified (in Cargo.toml) between subsequent container boots.*
+
+To re-cache dependencies in containers once they have been modified, rebuild the cache:
+
+```bash
+docker compose build
+```
+
+Then you can call `docker compose up` normally once more.
+
 ### Native Install
 
 You must have the proper MongoDB version installed. Then:

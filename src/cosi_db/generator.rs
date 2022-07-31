@@ -5,10 +5,11 @@ use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
 use names::Name;
-use lipsum::lipsum;
+use lipsum::lipsum_from_seed;
 
 // COSI
 use super::model::person::{Person, Sex};
+use super::model::address::{Address};
 
 pub trait Generator<T> {
     fn generate(size: u32) -> Vec<T>;
@@ -36,18 +37,20 @@ impl Generator<Sex> for Sex {
 impl Generator<Address> for Address {
     fn generate(size: u32) -> Vec<Address> {
         let mut result = Vec::new();
+        let mut rng = thread_rng();
 
         // TODO: Generate optional.
         for i in 0..size {
+            let seed =  rng.gen_range(0, 2_u64.pow(32)) as u64;
             result.push(Address {
-                line_one: lipsum(8),
-                line_two: lipsum(8),
-                line_three: lipsum(8),
-                city: lipsum(1),
-                region: lipsum(1),
-                postal_code: Some(lipsum(1)),
-                county: Some(lipsum(2)),
-                country: Some(lipsum(3))
+                line_one: lipsum_from_seed(8, seed),
+                line_two: lipsum_from_seed(8, seed),
+                line_three: lipsum_from_seed(8, seed),
+                city: lipsum_from_seed(1, seed),
+                region: lipsum_from_seed(1, seed),
+                postal_code: Some(lipsum_from_seed(1, seed)),
+                county: Some(lipsum_from_seed(2, seed)),
+                country: Some(lipsum_from_seed(3, seed))
             });
         }
 

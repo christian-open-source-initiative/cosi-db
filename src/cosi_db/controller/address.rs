@@ -12,7 +12,11 @@ use rocket::futures::TryStreamExt;
 use crate::cosi_db::common::PaginateData;
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
 use crate::cosi_db::generator::Generator;
-use crate::cosi_db::model::person::Person;
+use crate::cosi_db::model::address::Address;
+
+async fn get_connection() -> CosiDB {
+    CosiDB::new("admin", "admin", None).await.unwrap()
+}
 
 #[get("/gen_address/<total>")]
 pub async fn generate_address(total: u8) -> RawJson<String> {
@@ -24,9 +28,8 @@ pub async fn generate_address(total: u8) -> RawJson<String> {
         address_col.drop(None).await;
         address_col.insert_many(address_data, None).await;
 
-        let total = person_col.estimated_document_count(None).await.unwrap();
+        let total = address_col.estimated_document_count(None).await.unwrap();
         return RawJson(format!("{{\"total\": {}}}", total));
-        }
     }
     {
         return RawJson("{}".to_string());
@@ -59,4 +62,5 @@ pub async fn get_address(page: Option<u64>) -> RawJson<String> {
             data: data,
         })
         .unwrap(),
+    )
 }
