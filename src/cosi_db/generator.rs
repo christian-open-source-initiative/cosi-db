@@ -4,12 +4,12 @@ use chrono::NaiveDate;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
-use names::Name;
 use lipsum::lipsum_words_from_seed;
+use names::Name;
 
 // COSI
+use super::model::address::Address;
 use super::model::person::{Person, Sex};
-use super::model::address::{Address};
 
 pub trait Generator<T> {
     fn generate(size: u32) -> Vec<T>;
@@ -41,7 +41,7 @@ impl Generator<Address> for Address {
 
         // TODO: Generate optional.
         for i in 0..size {
-            let seed: u64 =  rng.gen_range(0, 2_u64.pow(32));
+            let seed: u64 = rng.gen_range(0, 2_u64.pow(32));
             result.push(Address {
                 line_one: lipsum_words_from_seed(8, seed),
                 line_two: lipsum_words_from_seed(8, seed),
@@ -50,7 +50,7 @@ impl Generator<Address> for Address {
                 region: lipsum_words_from_seed(1, seed),
                 postal_code: Some(lipsum_words_from_seed(1, seed)),
                 county: Some(lipsum_words_from_seed(2, seed)),
-                country: Some(lipsum_words_from_seed(3, seed))
+                country: Some(lipsum_words_from_seed(3, seed)),
             });
         }
 

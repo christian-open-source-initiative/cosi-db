@@ -24,7 +24,10 @@ pub async fn generate_address(total: u8) -> RawJson<String> {
     {
         let connection = get_connection().await;
         let address_data = Address::generate(total as u32);
-        let address_col = connection.client.database("cosi_db").collection::<Address>("address");
+        let address_col = connection
+            .client
+            .database("cosi_db")
+            .collection::<Address>("address");
         address_col.drop(None).await;
         address_col.insert_many(address_data, None).await;
 
@@ -41,7 +44,10 @@ pub async fn get_address(page: Option<u64>) -> RawJson<String> {
     let page = page.unwrap_or(0);
 
     let connection = get_connection().await;
-    let address_col = connection.client.database("cosi_db").collection::<Address>("address");
+    let address_col = connection
+        .client
+        .database("cosi_db")
+        .collection::<Address>("address");
 
     // Page calculate.
     let total_address: u64 = address_col.estimated_document_count(None).await.unwrap();
