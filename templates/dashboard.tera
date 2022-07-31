@@ -11,7 +11,12 @@
 <body>
     <h1>COSI DB</h1>
 
-    <button type="button" id="gen-people">Generate Data</button>
+    <!-- Table Selection -->
+    <button type="button" id="address-select">Address Table</button>
+    <button type="button" id="people-select">People Table</button>
+
+    <button type="button" id="gen-data">Generate Data</button>
+
     <div id="status"></div>
 
     <div id="loading">Now loading...</div>

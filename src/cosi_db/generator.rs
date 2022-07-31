@@ -1,29 +1,15 @@
 extern crate rand;
 
-// Houses person to person interactions.
 use chrono::NaiveDate;
-use names::Name;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
-use serde::{Deserialize, Serialize};
 
-#[derive(Copy, Clone, Debug, Deserialize, Serialize)]
-pub enum Sex {
-    Male,
-    Female,
-    Undefined,
-}
+use lipsum::lipsum_words_from_seed;
+use names::Name;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Person {
-    pub first_name: String,
-    pub middle_name: String,
-    pub last_name: String,
-    pub nicks: Vec<String>,
-    pub dob: Option<NaiveDate>,
-    pub age: Option<u8>,
-    pub sex: Sex,
-}
+// COSI
+use super::model::address::Address;
+use super::model::person::{Person, Sex};
 
 pub trait Generator<T> {
     fn generate(size: u32) -> Vec<T>;
@@ -42,6 +28,30 @@ impl Generator<Sex> for Sex {
                 _ => Sex::Undefined,
             };
             result.push(pick);
+        }
+
+        return result;
+    }
+}
+
+impl Generator<Address> for Address {
+    fn generate(size: u32) -> Vec<Address> {
+        let mut result = Vec::new();
+        let mut rng = thread_rng();
+
+        // TODO: Generate optional.
+        for i in 0..size {
+            let seed: u64 = rng.gen_range(0, 2_u64.pow(32));
+            result.push(Address {
+                line_one: lipsum_words_from_seed(8, seed),
+                line_two: lipsum_words_from_seed(8, seed),
+                line_three: lipsum_words_from_seed(8, seed),
+                city: lipsum_words_from_seed(1, seed),
+                region: lipsum_words_from_seed(1, seed),
+                postal_code: Some(lipsum_words_from_seed(1, seed)),
+                county: Some(lipsum_words_from_seed(2, seed)),
+                country: Some(lipsum_words_from_seed(3, seed)),
+            });
         }
 
         return result;
