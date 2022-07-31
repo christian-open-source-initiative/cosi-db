@@ -5,7 +5,7 @@ use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
 use names::Name;
-use lipsum::lipsum_from_seed;
+use lipsum::lipsum_words_from_seed;
 
 // COSI
 use super::model::person::{Person, Sex};
@@ -41,16 +41,16 @@ impl Generator<Address> for Address {
 
         // TODO: Generate optional.
         for i in 0..size {
-            let seed =  rng.gen_range(0, 2_u64.pow(32)) as u64;
+            let seed: u64 =  rng.gen_range(0, 2_u64.pow(32));
             result.push(Address {
-                line_one: lipsum_from_seed(8, seed),
-                line_two: lipsum_from_seed(8, seed),
-                line_three: lipsum_from_seed(8, seed),
-                city: lipsum_from_seed(1, seed),
-                region: lipsum_from_seed(1, seed),
-                postal_code: Some(lipsum_from_seed(1, seed)),
-                county: Some(lipsum_from_seed(2, seed)),
-                country: Some(lipsum_from_seed(3, seed))
+                line_one: lipsum_words_from_seed(8, seed),
+                line_two: lipsum_words_from_seed(8, seed),
+                line_three: lipsum_words_from_seed(8, seed),
+                city: lipsum_words_from_seed(1, seed),
+                region: lipsum_words_from_seed(1, seed),
+                postal_code: Some(lipsum_words_from_seed(1, seed)),
+                county: Some(lipsum_words_from_seed(2, seed)),
+                country: Some(lipsum_words_from_seed(3, seed))
             });
         }
 
