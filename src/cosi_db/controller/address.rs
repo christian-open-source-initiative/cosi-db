@@ -9,10 +9,11 @@ use mongodb::{bson::doc, options::FindOptions};
 use rocket::futures::TryStreamExt;
 
 // cosi_db
-use crate::cosi_db::common::PaginateData;
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
+use crate::cosi_db::controller::common::PaginateData;
 use crate::cosi_db::generator::Generator;
 use crate::cosi_db::model::address::Address;
+use crate::generate_pageable_getter;
 
 async fn get_connection() -> CosiDB {
     CosiDB::new("admin", "admin", None).await.unwrap()
@@ -39,15 +40,12 @@ pub async fn generate_address(total: u8) -> RawJson<String> {
     }
 }
 
+// Generates Address getter endpoint.
+generate_pageable_getter!(Address);
+
 #[get("/get_address?<page>")]
 pub async fn get_address(page: Option<u64>) -> RawJson<String> {
     let page = page.unwrap_or(0);
-
-    let connection = get_connection().await;
-    let address_col = connection
-        .client
-        .database("cosi_db")
-        .collection::<Address>("address");
 
     // Page calculate.
     let total_address: u64 = address_col.estimated_document_count(None).await.unwrap();
@@ -60,7 +58,6 @@ pub async fn get_address(page: Option<u64>) -> RawJson<String> {
         .build();
     let data_cursor = address_col.find(doc! {}, Some(find_options)).await.unwrap();
     let data: Vec<Address> = data_cursor.try_collect().await.unwrap();
-
     RawJson(
         serde_json::to_string(&PaginateData {
             page: page,

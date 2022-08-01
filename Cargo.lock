@@ -371,6 +371,7 @@ dependencies = [
  "lipsum",
  "mongodb",
  "names",
+ "paste",
  "rand 0.7.3",
  "rocket",
  "rocket_dyn_templates",
@@ -1503,6 +1504,12 @@ checksum = "c705f256449c60da65e11ff6626e0c16a0a0b96aaa348de61376b249bc340f41"
 dependencies = [
  "regex",
 ]
+
+[[package]]
+name = "paste"
+version = "1.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c520e05135d6e763148b6426a837e239041653ba7becd2e538c076c738025fc"
 
 [[package]]
 name = "pbkdf2"

@@ -9,8 +9,8 @@ use mongodb::{bson::doc, options::FindOptions};
 use rocket::futures::TryStreamExt;
 
 // cosi_db
-use crate::cosi_db::common::PaginateData;
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
+use crate::cosi_db::controller::common::PaginateData;
 use crate::cosi_db::generator::Generator;
 use crate::cosi_db::model::person::Person;
 

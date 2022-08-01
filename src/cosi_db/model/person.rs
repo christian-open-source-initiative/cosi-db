@@ -1,4 +1,3 @@
-// Houses person to person interactions.
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
