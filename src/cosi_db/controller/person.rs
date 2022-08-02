@@ -53,12 +53,12 @@ pub async fn get_people(page: Option<u64>) -> RawJson<String> {
 
     // Page calculate.
     let total_people: u64 = person_col.estimated_document_count(None).await.unwrap();
-    let batch_size: u32 = 100;
-    let total_pages: u64 = (total_people as f64 / batch_size as f64).ceil() as u64;
+    let limit_size: i64 = 100;
+    let total_pages: u64 = (total_people as f64 / limit_size as f64).ceil() as u64;
 
     let find_options = FindOptions::builder()
-        .batch_size(batch_size)
-        .skip(batch_size as u64 * page)
+        .limit(limit_size)
+        .skip(limit_size as u64 * page)
         .build();
     let data_cursor = person_col.find(doc! {}, Some(find_options)).await.unwrap();
     let data: Vec<Person> = data_cursor.try_collect().await.unwrap();
