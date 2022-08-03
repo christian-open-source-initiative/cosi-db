@@ -40,30 +40,4 @@ pub async fn generate_address(total: u8) -> RawJson<String> {
     }
 }
 
-// Generates Address getter endpoint.
-generate_pageable_getter!(Address);
-
-#[get("/get_address?<page>")]
-pub async fn get_address(page: Option<u64>) -> RawJson<String> {
-    let page = page.unwrap_or(0);
-
-    // Page calculate.
-    let total_address: u64 = address_col.estimated_document_count(None).await.unwrap();
-    let limit_size: i64 = 100;
-    let total_pages: u64 = (total_address as f64 / limit_size as f64).ceil() as u64;
-
-    let find_options = FindOptions::builder()
-        .limit(limit_size)
-        .skip(limit_size as u64 * page)
-        .build();
-    let data_cursor = address_col.find(doc! {}, Some(find_options)).await.unwrap();
-    let data: Vec<Address> = data_cursor.try_collect().await.unwrap();
-    RawJson(
-        serde_json::to_string(&PaginateData {
-            page: page,
-            total_pages: total_pages,
-            data: data,
-        })
-        .unwrap(),
-    )
-}
+generate_pageable_getter! { Address, "address" }

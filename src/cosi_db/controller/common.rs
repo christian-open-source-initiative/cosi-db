@@ -6,45 +6,45 @@ pub struct PaginateData<T> {
     pub total_pages: u64,
     pub data: Vec<T>,
 }
-
 // Helper macros to generate endpoints.
 // Use paste to auto-generate a helper macro.
 #[macro_export]
 macro_rules! generate_pageable_getter {
-    ($table: ident, $route: expr) => {
-        use paste::paste;
-        paste! {
-            #[get([</get $table _{} ?<page>>])]
-            pub fn [<get $table:lower>](page: Option<u64>) -> RawJson<String> {
-                let page = page.unwrap_or(0);
+    ($T:ident, $S:literal) => {
+        $crate::paste::paste! {
+            $crate::with_builtin_macros::with_builtin!{
+                let $v_path = concat!("/get_", $S, "?<page>") in {
+                    #[get($v_path)]
+                    pub async fn [<get_ $T:lower>](page: Option<u64>) -> RawJson<String> {
+                        let page = page.unwrap_or(0);
 
-                let connection = get_connection().await;
-                let col = connection
-                    .client
-                    .database("cosi_db")
-                    .collection::<$table>(stringify!($ident).to_lower());
+                        let col = get_connection().await
+                            .client
+                            .database("cosi_db")
+                            .collection::<$T>(&stringify!($T).to_lowercase());
 
-                // Page calculate.
-                let total_result: u64 = col.estimated_document_count(None).await.unwrap();
-                let batch_size: u32 = 100;
-                let total_pages: u64 = (total_result as f64 / batch_size as f64).ceil() as u64;
+                        // Page calculate.
+                        let total_result: u64 = col.estimated_document_count(None).await.unwrap();
+                        let limit_size: i64 = 100;
+                        let total_pages: u64 = (total_result as f64 / limit_size as f64).ceil() as u64;
 
-                let find_options = FindOptions::builder()
-                    .batch_size(batch_size)
-                    .skip(batch_size as u64 * page)
-                    .build();
-                let data_cursor = col.find(doc! {}, Some(find_options)).await.unwrap();
-                let data: Vec<Address> = data_cursor.try_collect().await.unwrap();
+                        let find_options = FindOptions::builder()
+                            .limit(limit_size)
+                            .skip(limit_size as u64 * page)
+                            .build();
+                        let data_cursor = col.find(doc! {}, Some(find_options)).await.unwrap();
+                        let data: Vec<$T> = data_cursor.try_collect().await.unwrap();
 
-                RawJson(
-                    serde_json::to_string(&PaginateData {
-                        page: page,
-                        total_pages: total_pages,
-                        data: data,
-                    })
-                    .unwrap(),
-                )
+                        RawJson(
+                            serde_json::to_string(&PaginateData {
+                                page: page,
+                                total_pages: total_pages,
+                                data: data
+                            }).unwrap()
+                        )
+                    }
+                }
             }
         }
-    };
+    }
 }

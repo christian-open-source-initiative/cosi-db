@@ -1,5 +1,5 @@
 const ALL_PAGEABLE_ENDPOINTS = [
-    "get_people",
+    "get_person",
     "get_address"
 ];
 
