@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
 use lipsum::lipsum_words_from_seed;
@@ -57,7 +56,7 @@ impl Generator<Address> for Address {
         let mut rng = thread_rng();
 
         // TODO: Generate optional.
-        for i in 0..size {
+        for _ in 0..size {
             let seed: u64 = rng.gen_range(0, 2_u64.pow(32));
             result.push(Address {
                 line_one: lipsum_words_from_seed(8, seed),

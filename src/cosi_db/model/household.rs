@@ -1,19 +1,14 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, from_document, to_document, Document};
-use mongodb::options::AggregateOptions;
-use mongodb::options::FindOptions;
 use rocket::futures::TryStreamExt;
 
 use names::Name;
-use rand::rngs::ThreadRng;
-use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
 use core::convert::From;
 
 // cosi_db
-use crate::cosi_db::connection::CosiDB;
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};
 
@@ -85,11 +80,11 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             let opt = r.as_ref().unwrap();
             let orm_i = orm.pop().unwrap();
 
-            match (opt) {
-                (Some(h)) => {
+            match opt {
+                Some(h) => {
                     results.push(h.clone());
                 }
-                (None) => {
+                None => {
                     let addr_doc = address_raw
                         .find_one(to_document(&orm_i.address)?, None)
                         .await?
@@ -168,7 +163,7 @@ impl Generator<Household> for Household {
         let mut generator = names::Generator::with_naming(Name::Plain);
         let mut get_name = || generator.next().unwrap();
 
-        for i in 0..size {
+        for _ in 0..size {
             let address = result_address.pop().unwrap();
             let person = result_person.pop().unwrap();
             result.push(Household {

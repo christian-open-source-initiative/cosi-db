@@ -2,12 +2,11 @@ use async_trait::async_trait;
 use mongodb::{bson::Document, options::FindOptions};
 use mongodb::{Collection, Cursor};
 
-use core::fmt::Display;
-use futures::stream::{StreamExt, TryStreamExt};
+use futures::stream::TryStreamExt;
 
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
 
 #[async_trait]
 pub trait Generator<T> {
