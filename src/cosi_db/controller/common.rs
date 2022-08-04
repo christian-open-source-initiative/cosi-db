@@ -1,11 +1,19 @@
 use serde::{Deserialize, Serialize};
 
+// cosi_db
+use crate::cosi_db::connection::{CosiDB, MongoConnection};
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PaginateData<T> {
     pub page: u64,
     pub total_pages: u64,
     pub data: Vec<T>,
 }
+
+pub async fn get_connection() -> CosiDB {
+    CosiDB::new("admin", "admin", None).await.unwrap()
+}
+
 // Helper macros to generate endpoints.
 // Use paste to auto-generate a helper macro.
 #[macro_export]
@@ -18,7 +26,7 @@ macro_rules! generate_pageable_getter {
                     pub async fn [<get_ $T:lower>](page: Option<u64>) -> RawJson<String> {
                         let page = page.unwrap_or(0);
 
-                        let col = get_connection().await
+                        let col = $crate::cosi_db::controller::common::get_connection().await
                             .client
                             .database("cosi_db")
                             .collection::<$T>(&stringify!($T).to_lowercase());

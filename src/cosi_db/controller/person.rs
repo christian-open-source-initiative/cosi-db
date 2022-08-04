@@ -10,14 +10,10 @@ use rocket::futures::TryStreamExt;
 
 // cosi_db
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
-use crate::cosi_db::controller::common::PaginateData;
+use crate::cosi_db::controller::common::{get_connection, PaginateData};
 use crate::cosi_db::generator::Generator;
 use crate::cosi_db::model::person::Person;
 use crate::generate_pageable_getter;
-
-async fn get_connection() -> CosiDB {
-    CosiDB::new("admin", "admin", None).await.unwrap()
-}
 
 #[get("/gen_people/<total>")]
 pub async fn generate_people(total: u8) -> RawJson<String> {

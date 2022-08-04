@@ -10,7 +10,7 @@ let tableTrack = PEOPLE_TABLE_IDX;
 
 let ENDPOINT = {};
 ENDPOINT[ADDRESS_TABLE_IDX] = "address";
-ENDPOINT[PEOPLE_TABLE_IDX] = "people";
+ENDPOINT[PEOPLE_TABLE_IDX] = "person";
 
 // End point mapping
 let GEN_ENDPOINT_LOOKUP = {};
