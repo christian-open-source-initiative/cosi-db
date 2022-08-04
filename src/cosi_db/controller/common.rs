@@ -16,6 +16,36 @@ pub async fn get_connection() -> CosiDB {
 
 // Helper macros to generate endpoints.
 // Use paste to auto-generate a helper macro.
+
+// GENERATORS
+#[macro_export]
+macro_rules! generate_generators {
+    ($T:ident, $S:literal) => {
+        $crate::paste::paste! {
+            $crate::with_builtin_macros::with_builtin!{
+                let $v_path = concat!("/gen_", $S, "/<total>") in {
+                    #[get($v_path)]
+                    pub async fn [<generate_ $T:lower>](total: u8) -> RawJson<String> {
+                        let connection = $crate::cosi_db::controller::common::get_connection().await;
+                        let data = $T::generate(total as u32);
+
+                        let col = connection
+                            .client
+                            .database("cosi_db")
+                            .collection::<$T>(&stringify!($T).to_lowercase());
+                        col.drop(None).await;
+                        col.insert_many(data, None).await;
+
+                        let total = col.estimated_document_count(None).await.unwrap();
+                        return RawJson(format!("{{\"total\": {}}}", total));
+                    }
+                }
+            }
+        }
+    }
+}
+
+// GETTERS
 #[macro_export]
 macro_rules! generate_pageable_getter {
     ($T:ident, $S:literal) => {

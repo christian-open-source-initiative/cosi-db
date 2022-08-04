@@ -13,28 +13,7 @@ use crate::cosi_db::connection::{CosiDB, MongoConnection};
 use crate::cosi_db::controller::common::{get_connection, PaginateData};
 use crate::cosi_db::generator::Generator;
 use crate::cosi_db::model::person::Person;
-use crate::generate_pageable_getter;
+use crate::{generate_generators, generate_pageable_getter};
 
-#[get("/gen_people/<total>")]
-pub async fn generate_people(total: u8) -> RawJson<String> {
-    #[cfg(debug_assertions)]
-    {
-        let connection = get_connection().await;
-        let person_data = Person::generate(total as u32);
-
-        let person_col = connection
-            .client
-            .database("cosi_db")
-            .collection::<Person>("person");
-        person_col.drop(None).await;
-        person_col.insert_many(person_data, None).await;
-
-        let total = person_col.estimated_document_count(None).await.unwrap();
-        return RawJson(format!("{{\"total\": {}}}", total));
-    }
-    {
-        return RawJson("{}".to_string());
-    }
-}
-
+generate_generators! { Person, "person" }
 generate_pageable_getter! { Person, "person" }

@@ -4,7 +4,7 @@ const ALL_PAGEABLE_ENDPOINTS = [
 ];
 
 const ALL_GEN_ENDPOINTS = [
-    "gen_people",
+    "gen_person",
     "gen_address"
 ];
 
