@@ -1,20 +1,16 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, from_document, to_document, Document};
-use mongodb::options::AggregateOptions;
-use mongodb::options::FindOptions;
 use rocket::futures::TryStreamExt;
 
 use names::Name;
-use rand::rngs::ThreadRng;
-use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
 use core::convert::From;
 
 // cosi_db
-use crate::cosi_db::connection::CosiDB;
 use crate::cosi_db::controller::common::get_connection;
+use crate::cosi_db::errors::{COSIError, COSIResult};
 
 use crate::cosi_db::model::address::Address;
 use crate::cosi_db::model::common::{COSICollection, Generator};
@@ -66,7 +62,7 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             .collection::<HouseholdImpl>("household")
     }
 
-    async fn to_impl(mut orm: Vec<Household>) -> Vec<HouseholdImpl> {
+    async fn to_impl(mut orm: Vec<Household>) -> COSIResult<Vec<HouseholdImpl>> {
         // Slow, fetch results each and every one.
         let collection = Self::get_collection().await;
         let mut queries = vec![];
@@ -78,32 +74,30 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
         let address_raw = Address::get_raw_document().await;
         let people_raw = Person::get_raw_document().await;
         let mut results: Vec<HouseholdImpl> = vec![];
+
         for r in q_result.iter().rev() {
+            // Should never error out.
             let opt = r.as_ref().unwrap();
             let orm_i = orm.pop().unwrap();
 
-            match (opt) {
-                (Some(h)) => {
+            match opt {
+                Some(h) => {
                     results.push(h.clone());
                 }
-                (None) => {
+                None => {
                     let addr_doc = address_raw
-                        .find_one(to_document(&orm_i.address).unwrap(), None)
-                        .await
-                        .unwrap()
-                        .unwrap();
+                        .find_one(to_document(&orm_i.address)?, None)
+                        .await?
+                        .ok_or(COSIError::msg("Unable to fetch address table."))?;
                     let persons_doc: Vec<Document> = orm_i
                         .persons
                         .iter()
                         .map(|p| to_document(&p).unwrap())
                         .collect();
-                    let people_cursor = people_raw
-                        .find(doc! {"$or": persons_doc}, None)
-                        .await
-                        .unwrap();
+                    let people_cursor = people_raw.find(doc! {"$or": persons_doc}, None).await?;
 
-                    let persons_results: Vec<Document> = people_cursor.try_collect().await.unwrap();
-                    let persons_id = persons_results
+                    let persons_results: Vec<Document> = people_cursor.try_collect().await?;
+                    let persons_id: Vec<ObjectId> = persons_results
                         .iter()
                         .map(|pd| pd.get("_id").unwrap().as_object_id().unwrap())
                         .collect();
@@ -116,10 +110,10 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             }
         }
 
-        return results;
+        return Ok(results);
     }
 
-    async fn to_orm(imp: Vec<HouseholdImpl>) -> Vec<Household> {
+    async fn to_orm(imp: Vec<HouseholdImpl>) -> COSIResult<Vec<Household>> {
         let mut result = vec![];
 
         let address_col = Address::get_collection().await;
@@ -127,14 +121,12 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
         for i in imp {
             let address = address_col
                 .find_one(doc! {"_id": i.address}, None)
-                .await
-                .unwrap()
-                .unwrap();
+                .await?
+                .ok_or(COSIError::msg("Unable to find provided address."))?;
             let persons_cursor = person_col
                 .find(doc! {"_id": {"$in": i.persons}}, None)
-                .await
-                .unwrap();
-            let persons = persons_cursor.try_collect().await.unwrap();
+                .await?;
+            let persons = persons_cursor.try_collect().await?;
 
             result.push(Household {
                 house_name: i.house_name,
@@ -143,13 +135,13 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             })
         }
 
-        return result;
+        return Ok(result);
     }
 }
 
 #[async_trait]
 impl Generator<Household> for Household {
-    async fn generate(size: u32) -> Vec<Household> {
+    async fn generate(size: u32) -> COSIResult<Vec<Household>> {
         // Generates data dependent on "address" and "person" tables.
         // If no values exist, this function would return a vector of zero.
         let mut result = Vec::new();
@@ -160,12 +152,10 @@ impl Generator<Household> for Household {
 
         let person_agg = person_col
             .aggregate([doc! {"$sample": {"size": size}}], None)
-            .await
-            .unwrap();
+            .await?;
         let address_agg = address_col
             .aggregate([doc! {"$sample": {"size": size}}], None)
-            .await
-            .unwrap();
+            .await?;
 
         let mut result_person: Vec<Document> = person_agg.try_collect().await.unwrap();
         let mut result_address: Vec<Document> = address_agg.try_collect().await.unwrap();
@@ -173,16 +163,16 @@ impl Generator<Household> for Household {
         let mut generator = names::Generator::with_naming(Name::Plain);
         let mut get_name = || generator.next().unwrap();
 
-        for i in 0..size {
+        for _ in 0..size {
             let address = result_address.pop().unwrap();
             let person = result_person.pop().unwrap();
             result.push(Household {
                 house_name: get_name(),
-                address: from_document(address).unwrap(),
-                persons: vec![from_document(person).unwrap()],
+                address: from_document(address)?,
+                persons: vec![from_document(person)?],
             });
         }
 
-        return result;
+        return Ok(result);
     }
 }

@@ -34,23 +34,24 @@ macro_rules! generate_generators {
 
                         #[cfg(debug_assertions)]
                         {
-                        let connection = $crate::cosi_db::controller::common::get_connection().await;
-                        let data = $T::generate(total as u32).await;
+                            let data = $T::generate(total as u32).await.unwrap();
 
-                        let col = $T::get_collection().await;
-                        col.drop(None).await;
-                        col.insert_many($T::to_impl(data).await, None).await;
+                            let col = $T::get_collection().await;
+                            col.drop(None).await.unwrap();
+                            col.insert_many($T::to_impl(data).await.unwrap(), None).await.unwrap();
 
-                        let total = col.estimated_document_count(None).await.unwrap();
-                        return RawJson(format!("{{\"total\": {}}}", total));
+                            let total = col.estimated_document_count(None).await.unwrap();
+                            return RawJson(format!("{{\"total\": {}}}", total));
                         }
-
-                        return RawJson("{}".to_string());
+                        #[cfg(not(debug_assertions))]
+                        {
+                            return RawJson("{}".to_string());
+                        }
                     }
                 }
             }
         }
-    }
+    };
 }
 
 // GETTERS
@@ -75,7 +76,7 @@ macro_rules! generate_pageable_getter {
                             .limit(limit_size)
                             .skip(limit_size as u64 * page)
                             .build();
-                        let data: Vec<$T> = $T::find_data(Some(doc!{}), Some(find_options)).await;
+                        let data: Vec<$T> = $T::find_data(Some(doc!{}), Some(find_options)).await.unwrap();
 
                         RawJson(
                             serde_json::to_string(&PaginateData {

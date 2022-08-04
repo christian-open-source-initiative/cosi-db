@@ -9,6 +9,7 @@ use names::Name;
 // cosi_db
 use super::common::{COSICollection, Generator};
 use crate::cosi_db::controller::common::get_connection;
+use crate::cosi_db::errors::COSIResult;
 
 #[derive(Copy, Clone, Debug, Deserialize, Serialize)]
 pub enum Sex {
@@ -41,7 +42,7 @@ impl COSICollection<'_, Person, Person> for Person {
 
 #[async_trait]
 impl Generator<Sex> for Sex {
-    async fn generate(size: u32) -> Vec<Sex> {
+    async fn generate(size: u32) -> COSIResult<Vec<Sex>> {
         let mut rng = thread_rng();
         let mut result = Vec::new();
 
@@ -55,14 +56,14 @@ impl Generator<Sex> for Sex {
             result.push(pick);
         }
 
-        return result;
+        return Ok(result);
     }
 }
 
 #[async_trait]
 impl Generator<Person> for Person {
-    async fn generate(size: u32) -> Vec<Person> {
-        let sexes = Sex::generate(size).await;
+    async fn generate(size: u32) -> COSIResult<Vec<Person>> {
+        let sexes = Sex::generate(size).await?;
         let mut result = Vec::new();
         let mut generator = names::Generator::with_naming(Name::Plain);
         let mut get_name = || generator.next().unwrap();
@@ -89,6 +90,6 @@ impl Generator<Person> for Person {
             });
         }
 
-        return result;
+        return Ok(result);
     }
 }

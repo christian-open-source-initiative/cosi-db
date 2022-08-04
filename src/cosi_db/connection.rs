@@ -1,7 +1,7 @@
 // Handles connection to database.
 use async_trait::async_trait;
 
-use mongodb::{bson::doc, options::ClientOptions, Client};
+use mongodb::{options::ClientOptions, Client};
 
 pub struct CosiDBConfigs {
     pub ip: String,
