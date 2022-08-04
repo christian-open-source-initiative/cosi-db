@@ -25,10 +25,10 @@ pub async fn get_connection() -> Database {
 // GENERATORS
 #[macro_export]
 macro_rules! generate_generators {
-    ($T:ident, $S:literal) => {
+    ($T:ident) => {
         $crate::paste::paste! {
             $crate::with_builtin_macros::with_builtin!{
-                let $v_path = concat!("/gen_", $S, "/<total>") in {
+                let $v_path = concat!("/gen_", stringify!([<$T: lower>]),  "/<total>") in {
                     #[get($v_path)]
                     pub async fn [<generate_ $T:lower>](total: u8) -> RawJson<String> {
 
@@ -57,10 +57,10 @@ macro_rules! generate_generators {
 // GETTERS
 #[macro_export]
 macro_rules! generate_pageable_getter {
-    ($T:ident, $S:literal) => {
+    ($T:ident) => {
         $crate::paste::paste! {
             $crate::with_builtin_macros::with_builtin!{
-                let $v_path = concat!("/get_", $S, "?<page>") in {
+                let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>") in {
                     #[get($v_path)]
                     pub async fn [<get_ $T:lower>](page: Option<u64>) -> RawJson<String> {
                         let page = page.unwrap_or(0);

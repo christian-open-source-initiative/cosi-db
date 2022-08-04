@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
 use mongodb::options::AggregateOptions;
-use mongodb::{bson::doc, bson::Document, options::FindOptions};
+use mongodb::{bson::doc, bson::from_document, bson::Document, options::FindOptions};
 use rocket::futures::TryStreamExt;
 
 use names::Name;
@@ -20,8 +20,8 @@ use crate::cosi_db::model::person::Person;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Household {
     pub house_name: String,
-    pub address: ObjectId,
-    pub persons: Vec<ObjectId>,
+    pub address: Address,
+    pub persons: Vec<Person>,
 }
 
 #[async_trait]
@@ -54,16 +54,8 @@ impl Generator<Household> for Household {
         for i in 0..size {
             result.push(Household {
                 house_name: get_name(),
-                address: result_address[i as usize]
-                    .get("_id")
-                    .unwrap()
-                    .as_object_id()
-                    .unwrap(),
-                persons: vec![result_person[i as usize]
-                    .get("_id")
-                    .unwrap()
-                    .as_object_id()
-                    .unwrap()],
+                address: from_document(result_address[i as usize].clone()).unwrap(),
+                persons: vec![from_document(result_person[i as usize].clone()).unwrap()],
             });
         }
 

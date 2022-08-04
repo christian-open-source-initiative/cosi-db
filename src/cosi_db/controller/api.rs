@@ -17,15 +17,15 @@ use crate::{generate_generators, generate_pageable_getter};
 
 // Address
 use crate::cosi_db::model::address::Address;
-generate_generators! { Address, "address" }
-generate_pageable_getter! { Address, "address" }
+generate_generators! { Address }
+generate_pageable_getter! { Address }
 
 // Person
 use crate::cosi_db::model::person::Person;
-generate_generators! { Person, "person" }
-generate_pageable_getter! { Person, "person" }
+generate_generators! { Person }
+generate_pageable_getter! { Person }
 
 // Household
 use crate::cosi_db::model::household::Household;
-generate_generators! { Household, "household" }
-generate_pageable_getter! { Household, "household" }
+generate_generators! { Household }
+generate_pageable_getter! { Household }
