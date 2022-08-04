@@ -40,6 +40,10 @@ impl Default for Address {
 
 #[async_trait]
 impl COSICollection<'_, Address, Address> for Address {
+    fn get_table_name() -> String {
+        return "address".to_string();
+    }
+
     async fn get_collection() -> mongodb::Collection<Address> {
         get_connection().await.collection::<Address>("address")
     }

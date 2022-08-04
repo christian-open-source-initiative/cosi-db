@@ -30,6 +30,10 @@ pub struct Person {
 
 #[async_trait]
 impl COSICollection<'_, Person, Person> for Person {
+    fn get_table_name() -> String {
+        return "person".to_string();
+    }
+
     async fn get_collection() -> mongodb::Collection<Person> {
         get_connection().await.collection::<Person>("person")
     }

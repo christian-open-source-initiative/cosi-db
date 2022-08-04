@@ -1,7 +1,8 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
+use mongodb::bson::{doc, from_document, to_document, Document};
 use mongodb::options::AggregateOptions;
-use mongodb::{bson::doc, bson::from_document, bson::Document, options::FindOptions};
+use mongodb::options::FindOptions;
 use rocket::futures::TryStreamExt;
 
 use names::Name;
@@ -55,26 +56,67 @@ impl From<HouseholdImpl> for Household {
 
 #[async_trait]
 impl COSICollection<'_, Household, HouseholdImpl> for Household {
+    fn get_table_name() -> String {
+        return "household".to_string();
+    }
+
     async fn get_collection() -> mongodb::Collection<HouseholdImpl> {
         get_connection()
             .await
             .collection::<HouseholdImpl>("household")
     }
 
-    async fn to_impl(orm: Vec<Household>) -> Vec<HouseholdImpl> {
-        let mut result: Vec<HouseholdImpl> = vec![];
-
+    async fn to_impl(mut orm: Vec<Household>) -> Vec<HouseholdImpl> {
         // Slow, fetch results each and every one.
         let collection = Self::get_collection().await;
         let mut queries = vec![];
-        for o in orm {
-            queries.push(collection.find_one(doc! {"house_name": o.house_name}, None));
+        for o in &orm {
+            queries.push(collection.find_one(doc! {"house_name": o.house_name.clone()}, None));
         }
-        return futures::future::join_all(queries)
-            .await
-            .iter()
-            .map(|v| v.clone().unwrap().unwrap())
-            .collect();
+        let q_result = futures::future::join_all(queries).await;
+
+        let address_raw = Address::get_raw_document().await;
+        let people_raw = Person::get_raw_document().await;
+        let mut results: Vec<HouseholdImpl> = vec![];
+        for r in q_result.iter().rev() {
+            let opt = r.as_ref().unwrap();
+            let orm_i = orm.pop().unwrap();
+
+            match (opt) {
+                (Some(h)) => {
+                    results.push(h.clone());
+                }
+                (None) => {
+                    let addr_doc = address_raw
+                        .find_one(to_document(&orm_i.address).unwrap(), None)
+                        .await
+                        .unwrap()
+                        .unwrap();
+                    let persons_doc: Vec<Document> = orm_i
+                        .persons
+                        .iter()
+                        .map(|p| to_document(&p).unwrap())
+                        .collect();
+                    let people_cursor = people_raw
+                        .find(doc! {"$or": persons_doc}, None)
+                        .await
+                        .unwrap();
+
+                    let persons_results: Vec<Document> = people_cursor.try_collect().await.unwrap();
+                    let persons_id = persons_results
+                        .iter()
+                        .map(|pd| pd.get("_id").unwrap().as_object_id().unwrap())
+                        .collect();
+                    results.push(HouseholdImpl {
+                        house_name: orm_i.house_name.clone(),
+                        address: addr_doc.get("_id").unwrap().as_object_id().unwrap(),
+                        persons: persons_id,
+                    })
+                }
+            }
+        }
+
+        return results;
     }
 
     async fn to_orm(imp: Vec<HouseholdImpl>) -> Vec<Household> {
