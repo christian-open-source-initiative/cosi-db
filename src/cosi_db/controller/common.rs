@@ -1,3 +1,4 @@
+use mongodb::Database;
 use serde::{Deserialize, Serialize};
 
 // cosi_db
@@ -10,8 +11,12 @@ pub struct PaginateData<T> {
     pub data: Vec<T>,
 }
 
-pub async fn get_connection() -> CosiDB {
-    CosiDB::new("admin", "admin", None).await.unwrap()
+pub async fn get_connection() -> Database {
+    CosiDB::new("admin", "admin", None)
+        .await
+        .unwrap()
+        .client
+        .database("cosi_db")
 }
 
 // Helper macros to generate endpoints.
@@ -26,18 +31,22 @@ macro_rules! generate_generators {
                 let $v_path = concat!("/gen_", $S, "/<total>") in {
                     #[get($v_path)]
                     pub async fn [<generate_ $T:lower>](total: u8) -> RawJson<String> {
+
+                        #[cfg(debug_assertions)]
+                        {
                         let connection = $crate::cosi_db::controller::common::get_connection().await;
                         let data = $T::generate(total as u32);
 
                         let col = connection
-                            .client
-                            .database("cosi_db")
                             .collection::<$T>(&stringify!($T).to_lowercase());
                         col.drop(None).await;
                         col.insert_many(data, None).await;
 
                         let total = col.estimated_document_count(None).await.unwrap();
                         return RawJson(format!("{{\"total\": {}}}", total));
+                        }
+
+                        return RawJson("{}".to_string());
                     }
                 }
             }
@@ -57,8 +66,6 @@ macro_rules! generate_pageable_getter {
                         let page = page.unwrap_or(0);
 
                         let col = $crate::cosi_db::controller::common::get_connection().await
-                            .client
-                            .database("cosi_db")
                             .collection::<$T>(&stringify!($T).to_lowercase());
 
                         // Page calculate.
