@@ -35,7 +35,7 @@ macro_rules! generate_generators {
                         #[cfg(debug_assertions)]
                         {
                         let connection = $crate::cosi_db::controller::common::get_connection().await;
-                        let data = $T::generate(total as u32).await;
+                        let data = $T::generate(total as u32).await.unwrap();
 
                         let col = $T::get_collection().await;
                         col.drop(None).await;

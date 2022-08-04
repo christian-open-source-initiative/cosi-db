@@ -10,6 +10,7 @@ use std::default::Default;
 // cosi_db
 use super::common::{COSICollection, Generator};
 use crate::cosi_db::controller::common::get_connection;
+use crate::cosi_db::errors::COSIResult;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Address {
@@ -51,7 +52,7 @@ impl COSICollection<'_, Address, Address> for Address {
 
 #[async_trait]
 impl Generator<Address> for Address {
-    async fn generate(size: u32) -> Vec<Address> {
+    async fn generate(size: u32) -> COSIResult<Vec<Address>> {
         let mut result = Vec::new();
         let mut rng = thread_rng();
 
@@ -70,6 +71,6 @@ impl Generator<Address> for Address {
             });
         }
 
-        return result;
+        return Ok(result);
     }
 }

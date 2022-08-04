@@ -11,7 +11,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 #[async_trait]
 pub trait Generator<T> {
-    async fn generate(size: u32) -> Vec<T>;
+    async fn generate(size: u32) -> COSIResult<Vec<T>>;
 }
 
 #[async_trait]

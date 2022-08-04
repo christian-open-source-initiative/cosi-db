@@ -146,7 +146,7 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
 
 #[async_trait]
 impl Generator<Household> for Household {
-    async fn generate(size: u32) -> Vec<Household> {
+    async fn generate(size: u32) -> COSIResult<Vec<Household>> {
         // Generates data dependent on "address" and "person" tables.
         // If no values exist, this function would return a vector of zero.
         let mut result = Vec::new();
@@ -157,12 +157,10 @@ impl Generator<Household> for Household {
 
         let person_agg = person_col
             .aggregate([doc! {"$sample": {"size": size}}], None)
-            .await
-            .unwrap();
+            .await?;
         let address_agg = address_col
             .aggregate([doc! {"$sample": {"size": size}}], None)
-            .await
-            .unwrap();
+            .await?;
 
         let mut result_person: Vec<Document> = person_agg.try_collect().await.unwrap();
         let mut result_address: Vec<Document> = address_agg.try_collect().await.unwrap();
@@ -175,11 +173,11 @@ impl Generator<Household> for Household {
             let person = result_person.pop().unwrap();
             result.push(Household {
                 house_name: get_name(),
-                address: from_document(address).unwrap(),
-                persons: vec![from_document(person).unwrap()],
+                address: from_document(address)?,
+                persons: vec![from_document(person)?],
             });
         }
 
-        return result;
+        return Ok(result);
     }
 }
