@@ -5,6 +5,7 @@ use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
 use lipsum::lipsum_words_from_seed;
+use std::default::Default;
 
 // cosi_db
 use super::common::{COSICollection, Generator};
@@ -20,6 +21,21 @@ pub struct Address {
     pub postal_code: Option<String>,
     pub county: Option<String>,
     pub country: Option<String>,
+}
+
+impl Default for Address {
+    fn default() -> Self {
+        Address {
+            line_one: "line_one".to_string(),
+            line_two: "line_two".to_string(),
+            line_three: "line_three".to_string(),
+            city: "city".to_string(),
+            region: "region".to_string(),
+            postal_code: None,
+            county: None,
+            country: None,
+        }
+    }
 }
 
 #[async_trait]

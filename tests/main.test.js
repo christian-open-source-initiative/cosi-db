@@ -17,8 +17,8 @@ beforeAll(async ()=> {
     let total_data_points_per_table = 200;
     for (let endpoints of ALL_GEN_ENDPOINTS) {
         let response = await cosi_request().get(`/${endpoints}/${total_data_points_per_table}`)
-                                           .expect("Content-Type", /json/)
-                                           .expect(200);
+                                           .expect(200)
+                                           .expect("Content-Type", /json/);
 
         let json_data = JSON.parse(response.text);
         expectKeys(json_data, ["total"]);
@@ -48,8 +48,8 @@ describe("Verify Getters", () => {
             const response = await cosi_request()
                                     .get(`/${endpoint}`)
                                     .query({page: 0})
-                                    .expect("Content-Type", /json/)
-                                    .expect(200);
+                                    .expect(200)
+                                    .expect("Content-Type", /json/);
 
             // Further data verification.
             let json_data = JSON.parse(response.text);

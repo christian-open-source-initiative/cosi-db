@@ -9,6 +9,8 @@ use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
+use core::convert::From;
+
 // cosi_db
 use crate::cosi_db::connection::CosiDB;
 use crate::cosi_db::controller::common::get_connection;
@@ -25,16 +27,81 @@ pub struct Household {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Household_Impl {
+pub struct HouseholdImpl {
     pub house_name: String,
     pub address: ObjectId,
     pub persons: Vec<ObjectId>,
 }
 
+impl From<Household> for HouseholdImpl {
+    fn from(h: Household) -> HouseholdImpl {
+        HouseholdImpl {
+            house_name: h.house_name,
+            address: ObjectId::default(),
+            persons: vec![],
+        }
+    }
+}
+
+impl From<HouseholdImpl> for Household {
+    fn from(h: HouseholdImpl) -> Household {
+        Household {
+            house_name: h.house_name,
+            address: Address::default(),
+            persons: vec![],
+        }
+    }
+}
+
 #[async_trait]
-impl COSICollection<'_, Household, Household> for Household {
-    async fn get_collection() -> mongodb::Collection<Household> {
-        get_connection().await.collection::<Household>("household")
+impl COSICollection<'_, Household, HouseholdImpl> for Household {
+    async fn get_collection() -> mongodb::Collection<HouseholdImpl> {
+        get_connection()
+            .await
+            .collection::<HouseholdImpl>("household")
+    }
+
+    async fn to_impl(orm: Vec<Household>) -> Vec<HouseholdImpl> {
+        let mut result: Vec<HouseholdImpl> = vec![];
+
+        // Slow, fetch results each and every one.
+        let collection = Self::get_collection().await;
+        let mut queries = vec![];
+        for o in orm {
+            queries.push(collection.find_one(doc! {"house_name": o.house_name}, None));
+        }
+        return futures::future::join_all(queries)
+            .await
+            .iter()
+            .map(|v| v.clone().unwrap().unwrap())
+            .collect();
+    }
+
+    async fn to_orm(imp: Vec<HouseholdImpl>) -> Vec<Household> {
+        let mut result = vec![];
+
+        let address_col = Address::get_collection().await;
+        let person_col = Person::get_collection().await;
+        for i in imp {
+            let address = address_col
+                .find_one(doc! {"_id": i.address}, None)
+                .await
+                .unwrap()
+                .unwrap();
+            let persons_cursor = person_col
+                .find(doc! {"_id": {"$in": i.persons}}, None)
+                .await
+                .unwrap();
+            let persons = persons_cursor.try_collect().await.unwrap();
+
+            result.push(Household {
+                house_name: i.house_name,
+                address: address,
+                persons: persons,
+            })
+        }
+
+        return result;
     }
 }
 
@@ -43,7 +110,6 @@ impl Generator<Household> for Household {
     async fn generate(size: u32) -> Vec<Household> {
         // Generates data dependent on "address" and "person" tables.
         // If no values exist, this function would return a vector of zero.
-
         let mut result = Vec::new();
 
         // Random sample results and link them together.

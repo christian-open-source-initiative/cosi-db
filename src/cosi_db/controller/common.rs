@@ -37,10 +37,9 @@ macro_rules! generate_generators {
                         let connection = $crate::cosi_db::controller::common::get_connection().await;
                         let data = $T::generate(total as u32).await;
 
-                        let col = connection
-                            .collection::<$T>(&stringify!($T).to_lowercase());
+                        let col = $T::get_collection().await;
                         col.drop(None).await;
-                        col.insert_many(data, None).await;
+                        col.insert_many($T::to_impl(data).await, None).await;
 
                         let total = col.estimated_document_count(None).await.unwrap();
                         return RawJson(format!("{{\"total\": {}}}", total));
@@ -65,8 +64,7 @@ macro_rules! generate_pageable_getter {
                     pub async fn [<get_ $T:lower>](page: Option<u64>) -> RawJson<String> {
                         let page = page.unwrap_or(0);
 
-                        let col = $crate::cosi_db::controller::common::get_connection().await
-                            .collection::<$T>(&stringify!($T).to_lowercase());
+                        let col = $T::get_collection().await;
 
                         // Page calculate.
                         let total_result: u64 = col.estimated_document_count(None).await.unwrap();
