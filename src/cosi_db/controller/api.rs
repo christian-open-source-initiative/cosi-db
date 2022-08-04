@@ -5,12 +5,13 @@ use serde_json;
 use rocket::response::content::RawJson;
 
 // mongo
+use futures::stream::TryStreamExt;
 use mongodb::{bson::doc, options::FindOptions};
-use rocket::futures::TryStreamExt;
 
 // cosi_db
 use crate::cosi_db::connection::CosiDB;
 use crate::cosi_db::controller::common::{get_connection, PaginateData};
+use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::common::Generator;
 
 use crate::{generate_generators, generate_pageable_getter};

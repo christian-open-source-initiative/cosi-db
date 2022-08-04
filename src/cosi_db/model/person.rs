@@ -29,7 +29,7 @@ pub struct Person {
 }
 
 #[async_trait]
-impl COSICollection<Person> for Person {
+impl COSICollection<'_, Person> for Person {
     async fn get_collection() -> mongodb::Collection<Person> {
         get_connection().await.collection::<Person>("person")
     }

@@ -25,6 +25,13 @@ pub struct Household {
 }
 
 #[async_trait]
+impl COSICollection<'_, Household> for Household {
+    async fn get_collection() -> mongodb::Collection<Household> {
+        get_connection().await.collection::<Household>("household")
+    }
+}
+
+#[async_trait]
 impl Generator<Household> for Household {
     async fn generate(size: u32) -> Vec<Household> {
         // Generates data dependent on "address" and "person" tables.
@@ -45,17 +52,19 @@ impl Generator<Household> for Household {
             .await
             .unwrap();
 
-        let result_person: Vec<Document> = person_agg.try_collect().await.unwrap();
-        let result_address: Vec<Document> = address_agg.try_collect().await.unwrap();
+        let mut result_person: Vec<Document> = person_agg.try_collect().await.unwrap();
+        let mut result_address: Vec<Document> = address_agg.try_collect().await.unwrap();
 
         let mut generator = names::Generator::with_naming(Name::Plain);
         let mut get_name = || generator.next().unwrap();
 
         for i in 0..size {
+            let address = result_address.pop().unwrap();
+            let person = result_person.pop().unwrap();
             result.push(Household {
                 house_name: get_name(),
-                address: from_document(result_address[i as usize].clone()).unwrap(),
-                persons: vec![from_document(result_person[i as usize].clone()).unwrap()],
+                address: from_document(address).unwrap(),
+                persons: vec![from_document(person).unwrap()],
             });
         }
 
