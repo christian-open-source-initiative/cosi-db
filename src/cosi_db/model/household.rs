@@ -15,6 +15,7 @@ use core::convert::From;
 // cosi_db
 use crate::cosi_db::connection::CosiDB;
 use crate::cosi_db::controller::common::get_connection;
+use crate::cosi_db::errors::CosiResult;
 
 use crate::cosi_db::model::address::Address;
 use crate::cosi_db::model::common::{COSICollection, Generator};
@@ -66,7 +67,7 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             .collection::<HouseholdImpl>("household")
     }
 
-    async fn to_impl(mut orm: Vec<Household>) -> Vec<HouseholdImpl> {
+    async fn to_impl(mut orm: Vec<Household>) -> CosiResult<Vec<HouseholdImpl>> {
         // Slow, fetch results each and every one.
         let collection = Self::get_collection().await;
         let mut queries = vec![];
@@ -116,10 +117,10 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             }
         }
 
-        return results;
+        return Ok(results);
     }
 
-    async fn to_orm(imp: Vec<HouseholdImpl>) -> Vec<Household> {
+    async fn to_orm(imp: Vec<HouseholdImpl>) -> CosiResult<Vec<Household>> {
         let mut result = vec![];
 
         let address_col = Address::get_collection().await;
@@ -143,7 +144,7 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             })
         }
 
-        return result;
+        return Ok(result);
     }
 }
 
