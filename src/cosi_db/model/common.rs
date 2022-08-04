@@ -6,7 +6,7 @@ use core::fmt::Display;
 use futures::stream::{StreamExt, TryStreamExt};
 
 use crate::cosi_db::controller::common::get_connection;
-use crate::cosi_db::errors::CosiResult;
+use crate::cosi_db::errors::COSIResult;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 #[async_trait]
@@ -29,13 +29,13 @@ where
 
     async fn get_collection() -> Collection<I>;
 
-    async fn to_impl(orm: Vec<T>) -> CosiResult<Vec<I>> {
+    async fn to_impl(orm: Vec<T>) -> COSIResult<Vec<I>> {
         // This extra call allows for async side-effects.
         // Default implementation is non-bulk. Can be slow.
         Ok(orm.iter().map(|v| v.clone().into()).collect())
     }
 
-    async fn to_orm(imp: Vec<I>) -> CosiResult<Vec<T>> {
+    async fn to_orm(imp: Vec<I>) -> COSIResult<Vec<T>> {
         // This extra call allows for async side-effects.
         // Default implementation is non-bulk. Can be slow.
         Ok(imp.iter().map(|v| v.clone().into()).collect())
@@ -45,10 +45,10 @@ where
     async fn find_data(
         filter: Option<Document>,
         options: Option<FindOptions>,
-    ) -> CosiResult<Vec<T>> {
+    ) -> COSIResult<Vec<T>> {
         let col = Self::get_collection().await;
-        let cursor: Cursor<I> = col.find(filter, options).await.unwrap();
-        let results = cursor.try_collect().await.unwrap();
+        let cursor: Cursor<I> = col.find(filter, options).await?;
+        let results = cursor.try_collect().await?;
         return Ok(Self::to_orm(results).await?);
     }
 }

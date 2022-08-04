@@ -15,7 +15,7 @@ use core::convert::From;
 // cosi_db
 use crate::cosi_db::connection::CosiDB;
 use crate::cosi_db::controller::common::get_connection;
-use crate::cosi_db::errors::CosiResult;
+use crate::cosi_db::errors::{COSIError, COSIResult};
 
 use crate::cosi_db::model::address::Address;
 use crate::cosi_db::model::common::{COSICollection, Generator};
@@ -67,7 +67,7 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
             .collection::<HouseholdImpl>("household")
     }
 
-    async fn to_impl(mut orm: Vec<Household>) -> CosiResult<Vec<HouseholdImpl>> {
+    async fn to_impl(mut orm: Vec<Household>) -> COSIResult<Vec<HouseholdImpl>> {
         // Slow, fetch results each and every one.
         let collection = Self::get_collection().await;
         let mut queries = vec![];
@@ -79,7 +79,9 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
         let address_raw = Address::get_raw_document().await;
         let people_raw = Person::get_raw_document().await;
         let mut results: Vec<HouseholdImpl> = vec![];
+
         for r in q_result.iter().rev() {
+            // Should never error out.
             let opt = r.as_ref().unwrap();
             let orm_i = orm.pop().unwrap();
 
@@ -89,22 +91,18 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
                 }
                 (None) => {
                     let addr_doc = address_raw
-                        .find_one(to_document(&orm_i.address).unwrap(), None)
-                        .await
-                        .unwrap()
-                        .unwrap();
+                        .find_one(to_document(&orm_i.address)?, None)
+                        .await?
+                        .ok_or(COSIError::msg("Unable to fetch address table."))?;
                     let persons_doc: Vec<Document> = orm_i
                         .persons
                         .iter()
                         .map(|p| to_document(&p).unwrap())
                         .collect();
-                    let people_cursor = people_raw
-                        .find(doc! {"$or": persons_doc}, None)
-                        .await
-                        .unwrap();
+                    let people_cursor = people_raw.find(doc! {"$or": persons_doc}, None).await?;
 
-                    let persons_results: Vec<Document> = people_cursor.try_collect().await.unwrap();
-                    let persons_id = persons_results
+                    let persons_results: Vec<Document> = people_cursor.try_collect().await?;
+                    let persons_id: Vec<ObjectId> = persons_results
                         .iter()
                         .map(|pd| pd.get("_id").unwrap().as_object_id().unwrap())
                         .collect();
@@ -120,7 +118,7 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
         return Ok(results);
     }
 
-    async fn to_orm(imp: Vec<HouseholdImpl>) -> CosiResult<Vec<Household>> {
+    async fn to_orm(imp: Vec<HouseholdImpl>) -> COSIResult<Vec<Household>> {
         let mut result = vec![];
 
         let address_col = Address::get_collection().await;
@@ -128,14 +126,12 @@ impl COSICollection<'_, Household, HouseholdImpl> for Household {
         for i in imp {
             let address = address_col
                 .find_one(doc! {"_id": i.address}, None)
-                .await
-                .unwrap()
-                .unwrap();
+                .await?
+                .ok_or(COSIError::msg("Unable to find provided address."))?;
             let persons_cursor = person_col
                 .find(doc! {"_id": {"$in": i.persons}}, None)
-                .await
-                .unwrap();
-            let persons = persons_cursor.try_collect().await.unwrap();
+                .await?;
+            let persons = persons_cursor.try_collect().await?;
 
             result.push(Household {
                 house_name: i.house_name,

@@ -1,5 +1,6 @@
 // Error handling logic.
 use std::error::Error;
+use std::fmt::Display;
 
-pub type RuntimeError = Box<dyn Error + Send>;
-pub type CosiResult<T> = Result<T, RuntimeError>;
+pub type COSIError = anyhow::Error;
+pub type COSIResult<T> = Result<T, COSIError>;
