@@ -77,7 +77,7 @@ macro_rules! generate_pageable_getter {
                             .limit(limit_size)
                             .skip(limit_size as u64 * page)
                             .build();
-                        let data: Vec<$T> = <$T as COSICollection<$T>>::find(Some(doc!{}), Some(find_options)).await;
+                        let data: Vec<$T> = $T::find_data(Some(doc!{}), Some(find_options)).await;
 
                         RawJson(
                             serde_json::to_string(&PaginateData {

@@ -4,9 +4,8 @@ use mongodb::{Collection, Cursor};
 
 use core::fmt::Display;
 use futures::stream::{StreamExt, TryStreamExt};
+
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::default::Default;
-use std::iter::Extend;
 
 #[async_trait]
 pub trait Generator<T> {
@@ -14,16 +13,30 @@ pub trait Generator<T> {
 }
 
 #[async_trait]
-pub trait COSICollection<'a, T>
+pub trait COSICollection<'a, T, I>
 where
-    T: Sized + Serialize + DeserializeOwned + Unpin + Send + Sync,
+    for<'r> T: Clone + Sized + Serialize + DeserializeOwned + Unpin + Send + Sync + From<I> + 'r, // Base class
+    for<'r> I: Clone + Sized + Serialize + DeserializeOwned + Unpin + Send + Sync + From<T> + 'r,
 {
-    async fn get_collection() -> Collection<T>;
+    async fn get_collection() -> Collection<I>;
+
+    async fn to_impl(orm: Vec<T>) -> Vec<I> {
+        // This extra call allows for async side-effects.
+        // Default implementation is non-bulk. Can be slow.
+        orm.iter().map(|v| v.clone().into()).collect()
+    }
+
+    async fn to_orm(imp: Vec<I>) -> Vec<T> {
+        // This extra call allows for async side-effects.
+        // Default implementation is non-bulk. Can be slow.
+        imp.iter().map(|v| v.clone().into()).collect()
+    }
 
     // Find with some extra processing for associated tables.
-    async fn find(filter: Option<Document>, options: Option<FindOptions>) -> Vec<T> {
+    async fn find_data(filter: Option<Document>, options: Option<FindOptions>) -> Vec<T> {
         let col = Self::get_collection().await;
-        let cursor: Cursor<T> = col.find(filter, options).await.unwrap();
-        return cursor.try_collect().await.unwrap();
+        let cursor: Cursor<I> = col.find(filter, options).await.unwrap();
+        let results = cursor.try_collect().await.unwrap();
+        return Self::to_orm(results).await;
     }
 }

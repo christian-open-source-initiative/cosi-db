@@ -24,8 +24,15 @@ pub struct Household {
     pub persons: Vec<Person>,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Household_Impl {
+    pub house_name: String,
+    pub address: ObjectId,
+    pub persons: Vec<ObjectId>,
+}
+
 #[async_trait]
-impl COSICollection<'_, Household> for Household {
+impl COSICollection<'_, Household, Household> for Household {
     async fn get_collection() -> mongodb::Collection<Household> {
         get_connection().await.collection::<Household>("household")
     }

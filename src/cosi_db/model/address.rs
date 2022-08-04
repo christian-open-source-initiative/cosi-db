@@ -23,7 +23,7 @@ pub struct Address {
 }
 
 #[async_trait]
-impl COSICollection<'_, Address> for Address {
+impl COSICollection<'_, Address, Address> for Address {
     async fn get_collection() -> mongodb::Collection<Address> {
         get_connection().await.collection::<Address>("address")
     }
