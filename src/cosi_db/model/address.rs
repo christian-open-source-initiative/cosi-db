@@ -25,13 +25,13 @@ pub struct Address {
 #[async_trait]
 impl COSICollection<Address> for Address {
     async fn get_collection() -> mongodb::Collection<Address> {
-        get_connection().await.collection::<Self>("address")
+        get_connection().await.collection::<Address>("address")
     }
 }
 
 #[async_trait]
 impl Generator<Address> for Address {
-    fn generate(size: u32) -> Vec<Address> {
+    async fn generate(size: u32) -> Vec<Address> {
         let mut result = Vec::new();
         let mut rng = thread_rng();
 

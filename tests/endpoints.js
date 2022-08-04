@@ -1,11 +1,13 @@
 const ALL_PAGEABLE_ENDPOINTS = [
     "get_person",
-    "get_address"
+    "get_address",
+    "get_household"
 ];
 
 const ALL_GEN_ENDPOINTS = [
     "gen_person",
-    "gen_address"
+    "gen_address",
+    "gen_household"
 ];
 
 // All available endpoints in program.

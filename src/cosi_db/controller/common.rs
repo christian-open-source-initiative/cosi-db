@@ -35,7 +35,7 @@ macro_rules! generate_generators {
                         #[cfg(debug_assertions)]
                         {
                         let connection = $crate::cosi_db::controller::common::get_connection().await;
-                        let data = $T::generate(total as u32);
+                        let data = $T::generate(total as u32).await;
 
                         let col = connection
                             .collection::<$T>(&stringify!($T).to_lowercase());

@@ -1,5 +1,3 @@
-pub mod address;
+pub mod api;
 pub mod common;
 pub mod dashboard;
-pub mod household;
-pub mod person;

@@ -31,13 +31,13 @@ pub struct Person {
 #[async_trait]
 impl COSICollection<Person> for Person {
     async fn get_collection() -> mongodb::Collection<Person> {
-        get_connection().await.collection::<Self>("person")
+        get_connection().await.collection::<Person>("person")
     }
 }
 
 #[async_trait]
 impl Generator<Sex> for Sex {
-    fn generate(size: u32) -> Vec<Sex> {
+    async fn generate(size: u32) -> Vec<Sex> {
         let mut rng = thread_rng();
         let mut result = Vec::new();
 
@@ -57,12 +57,12 @@ impl Generator<Sex> for Sex {
 
 #[async_trait]
 impl Generator<Person> for Person {
-    fn generate(size: u32) -> Vec<Person> {
+    async fn generate(size: u32) -> Vec<Person> {
+        let sexes = Sex::generate(size).await;
         let mut result = Vec::new();
         let mut generator = names::Generator::with_naming(Name::Plain);
         let mut get_name = || generator.next().unwrap();
         let mut rng = thread_rng();
-        let sexes = Sex::generate(size);
 
         let gen_date = |age: u8, rng: &mut ThreadRng| {
             NaiveDate::from_ymd(

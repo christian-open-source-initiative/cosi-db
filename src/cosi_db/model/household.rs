@@ -1,11 +1,16 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
+use mongodb::options::AggregateOptions;
+use mongodb::{bson::doc, bson::Document, options::FindOptions};
+use rocket::futures::TryStreamExt;
+
+use names::Name;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
 // cosi_db
-use crate::cosi_db::connection::{CosiDB, MongoConnection};
+use crate::cosi_db::connection::CosiDB;
 use crate::cosi_db::controller::common::get_connection;
 
 use crate::cosi_db::model::address::Address;
@@ -21,12 +26,45 @@ pub struct Household {
 
 #[async_trait]
 impl Generator<Household> for Household {
-    fn generate(size: u32) -> Vec<Household> {
+    async fn generate(size: u32) -> Vec<Household> {
         // Generates data dependent on "address" and "person" tables.
+        // If no values exist, this function would return a vector of zero.
+
         let mut result = Vec::new();
+
+        // Random sample results and link them together.
+        let person_col = Person::get_collection().await;
+        let address_col = Address::get_collection().await;
+
+        let person_agg = person_col
+            .aggregate([doc! {"$sample": {"size": size}}], None)
+            .await
+            .unwrap();
+        let address_agg = address_col
+            .aggregate([doc! {"$sample": {"size": size}}], None)
+            .await
+            .unwrap();
+
+        let result_person: Vec<Document> = person_agg.try_collect().await.unwrap();
+        let result_address: Vec<Document> = address_agg.try_collect().await.unwrap();
+
+        let mut generator = names::Generator::with_naming(Name::Plain);
+        let mut get_name = || generator.next().unwrap();
+
         for i in 0..size {
-            let person_col = <Person as COSICollection<Person>>::get_connection().await;
-            let address_col = <Address as COSICollection<Address>>::get_connection().await;
+            result.push(Household {
+                house_name: get_name(),
+                address: result_address[i as usize]
+                    .get("_id")
+                    .unwrap()
+                    .as_object_id()
+                    .unwrap(),
+                persons: vec![result_person[i as usize]
+                    .get("_id")
+                    .unwrap()
+                    .as_object_id()
+                    .unwrap()],
+            });
         }
 
         return result;

@@ -3,7 +3,7 @@ use mongodb::Collection;
 
 #[async_trait]
 pub trait Generator<T> {
-    fn generate(size: u32) -> Vec<T>;
+    async fn generate(size: u32) -> Vec<T>;
 }
 
 #[async_trait]
