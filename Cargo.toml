@@ -11,11 +11,14 @@ rocket = { version = "0.5.0-rc.2", features = ["secrets"] }
 rocket_dyn_templates = {version = "0.1.0-rc.2", features=["tera"]}
 serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4.0", features = ["serde"] }
-async-trait = "0.1.56"
+async-trait = "0.1.57"
 names = "0.14.0"
 mongodb = "2.2"
 serde_json = "1.0.82"
 lipsum = "0.8.2"
+paste = "1.0"
+with_builtin_macros = "0.0.3"
+futures = "0.3.21"
 
 [build-dependencies]
 copy_to_output = "2.0.0"

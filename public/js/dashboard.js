@@ -1,16 +1,19 @@
 // Selects which table to display
 let ADDRESS_TABLE_IDX = 0;
 let PEOPLE_TABLE_IDX = 1;
+let HOUSEHOLD_TABLE_IDX = 3;
 let TABLE_IDX = [
     ADDRESS_TABLE_IDX,
-    PEOPLE_TABLE_IDX
+    PEOPLE_TABLE_IDX,
+    HOUSEHOLD_TABLE_IDX
 ];
 // Init tracker to default value.
 let tableTrack = PEOPLE_TABLE_IDX;
 
 let ENDPOINT = {};
 ENDPOINT[ADDRESS_TABLE_IDX] = "address";
-ENDPOINT[PEOPLE_TABLE_IDX] = "people";
+ENDPOINT[PEOPLE_TABLE_IDX] = "person";
+ENDPOINT[HOUSEHOLD_TABLE_IDX] = "household";
 
 // End point mapping
 let GEN_ENDPOINT_LOOKUP = {};
@@ -74,6 +77,11 @@ $(document).ready(() => {
     // Register callbacks.
     $("#address-select").click(() => {
         tableTrack = ADDRESS_TABLE_IDX;
+        updateTable();
+    });
+
+    $("#household-select").click(() => {
+        tableTrack = HOUSEHOLD_TABLE_IDX;
         updateTable();
     });
 

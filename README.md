@@ -4,7 +4,7 @@ A database used for capturing ministry and community life within, usually, a chu
 
 ## Requirements
 
-* Rust `1.62.1`
+* Rust `1.64.0-nightly`. Check rust-toolchain.toml for most up-to-date.
 * MongoDB `v6.0.0`
 
 ## Build and Setup

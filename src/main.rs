@@ -5,6 +5,9 @@ extern crate rocket;
 use rocket::{Build, Rocket};
 use rocket_dyn_templates::Template;
 
+pub use ::paste;
+pub use ::with_builtin_macros;
+
 // COSI
 pub mod cosi_db;
 pub mod routes;
