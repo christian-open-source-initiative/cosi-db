@@ -2,9 +2,23 @@ body, * {
     font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
+html, body, h1 {
+    padding: 0;
+    margin: 0;
+}
+
 body {
     background-color: #131516;
     color: white;
+}
+
+.center-content {
+    width: 75%;
+    margin: 0 auto;
+}
+
+#outer-div {
+    padding: 1rem;
 }
 
 #status {
@@ -32,12 +46,67 @@ body {
     padding: 15px;
     min-width: 3rem;
 }
+
 #data-table tr {
     background-color: #323550;
 }
+
 #data-table tr:nth-child(odd) {
     background-color: #534261;
 }
 
 th:first-child { border-top-left-radius: 10px; }
 th:last-child { border-top-right-radius: 10px; }
+
+/* Search bar! */
+#search-bar-div {
+    box-sizing: border-box;
+}
+
+#search-bar-div * {
+    box-sizing: inherit;
+}
+
+.search-bar-general {
+    height: 2rem;
+    width: 8%;
+    border: 1px solid grey;
+    z-index: 8;
+    position: relative;
+}
+
+#main-search-bar {
+    border-radius: 10px;
+    height: 2rem;
+    width: 90%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#main-search-bar-submit {
+    background-color: #2195f3e5;
+}
+
+#main-search-bar-submit:hover {
+    background: #0b7ddab0;
+}
+
+#search-suggestions {
+    background-color: #ABB8C3;
+    padding: 1.2rem;
+    width: 90%;
+    border-radius: 10px;
+    color: black;
+}
+
+#cover-entire-screen {
+    background-color: rgb(31, 29, 29);
+    opacity: 0.6;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    display: none;
+    padding: 0;
+    margin: 0;
+    z-index: 2;
+}

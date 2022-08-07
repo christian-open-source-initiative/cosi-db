@@ -23,7 +23,62 @@ for (const idx of TABLE_IDX) {
     GEN_ENDPOINT_LOOKUP[idx] = "gen_" + ENDPOINT[idx];
 }
 
+class SearchManager {
+    constructor(searchBar, searchSuggestion, searchButton, searchDarkener) {
+        this.searchBar = searchBar;
+        this.searchSuggestion = searchSuggestion;
+        this.searchButton = searchButton;
+        this.searchDarkener = searchDarkener;
+
+        // Initial states
+        this.searchSuggestion.hide();
+        this.searchDarkener.hide();
+        // We don't want to spam the server
+        this.querySent = false;
+
+        // Requires binding due to function reference.
+        this.searchBar.keyup(
+            (event) => {
+                if (event.key == "Escape") {
+                    this.searchDarkener.hide();
+                    // Unfocus so that we can refocus if start typing.
+                    this.searchDarkener.blur();
+                    return;
+                }
+                this.determineHide();
+            }
+        );
+
+        // We only want to hid if user focuses and already typed.
+        this.searchBar.focus(this.determineHide.bind(this));
+        this.searchBar.blur(() => { this.searchDarkener.hide(); });
+    }
+
+    determineHide() {
+        if (this.searchBar.val() == "") {
+            this.searchDarkener.hide();
+            return true;
+        }
+
+        this.searchDarkener.show();
+    }
+}
+
+function generalSetup() {
+    // Hide search suggestions until user inputs.
+    let searchManager = new SearchManager(
+        $("#main-search-bar"),
+        $("#search-suggestions"),
+        $("#main-search-bar-submit"),
+        $("#cover-entire-screen")
+    );
+
+}
+
+// Logic dealing with the search function.
 $(document).ready(() => {
+    generalSetup();
+
     // Generate data action.
     let generateTotal = 200;
     $("#gen-data").click(() => {
