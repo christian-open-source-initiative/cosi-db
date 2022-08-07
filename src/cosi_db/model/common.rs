@@ -14,10 +14,12 @@ pub trait Generator<T> {
 }
 
 #[async_trait]
-pub trait COSICollection<'a, T, I>
+pub trait COSICollection<'a, T, I, F>
 where
     for<'r> T: Clone + Sized + Serialize + DeserializeOwned + Unpin + Send + Sync + From<I> + 'r, // Base class
-    for<'r> I: Clone + Sized + Serialize + DeserializeOwned + Unpin + Send + Sync + From<T> + 'r,
+    for<'r> I:
+        Clone + Sized + Serialize + DeserializeOwned + Unpin + Send + Sync + From<T> + From<F> + 'r,
+    for<'r> F: Clone + Sized + Serialize + DeserializeOwned + Unpin + Send + 'r,
 {
     fn get_table_name() -> String;
     async fn get_raw_document() -> Collection<Document> {
@@ -49,5 +51,13 @@ where
         let cursor: Cursor<I> = col.find(filter, options).await?;
         let results = cursor.try_collect().await?;
         return Ok(Self::to_orm(results).await?);
+    }
+
+    // Used for processing formdata and input to internal representation.
+    // This function technically doesn't need to be here as it is just a softwrapper
+    // to into() however it allows for code-readers to understand the relationship between
+    // Struct AImpl and Struct AForm.
+    fn convert_form_input(form_data: F) -> COSIResult<I> {
+        return Ok(form_data.into());
     }
 }

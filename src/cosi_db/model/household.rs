@@ -7,6 +7,7 @@ use names::Name;
 use serde::{Deserialize, Serialize};
 
 use core::convert::From;
+use rocket::form::FromForm;
 
 // cosi_db
 use crate::cosi_db::controller::common::get_connection;
@@ -30,6 +31,27 @@ pub struct HouseholdImpl {
     pub persons: Vec<ObjectId>,
 }
 
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
+pub struct HouseholdForm {
+    pub house_name: String,
+    pub address: String,
+    pub persons: Vec<String>,
+}
+
+impl From<HouseholdForm> for HouseholdImpl {
+    fn from(h: HouseholdForm) -> HouseholdImpl {
+        HouseholdImpl {
+            house_name: h.house_name,
+            address: ObjectId::parse_str(h.address).unwrap(), // TODO: error handling
+            persons: h
+                .persons
+                .iter()
+                .map(|i| ObjectId::parse_str(i).unwrap())
+                .collect(),
+        }
+    }
+}
+
 impl From<Household> for HouseholdImpl {
     fn from(h: Household) -> HouseholdImpl {
         HouseholdImpl {
@@ -44,14 +66,14 @@ impl From<HouseholdImpl> for Household {
     fn from(h: HouseholdImpl) -> Household {
         Household {
             house_name: h.house_name,
-            address: Address::default(),
+            address: <Address as std::default::Default>::default(),
             persons: vec![],
         }
     }
 }
 
 #[async_trait]
-impl COSICollection<'_, Household, HouseholdImpl> for Household {
+impl COSICollection<'_, Household, HouseholdImpl, HouseholdForm> for Household {
     fn get_table_name() -> String {
         return "household".to_string();
     }

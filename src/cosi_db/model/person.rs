@@ -5,13 +5,14 @@ use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
 use names::Name;
+use rocket::form::{FromForm, FromFormField};
 
 // cosi_db
 use super::common::{COSICollection, Generator};
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
 
-#[derive(Copy, Clone, Debug, Deserialize, Serialize)]
+#[derive(Copy, Clone, Debug, FromFormField, Deserialize, Serialize)]
 pub enum Sex {
     Male,
     Female,
@@ -29,8 +30,33 @@ pub struct Person {
     pub sex: Sex,
 }
 
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
+pub struct PersonForm {
+    pub first_name: String,
+    pub middle_name: String,
+    pub last_name: String,
+    pub nicks: Vec<String>,
+    pub dob: Option<String>,
+    pub age: Option<u8>,
+    pub sex: Sex,
+}
+
+impl From<PersonForm> for Person {
+    fn from(p: PersonForm) -> Person {
+        Person {
+            first_name: p.first_name.clone(),
+            middle_name: p.middle_name.clone(),
+            last_name: p.last_name.clone(),
+            nicks: p.nicks,
+            dob: p.dob.map(|x| x.parse::<NaiveDate>().unwrap()), // TODO Error parsing.
+            age: p.age.clone(),
+            sex: p.sex.clone(),
+        }
+    }
+}
+
 #[async_trait]
-impl COSICollection<'_, Person, Person> for Person {
+impl COSICollection<'_, Person, Person, PersonForm> for Person {
     fn get_table_name() -> String {
         return "person".to_string();
     }

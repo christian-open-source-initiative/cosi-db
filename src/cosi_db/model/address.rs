@@ -6,12 +6,15 @@ use rand::{thread_rng, Rng};
 use lipsum::lipsum_words_from_seed;
 use std::default::Default;
 
+use field_types::FieldType;
+use rocket::form::FromForm;
+
 // cosi_db
 use super::common::{COSICollection, Generator};
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct Address {
     pub line_one: String,
     pub line_two: String,
@@ -22,6 +25,8 @@ pub struct Address {
     pub county: Option<String>,
     pub country: Option<String>,
 }
+
+pub type AddressForm = Address;
 
 impl Default for Address {
     fn default() -> Self {
@@ -39,7 +44,7 @@ impl Default for Address {
 }
 
 #[async_trait]
-impl COSICollection<'_, Address, Address> for Address {
+impl COSICollection<'_, Address, Address, Address> for Address {
     fn get_table_name() -> String {
         return "address".to_string();
     }

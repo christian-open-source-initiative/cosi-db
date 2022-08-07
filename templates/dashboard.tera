@@ -19,7 +19,7 @@
         <h1>COSI DB</h1>
         <h3>Search</h3>
         <div id="search-bar-div">
-          <input type="search" id="main-search-bar" class="search-bar-general" placeholder="Type something to search..." />
+          <input type="search" id="main-search-bar" class="search-bar-general" placeholder="Type something such as name, address, or event." />
           <button type="submit" id="main-search-bar-submit" class="search-bar-general"><i class="fa fa-search"></i></button>
           <div id="search-suggestions">Search suggestions</div>
         </div>
