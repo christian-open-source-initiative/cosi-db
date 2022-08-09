@@ -60,7 +60,7 @@ macro_rules! generate_pageable_getter {
     ($T:ident) => {
         $crate::paste::paste! {
             $crate::with_builtin_macros::with_builtin!{
-                let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>&<search_query>") in {
+                let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>&<search_query..>") in {
                     #[get($v_path)]
                     pub async fn [<get_ $T:lower>](page: Option<u64>, search_query: [<$T Form>]) -> RawJson<String> {
                         let page = page.unwrap_or(0);
@@ -77,9 +77,9 @@ macro_rules! generate_pageable_getter {
                             .skip(limit_size as u64 * page)
                             .build();
 
-                        let search_obj = $T::convert_form_input(search_query).unwrap();
+                        let search_doc = $T::convert_form_input(search_query).unwrap();
                         // Query any search_queries
-                        let data: Vec<$T> = $T::find_data(Some(to_document(&search_obj).unwrap()), Some(find_options)).await.unwrap();
+                        let data: Vec<$T> = $T::find_data(Some(search_doc), Some(find_options)).await.unwrap();
 
                         RawJson(
                             serde_json::to_string(&PaginateData {

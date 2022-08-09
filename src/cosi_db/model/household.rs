@@ -14,6 +14,7 @@ use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};
 
 use crate::cosi_db::model::address::Address;
+use crate::cosi_db::model::common::COSIForm;
 use crate::cosi_db::model::common::{COSICollection, Generator};
 use crate::cosi_db::model::person::Person;
 
@@ -33,24 +34,12 @@ pub struct HouseholdImpl {
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct HouseholdForm {
-    pub house_name: String,
-    pub address: String,
-    pub persons: Vec<String>,
+    pub house_name: Option<String>,
+    pub address: Option<String>,
+    pub persons: Option<Vec<String>>,
 }
 
-impl From<HouseholdForm> for HouseholdImpl {
-    fn from(h: HouseholdForm) -> HouseholdImpl {
-        HouseholdImpl {
-            house_name: h.house_name,
-            address: ObjectId::parse_str(h.address).unwrap(), // TODO: error handling
-            persons: h
-                .persons
-                .iter()
-                .map(|i| ObjectId::parse_str(i).unwrap())
-                .collect(),
-        }
-    }
-}
+impl COSIForm for HouseholdForm {}
 
 impl From<Household> for HouseholdImpl {
     fn from(h: Household) -> HouseholdImpl {

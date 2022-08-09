@@ -5,7 +5,7 @@ use serde_json;
 use rocket::response::content::RawJson;
 
 // mongo
-use mongodb::{bson::doc, bson::to_document, options::FindOptions};
+use mongodb::{bson::doc, options::FindOptions};
 
 // cosi_db
 use crate::cosi_db::controller::common::PaginateData;

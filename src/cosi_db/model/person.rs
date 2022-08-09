@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use chrono::NaiveDate;
+use mongodb::bson::doc;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
@@ -8,7 +9,7 @@ use names::Name;
 use rocket::form::{FromForm, FromFormField};
 
 // cosi_db
-use super::common::{COSICollection, Generator};
+use super::common::{COSICollection, COSIForm, Generator};
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
 
@@ -32,28 +33,16 @@ pub struct Person {
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct PersonForm {
-    pub first_name: String,
-    pub middle_name: String,
-    pub last_name: String,
-    pub nicks: Vec<String>,
-    pub dob: Option<String>,
-    pub age: Option<u8>,
-    pub sex: Sex,
+    pub first_name: Option<String>,
+    pub middle_name: Option<String>,
+    pub last_name: Option<String>,
+    pub nicks: Option<Vec<String>>,
+    pub dob: Option<Option<String>>,
+    pub age: Option<Option<u8>>,
+    pub sex: Option<Sex>,
 }
 
-impl From<PersonForm> for Person {
-    fn from(p: PersonForm) -> Person {
-        Person {
-            first_name: p.first_name.clone(),
-            middle_name: p.middle_name.clone(),
-            last_name: p.last_name.clone(),
-            nicks: p.nicks,
-            dob: p.dob.map(|x| x.parse::<NaiveDate>().unwrap()), // TODO Error parsing.
-            age: p.age.clone(),
-            sex: p.sex.clone(),
-        }
-    }
-}
+impl COSIForm for PersonForm {}
 
 #[async_trait]
 impl COSICollection<'_, Person, Person, PersonForm> for Person {

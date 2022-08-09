@@ -13,8 +13,9 @@ use rocket::form::FromForm;
 use super::common::{COSICollection, Generator};
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
+use crate::cosi_db::model::common::COSIForm;
 
-#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
+#[derive(Clone, Debug, Deserialize, FromForm, FieldType, Serialize)]
 pub struct Address {
     pub line_one: String,
     pub line_two: String,
@@ -26,7 +27,18 @@ pub struct Address {
     pub country: Option<String>,
 }
 
-pub type AddressForm = Address;
+#[derive(Clone, Debug, Deserialize, FromForm, FieldType, Serialize)]
+pub struct AddressForm {
+    pub line_one: Option<String>,
+    pub line_two: Option<String>,
+    pub line_three: Option<String>,
+    pub city: Option<String>,
+    pub region: Option<String>,
+    pub postal_code: Option<Option<String>>,
+    pub county: Option<Option<String>>,
+    pub country: Option<Option<String>>,
+}
+impl COSIForm for AddressForm {}
 
 impl Default for Address {
     fn default() -> Self {
@@ -44,7 +56,7 @@ impl Default for Address {
 }
 
 #[async_trait]
-impl COSICollection<'_, Address, Address, Address> for Address {
+impl COSICollection<'_, Address, Address, AddressForm> for Address {
     fn get_table_name() -> String {
         return "address".to_string();
     }
