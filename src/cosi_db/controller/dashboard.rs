@@ -18,7 +18,6 @@ pub fn index() -> RawHtml<Template> {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct SearchTable<T> {
     data: T,
-    table: String,
     entry_match: String,
 }
 
@@ -38,7 +37,6 @@ pub async fn search(query: &str) -> RawJson<String> {
             .iter()
             .map(|x| SearchTable {
                 data: x.clone(),
-                table: "Address".to_string(),
                 entry_match: entry.to_string(),
             })
             .collect();
@@ -56,7 +54,6 @@ pub async fn search(query: &str) -> RawJson<String> {
             .iter()
             .map(|x| SearchTable {
                 data: x.clone(),
-                table: "Household".to_string(),
                 entry_match: entry.to_string(),
             })
             .collect();
@@ -73,7 +70,6 @@ pub async fn search(query: &str) -> RawJson<String> {
             .iter()
             .map(|x| SearchTable {
                 data: x.clone(),
-                table: "Person".to_string(),
                 entry_match: entry.to_string(),
             })
             .collect();
@@ -81,7 +77,7 @@ pub async fn search(query: &str) -> RawJson<String> {
     }
 
     RawJson(format!(
-        "[{}, {}, {}]",
+        "{{ \"Address\": {}, \"Household\": {}, \"Person\": {}}}",
         serde_json::to_string(&address_data).unwrap(),
         serde_json::to_string(&household_data).unwrap(),
         serde_json::to_string(&person_data).unwrap(),
