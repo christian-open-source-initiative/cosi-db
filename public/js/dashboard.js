@@ -15,6 +15,17 @@ ENDPOINT[ADDRESS_TABLE_IDX] = "address";
 ENDPOINT[PEOPLE_TABLE_IDX] = "person";
 ENDPOINT[HOUSEHOLD_TABLE_IDX] = "household";
 
+let R_ENDPOINT = {};
+for (let k in ENDPOINT) {
+    R_ENDPOINT[ENDPOINT[k]] = k;
+}
+
+// Maps which keys to search for a given endpoint.
+let ENDPOINT_SEARCHABLE = {};
+ENDPOINT_SEARCHABLE[ENDPOINT[ADDRESS_TABLE_IDX]] = ["line_one", "line_two", "line_three"];
+ENDPOINT_SEARCHABLE[ENDPOINT[PEOPLE_TABLE_IDX]] = ["first_name", "middle_name"];
+ENDPOINT_SEARCHABLE[ENDPOINT[HOUSEHOLD_TABLE_IDX]] = ["house_name"]
+
 // End point mapping
 let GEN_ENDPOINT_LOOKUP = {};
 let GET_ENDPOINT_LOOKUP = {};
@@ -24,7 +35,7 @@ for (const idx of TABLE_IDX) {
 }
 
 class SearchManager {
-    constructor(searchBar, searchSuggestion, searchButton, searchDarkener) {
+    constructor(searchBar, searchSuggestion, searchButton, searchDarkener, tablesSearch=ENDPOINT) {
         this.searchBar = searchBar;
         this.searchSuggestion = searchSuggestion;
         this.searchButton = searchButton;
@@ -34,7 +45,10 @@ class SearchManager {
         this.searchSuggestion.hide();
         this.searchDarkener.hide();
         // We don't want to spam the server
-        this.querySent = false;
+        this.currentQuery = "";
+        this.tablesSearch = {...tablesSearch};
+        // Stores tables that are valid to be searched.
+        this.validSearches = {...ENDPOINT_SEARCHABLE};
 
         // Requires binding due to function reference.
         this.searchBar.keyup(
@@ -46,12 +60,36 @@ class SearchManager {
                     return;
                 }
                 this.determineHide();
+                if (this.currentQuery.length != this.searchBar.val().length) {
+                    this.currentQuery = this.searchBar.val();
+                    this.dispatchSearch();
+                }
             }
         );
 
         // We only want to hid if user focuses and already typed.
         this.searchBar.focus(this.determineHide.bind(this));
         this.searchBar.blur(() => { this.searchDarkener.hide(); });
+    }
+
+    dispatchSearch() {
+        // Dispatches the search result to all available tables.
+        this.searchSuggestion.empty();
+        for (const tableName in this.validSearches) {
+            let idx = R_ENDPOINT[tableName];
+            let endpoint = "/" + GET_ENDPOINT_LOOKUP[idx] + "/";
+            let queries = this.validSearches[tableName];
+
+            for (let q of queries) {
+                $.get(endpoint + "/?page=0" + `&${q}=${this.currentQuery}`, (data) => {
+                    if (data["data"].length != 0) {
+                        console.log(data["data"]);
+                        this.searchSuggestion.append(data["data"]);
+                    }
+                })
+                .fail((d, textStatus, error) => {console.log(error);});
+            }
+        }
     }
 
     determineHide() {
@@ -86,7 +124,6 @@ $(document).ready(() => {
         // of the buttons pressed.
         let endpoint = "/" + GEN_ENDPOINT_LOOKUP[tableTrack] + "/";
         $.get(endpoint + generateTotal + "/", (data) => {
-            console.log(data);
             $("#status").hide().html("Generated total datapoints: " + data["total"]).show();
             updateTable();
         })
