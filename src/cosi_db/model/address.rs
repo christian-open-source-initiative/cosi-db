@@ -6,7 +6,6 @@ use rand::{thread_rng, Rng};
 use lipsum::lipsum_words_from_seed;
 use std::default::Default;
 
-use field_types::FieldType;
 use rocket::form::FromForm;
 
 // cosi_db
@@ -15,7 +14,7 @@ use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
 use crate::cosi_db::model::common::COSIForm;
 
-#[derive(Clone, Debug, Deserialize, FromForm, FieldType, Serialize)]
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct Address {
     pub line_one: String,
     pub line_two: String,
@@ -27,7 +26,7 @@ pub struct Address {
     pub country: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize, FromForm, FieldType, Serialize)]
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct AddressForm {
     pub line_one: Option<String>,
     pub line_two: Option<String>,
