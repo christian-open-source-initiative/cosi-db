@@ -11,7 +11,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: Build Server
-        run: docker-compose up -d
       - name: Test Server
-        run: cd tests && npm install && npm test
+        run: |
+          docker-compose up -d 
+          cd tests 
+          npm install
+          npm test
