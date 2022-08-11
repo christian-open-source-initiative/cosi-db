@@ -2,9 +2,9 @@ version: '3'
 services:
   cosi-db:
     build: .
-    # ports:
-    #   - 27017:27017
-    #   - 8000:8000
+    ports:
+      - 27017:27017
+      - 8000:8000
     volumes:
       - .:/mnt/cosi
     command: bash -c "cd /mnt/cosi && cargo run"
