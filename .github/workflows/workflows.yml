@@ -1,4 +1,4 @@
-name: actions
+name: Build Passing
 on:
   push:
     branches:
