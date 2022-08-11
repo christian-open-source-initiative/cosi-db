@@ -115,14 +115,14 @@ describe("Verify Getters", () => {
         });
 
         test(`/${endpoint} load < 100ms`, async() => {
-            // Assert that all tables can load data page in < 100ms
+            // Assert that all tables can load data page in < 350ms
             let start_time = Date.now();
             // Exclude normal 200 and content asserts so they don't impact performance
             const response = await cosi_request()
                                     .get(`/${endpoint}`)
                                     .query({page: 0})
             let end_time = Date.now();
-            expect(end_time - start_time).toBeLessThan(100);
+            expect(end_time - start_time).toBeLessThan(350);
         });
     }
 });
