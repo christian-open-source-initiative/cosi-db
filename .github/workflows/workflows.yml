@@ -18,6 +18,9 @@ jobs:
         uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: 5.0
+          mongodb-username: admin
+          mongodb-password: admin
+          mongodb-db: cosi_db
       - name: Build
         run: |
           cargo build
