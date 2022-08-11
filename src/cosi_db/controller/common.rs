@@ -1,5 +1,10 @@
+use lazy_static::lazy_static;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
+
+// std
+use std::collections::HashMap;
+use std::sync::Mutex;
 
 // cosi_db
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
@@ -11,12 +16,30 @@ pub struct PaginateData<T> {
     pub data: Vec<T>,
 }
 
-pub async fn get_connection() -> Database {
-    CosiDB::new("admin", "admin", None)
-        .await
-        .unwrap()
-        .client
-        .database("cosi_db")
+// Lazy static helps us not have to type a few classes to do the intialization for us.
+lazy_static! {
+    // We share connections accross all threads.
+    static ref CONNECTIONS: Mutex<HashMap<String, Database>> = Mutex::new(HashMap::new());
+}
+
+pub async fn initialize_connections() {
+    let connections = ["address", "household", "person"];
+    for c in connections {
+        let db_connect = CosiDB::new("admin", "admin", None)
+            .await
+            .unwrap()
+            .client
+            .database("cosi_db");
+        CONNECTIONS
+            .lock()
+            .unwrap()
+            .insert(c.to_string(), db_connect);
+    }
+}
+
+pub async fn get_connection(key: &str) -> Database {
+    // Cloning connection clones meta-data but not the actually connection itself.
+    CONNECTIONS.lock().unwrap().get(key).unwrap().clone()
 }
 
 // Helper macros to generate endpoints.

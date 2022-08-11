@@ -46,12 +46,14 @@ where
 {
     fn get_table_name() -> String;
     async fn get_raw_document() -> Collection<Document> {
-        return get_connection()
-            .await
-            .collection::<Document>(&Self::get_table_name());
+        let tname = Self::get_table_name();
+        return get_connection(&tname).await.collection::<Document>(&tname);
     }
 
-    async fn get_collection() -> Collection<I>;
+    async fn get_collection() -> Collection<I> {
+        let tname = Self::get_table_name();
+        get_connection(&tname).await.collection::<I>(&tname)
+    }
 
     async fn to_impl(orm: Vec<T>) -> COSIResult<Vec<I>> {
         // This extra call allows for async side-effects.

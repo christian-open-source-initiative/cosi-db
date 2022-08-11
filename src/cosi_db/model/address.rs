@@ -59,10 +59,6 @@ impl COSICollection<'_, Address, Address, AddressForm> for Address {
     fn get_table_name() -> String {
         return "address".to_string();
     }
-
-    async fn get_collection() -> mongodb::Collection<Address> {
-        get_connection().await.collection::<Address>("address")
-    }
 }
 
 #[async_trait]

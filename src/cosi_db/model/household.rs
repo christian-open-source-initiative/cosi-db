@@ -67,12 +67,6 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdForm> for Household {
         return "household".to_string();
     }
 
-    async fn get_collection() -> mongodb::Collection<HouseholdImpl> {
-        get_connection()
-            .await
-            .collection::<HouseholdImpl>("household")
-    }
-
     async fn to_impl(mut orm: Vec<Household>) -> COSIResult<Vec<HouseholdImpl>> {
         // Slow, fetch results each and every one.
         let collection = Self::get_collection().await;

@@ -49,10 +49,6 @@ impl COSICollection<'_, Person, Person, PersonForm> for Person {
     fn get_table_name() -> String {
         return "person".to_string();
     }
-
-    async fn get_collection() -> mongodb::Collection<Person> {
-        get_connection().await.collection::<Person>("person")
-    }
 }
 
 #[async_trait]
