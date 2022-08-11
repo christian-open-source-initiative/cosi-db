@@ -11,7 +11,7 @@ use rocket::form::{FromForm, FromFormField};
 // cosi_db
 use super::common::{COSICollection, COSIForm, Generator};
 use crate::cosi_db::controller::common::get_connection;
-use crate::cosi_db::errors::COSIResult;
+use crate::cosi_db::errors::{COSIError, COSIResult};
 
 #[derive(Copy, Clone, Debug, FromFormField, Deserialize, Serialize)]
 pub enum Sex {
@@ -36,13 +36,54 @@ pub struct PersonForm {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub nicks: Option<Vec<String>>,
+    pub nicks: Vec<String>, // Vectors default to empty array.
     pub dob: Option<Option<String>>,
     pub age: Option<Option<u8>>,
     pub sex: Option<Sex>,
 }
 
-impl COSIForm for PersonForm {}
+impl PersonForm {
+    fn _sanitize(form: &PersonForm) -> COSIResult<()> {
+        let check = |b: bool, err_msg: Vec<&str>| {
+            if !b {
+                Err(COSIError::msg(err_msg.join(" ")))
+            } else {
+                Ok(true)
+            }
+        };
+        if let Some(Some(dob)) = &form.dob {
+            let splits: Vec<&str> = dob.split("-").collect();
+            let err_msg = "Date should be <year>-<month>-<day>.";
+            check(splits.len() == 3, vec![err_msg])?;
+
+            let year = splits[0].parse::<u16>();
+            let month = splits[1].parse::<u8>();
+            let day = splits[2].parse::<u8>();
+            check(year.is_ok(), vec![err_msg, "Invalid year number."])?;
+            check(month.is_ok(), vec![err_msg, "Invalid month number."])?;
+            check(day.is_ok(), vec![err_msg, "Invalid day number."])?;
+
+            // Force year to be within the 1800+
+            check(year.unwrap() > 1800, vec!["Year must be greater than 1800"])?;
+
+            // Rest of the errors.
+            NaiveDate::parse_from_str(&dob, "%Y-%m-%d")?;
+        }
+
+        return Ok(());
+    }
+}
+
+impl COSIForm for PersonForm {
+    fn sanitize_insert(&self) -> COSIResult<mongodb::bson::Document>
+    where
+        Self: Serialize,
+    {
+        // Add some common user errors.
+        PersonForm::_sanitize(self)?;
+        return self.convert_to_document(true);
+    }
+}
 
 #[async_trait]
 impl COSICollection<'_, Person, Person, PersonForm> for Person {
