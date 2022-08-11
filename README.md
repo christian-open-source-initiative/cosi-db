@@ -1,4 +1,5 @@
 # COSI Database
+![build passing](https://github.com/christian-open-source-initiative/cosi-db/actions/workflows/workflows.yml/badge.svg)
 
 A database used for capturing ministry and community life within, usually, a church setting!
 
