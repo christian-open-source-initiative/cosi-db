@@ -10,7 +10,6 @@ use rocket::form::FromForm;
 
 // cosi_db
 use super::common::{COSICollection, Generator};
-use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
 use crate::cosi_db::model::common::COSIForm;
 
@@ -58,10 +57,6 @@ impl Default for Address {
 impl COSICollection<'_, Address, Address, AddressForm> for Address {
     fn get_table_name() -> String {
         return "address".to_string();
-    }
-
-    async fn get_collection() -> mongodb::Collection<Address> {
-        get_connection().await.collection::<Address>("address")
     }
 }
 

@@ -10,7 +10,6 @@ use core::convert::From;
 use rocket::form::FromForm;
 
 // cosi_db
-use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};
 
 use crate::cosi_db::model::address::Address;
@@ -65,12 +64,6 @@ impl From<HouseholdImpl> for Household {
 impl COSICollection<'_, Household, HouseholdImpl, HouseholdForm> for Household {
     fn get_table_name() -> String {
         return "household".to_string();
-    }
-
-    async fn get_collection() -> mongodb::Collection<HouseholdImpl> {
-        get_connection()
-            .await
-            .collection::<HouseholdImpl>("household")
     }
 
     async fn to_impl(mut orm: Vec<Household>) -> COSIResult<Vec<HouseholdImpl>> {

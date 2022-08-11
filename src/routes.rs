@@ -10,10 +10,13 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             index,
             generate_person,
             get_person,
+            insert_person,
             generate_address,
             get_address,
+            insert_address,
             generate_household,
             get_household,
+            insert_household,
             search
         ],
     )

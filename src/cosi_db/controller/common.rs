@@ -1,5 +1,10 @@
+use lazy_static::lazy_static;
 use mongodb::Database;
 use serde::{Deserialize, Serialize};
+
+// std
+use std::collections::HashMap;
+use std::sync::Mutex;
 
 // cosi_db
 use crate::cosi_db::connection::{CosiDB, MongoConnection};
@@ -11,12 +16,30 @@ pub struct PaginateData<T> {
     pub data: Vec<T>,
 }
 
-pub async fn get_connection() -> Database {
-    CosiDB::new("admin", "admin", None)
-        .await
-        .unwrap()
-        .client
-        .database("cosi_db")
+// Lazy static helps us not have to type a few classes to do the intialization for us.
+lazy_static! {
+    // We share connections accross all threads.
+    static ref CONNECTIONS: Mutex<HashMap<String, Database>> = Mutex::new(HashMap::new());
+}
+
+pub async fn initialize_connections() {
+    let connections = ["address", "household", "person"];
+    for c in connections {
+        let db_connect = CosiDB::new("admin", "admin", None)
+            .await
+            .unwrap()
+            .client
+            .database("cosi_db");
+        CONNECTIONS
+            .lock()
+            .unwrap()
+            .insert(c.to_string(), db_connect);
+    }
+}
+
+pub async fn get_connection(key: &str) -> Database {
+    // Cloning connection clones meta-data but not the actually connection itself.
+    CONNECTIONS.lock().unwrap().get(key).unwrap().clone()
 }
 
 // Helper macros to generate endpoints.
@@ -77,7 +100,7 @@ macro_rules! generate_pageable_getter {
                             .skip(limit_size as u64 * page)
                             .build();
 
-                        let search_doc = $T::convert_form_input(search_query).unwrap();
+                        let search_doc = $T::convert_form_query(search_query).unwrap();
                         // Query any search_queries
                         let data: Vec<$T> = $T::find_data(Some(search_doc), Some(find_options)).await.unwrap();
 
@@ -88,6 +111,35 @@ macro_rules! generate_pageable_getter {
                                 data: data
                             }).unwrap()
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// INSERT
+#[macro_export]
+macro_rules! generate_pageable_inserter {
+    ($T:ident) => {
+        $crate::paste::paste! {
+            $crate::with_builtin_macros::with_builtin!{
+                let $v_path = concat!("/insert_", stringify!([<$T: lower>]), "?<insert_query..>") in {
+                    #[get($v_path)]
+                    pub async fn [<insert_ $T:lower>](insert_query: [<$T Form>]) -> Custom<RawJson<String>> {
+                        let search_convert = $T::convert_form_insert(insert_query);
+                        return match search_convert {
+                            Ok(search_obj) => {
+                                // Query any search_queries
+                                let bson_id: Bson = $T::insert_datum(&from_document(search_obj).unwrap(), None).await.unwrap();
+                                Custom(Status::Ok, RawJson(
+                                    serde_json::to_string(&bson_id).unwrap()
+                                ))
+                            },
+                            Err(err) => {
+                                Custom(Status::BadRequest, RawJson(format!("{{\"err\": \"{}\"}}", err)))
+                            }
+                        }
                     }
                 }
             }

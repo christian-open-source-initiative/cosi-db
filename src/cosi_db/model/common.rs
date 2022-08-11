@@ -1,11 +1,13 @@
 use async_trait::async_trait;
-use mongodb::{bson::to_document, bson::Bson, bson::Document, options::FindOptions};
+use mongodb::{
+    bson::to_document, bson::Bson, bson::Document, options::FindOptions, options::InsertOneOptions,
+};
 use mongodb::{Collection, Cursor};
 
 use futures::stream::TryStreamExt;
 
 use crate::cosi_db::controller::common::get_connection;
-use crate::cosi_db::errors::COSIResult;
+use crate::cosi_db::errors::{COSIError, COSIResult};
 use serde::{de::DeserializeOwned, Serialize};
 
 #[async_trait]
@@ -14,26 +16,45 @@ pub trait Generator<T> {
 }
 
 pub trait COSIForm {
-    fn sanitize(&self) -> COSIResult<Document>
+    // Helper function to convert object to document.
+    // Argument strict decides if all keys must be present.
+    fn convert_to_document(&self, strict: bool) -> COSIResult<Document>
     where
         Self: Serialize,
     {
-        // We only want to search values that are not-null.
-        // Double wrap in Option to allow for searching of nullable.
         let d = to_document(&self).unwrap();
         let mut result = Document::new();
         for v in d {
             match v.1 {
                 Bson::Null => {
-                    continue;
+                    if strict {
+                        return Err(COSIError::msg(format! {"{} key missing.", v.0}));
+                    }
                 }
                 _ => {
                     result.insert(v.0, v.1);
                 }
             }
         }
-
         return Ok(result);
+    }
+
+    fn sanitize_query(&self) -> COSIResult<Document>
+    where
+        Self: Serialize,
+    {
+        // We only want to search values that are not-null.
+        // Double wrap in Option to allow for searching of nullable.
+        self.convert_to_document(false)
+    }
+
+    fn sanitize_insert(&self) -> COSIResult<Document>
+    where
+        Self: Serialize,
+    {
+        // Insert does not allow for non-null.
+        // Double wrap in Option to allow for searching of nullable.
+        self.convert_to_document(true)
     }
 }
 
@@ -46,12 +67,14 @@ where
 {
     fn get_table_name() -> String;
     async fn get_raw_document() -> Collection<Document> {
-        return get_connection()
-            .await
-            .collection::<Document>(&Self::get_table_name());
+        let tname = Self::get_table_name();
+        return get_connection(&tname).await.collection::<Document>(&tname);
     }
 
-    async fn get_collection() -> Collection<I>;
+    async fn get_collection() -> Collection<I> {
+        let tname = Self::get_table_name();
+        get_connection(&tname).await.collection::<I>(&tname)
+    }
 
     async fn to_impl(orm: Vec<T>) -> COSIResult<Vec<I>> {
         // This extra call allows for async side-effects.
@@ -76,11 +99,21 @@ where
         return Ok(Self::to_orm(results).await?);
     }
 
+    async fn insert_datum(data: &I, options: Option<InsertOneOptions>) -> COSIResult<Bson> {
+        let col = Self::get_collection().await;
+        let result = col.insert_one(data, options).await?;
+        return Ok(result.inserted_id);
+    }
+
     // Used for processing formdata and input to internal representation.
     // This function technically doesn't need to be here as it is just a softwrapper
     // to into() however it allows for code-readers to understand the relationship between
     // Struct AImpl and Struct AForm.
-    fn convert_form_input(form_data: F) -> COSIResult<Document> {
-        return form_data.sanitize();
+    fn convert_form_query(form_data: F) -> COSIResult<Document> {
+        return form_data.sanitize_query();
+    }
+
+    fn convert_form_insert(form_data: F) -> COSIResult<Document> {
+        return form_data.sanitize_insert();
     }
 }

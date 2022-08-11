@@ -20,6 +20,7 @@ paste = "1.0"
 with_builtin_macros = "0.0.3"
 futures = "0.3.21"
 anyhow = "1.0.59"
+lazy_static = "1.4.0"
 
 [build-dependencies]
 copy_to_output = "2.0.0"
