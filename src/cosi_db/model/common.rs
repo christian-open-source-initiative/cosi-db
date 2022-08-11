@@ -5,7 +5,6 @@ use mongodb::{
 use mongodb::{Collection, Cursor};
 
 use futures::stream::TryStreamExt;
-use std::borrow::Borrow;
 
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};

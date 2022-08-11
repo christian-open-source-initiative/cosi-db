@@ -132,7 +132,7 @@ macro_rules! generate_pageable_inserter {
                             Ok(search_obj) => {
                                 // Query any search_queries
                                 let bson_id: Bson = $T::insert_datum(&from_document(search_obj).unwrap(), None).await.unwrap();
-                                Custom(Status::Accepted, RawJson(
+                                Custom(Status::Ok, RawJson(
                                     serde_json::to_string(&bson_id).unwrap()
                                 ))
                             },

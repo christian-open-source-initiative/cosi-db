@@ -11,7 +11,6 @@ use mongodb::{bson::doc, bson::from_document, bson::Bson, options::FindOptions};
 
 // cosi_db
 use crate::cosi_db::controller::common::PaginateData;
-use crate::cosi_db::errors::COSIError;
 use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::common::Generator;
 

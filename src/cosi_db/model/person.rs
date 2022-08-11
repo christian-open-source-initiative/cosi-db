@@ -10,7 +10,6 @@ use rocket::form::{FromForm, FromFormField};
 
 // cosi_db
 use super::common::{COSICollection, COSIForm, Generator};
-use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};
 
 #[derive(Copy, Clone, Debug, FromFormField, Deserialize, Serialize)]

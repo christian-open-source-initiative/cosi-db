@@ -10,7 +10,6 @@ use core::convert::From;
 use rocket::form::FromForm;
 
 // cosi_db
-use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};
 
 use crate::cosi_db::model::address::Address;
