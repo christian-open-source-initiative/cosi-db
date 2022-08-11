@@ -15,16 +15,16 @@ use crate::cosi_db::model::common::Generator;
 use crate::{generate_generators, generate_pageable_getter};
 
 // Address
-use crate::cosi_db::model::address::Address;
+use crate::cosi_db::model::address::{Address, AddressForm};
 generate_generators! { Address }
 generate_pageable_getter! { Address }
 
 // Person
-use crate::cosi_db::model::person::Person;
+use crate::cosi_db::model::person::{Person, PersonForm};
 generate_generators! { Person }
 generate_pageable_getter! { Person }
 
 // Household
-use crate::cosi_db::model::household::Household;
+use crate::cosi_db::model::household::{Household, HouseholdForm};
 generate_generators! { Household }
 generate_pageable_getter! { Household }

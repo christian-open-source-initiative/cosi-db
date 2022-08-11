@@ -5,22 +5,38 @@
   <title>COSI DB</title>
   <meta name="description" content="COSI Dashboard Dashboard Interface">
   <link rel="stylesheet" href="public/css/index.css"/>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="public/js/jquery.js"></script>
   <script src="public/js/dashboard.js"></script>
 </head>
 <body>
-    <h1>COSI DB</h1>
+    <div id="cover-entire-screen"></div>
 
-    <!-- Table Selection -->
-    <button type="button" id="address-select">Address Table</button>
-    <button type="button" id="household-select">Household Table</button>
-    <button type="button" id="people-select">People Table</button>
-
-    <button type="button" id="gen-data">Generate Data</button>
-
-    <div id="status"></div>
-
-    <div id="loading">Now loading...</div>
-    <table id="data-table"></table>
+    <!-- out-div necessary for cover-entire-screen -->
+    <div id="outer-div">
+      <div class="center-content">
+        <h1>COSI DB</h1>
+        <h3>Search</h3>
+        <div id="search-bar-div">
+          <input type="search" id="main-search-bar" class="search-bar-general" placeholder="Type something such as name, address, or event." />
+          <button type="submit" id="main-search-bar-submit" class="search-bar-general"><i class="fa fa-search"></i></button>
+          <div id="search-suggestions">Search suggestions</div>
+        </div>
+        <br /> <br />
+    
+        <!-- Table Selection -->
+        <button type="button" id="address-select">Address Table</button>
+        <button type="button" id="household-select">Household Table</button>
+        <button type="button" id="people-select">People Table</button>
+    
+        <button type="button" id="gen-data">Generate Data</button>
+    
+        <div id="status"></div>
+    
+        <div id="loading">Now loading...</div>
+        <table id="data-table"></table>
+      </div>
+    </div>
 </body>
 </html>

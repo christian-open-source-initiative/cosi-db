@@ -7,12 +7,14 @@ use names::Name;
 use serde::{Deserialize, Serialize};
 
 use core::convert::From;
+use rocket::form::FromForm;
 
 // cosi_db
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};
 
 use crate::cosi_db::model::address::Address;
+use crate::cosi_db::model::common::COSIForm;
 use crate::cosi_db::model::common::{COSICollection, Generator};
 use crate::cosi_db::model::person::Person;
 
@@ -30,6 +32,15 @@ pub struct HouseholdImpl {
     pub persons: Vec<ObjectId>,
 }
 
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
+pub struct HouseholdForm {
+    pub house_name: Option<String>,
+    pub address: Option<String>,
+    pub persons: Option<Vec<String>>,
+}
+
+impl COSIForm for HouseholdForm {}
+
 impl From<Household> for HouseholdImpl {
     fn from(h: Household) -> HouseholdImpl {
         HouseholdImpl {
@@ -44,14 +55,14 @@ impl From<HouseholdImpl> for Household {
     fn from(h: HouseholdImpl) -> Household {
         Household {
             house_name: h.house_name,
-            address: Address::default(),
+            address: <Address as std::default::Default>::default(),
             persons: vec![],
         }
     }
 }
 
 #[async_trait]
-impl COSICollection<'_, Household, HouseholdImpl> for Household {
+impl COSICollection<'_, Household, HouseholdImpl, HouseholdForm> for Household {
     fn get_table_name() -> String {
         return "household".to_string();
     }

@@ -1,17 +1,19 @@
 use async_trait::async_trait;
 use chrono::NaiveDate;
+use mongodb::bson::doc;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
 use names::Name;
+use rocket::form::{FromForm, FromFormField};
 
 // cosi_db
-use super::common::{COSICollection, Generator};
+use super::common::{COSICollection, COSIForm, Generator};
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::COSIResult;
 
-#[derive(Copy, Clone, Debug, Deserialize, Serialize)]
+#[derive(Copy, Clone, Debug, FromFormField, Deserialize, Serialize)]
 pub enum Sex {
     Male,
     Female,
@@ -29,8 +31,21 @@ pub struct Person {
     pub sex: Sex,
 }
 
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
+pub struct PersonForm {
+    pub first_name: Option<String>,
+    pub middle_name: Option<String>,
+    pub last_name: Option<String>,
+    pub nicks: Option<Vec<String>>,
+    pub dob: Option<Option<String>>,
+    pub age: Option<Option<u8>>,
+    pub sex: Option<Sex>,
+}
+
+impl COSIForm for PersonForm {}
+
 #[async_trait]
-impl COSICollection<'_, Person, Person> for Person {
+impl COSICollection<'_, Person, Person, PersonForm> for Person {
     fn get_table_name() -> String {
         return "person".to_string();
     }

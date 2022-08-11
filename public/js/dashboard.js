@@ -15,6 +15,11 @@ ENDPOINT[ADDRESS_TABLE_IDX] = "address";
 ENDPOINT[PEOPLE_TABLE_IDX] = "person";
 ENDPOINT[HOUSEHOLD_TABLE_IDX] = "household";
 
+let R_ENDPOINT = {};
+for (let k in ENDPOINT) {
+    R_ENDPOINT[ENDPOINT[k]] = k;
+}
+
 // End point mapping
 let GEN_ENDPOINT_LOOKUP = {};
 let GET_ENDPOINT_LOOKUP = {};
@@ -23,7 +28,89 @@ for (const idx of TABLE_IDX) {
     GEN_ENDPOINT_LOOKUP[idx] = "gen_" + ENDPOINT[idx];
 }
 
+class SearchManager {
+    constructor(searchBar, searchSuggestion, searchButton, searchDarkener) {
+        this.searchBar = searchBar;
+        this.searchSuggestion = searchSuggestion;
+        this.searchButton = searchButton;
+        this.searchDarkener = searchDarkener;
+
+        // Initial states
+        this.searchSuggestion.hide();
+        this.searchDarkener.hide();
+        // We don't want to spam the server
+        this.currentQuery = "";
+
+        // Requires binding due to function reference.
+        this.searchBar.keyup(
+            (event) => {
+                if (event.key == "Escape") {
+                    this.searchDarkener.hide();
+                    this.searchSuggestion.hide();
+                    // Unfocus so that we can refocus if start typing.
+                    this.searchDarkener.blur();
+                    return;
+                }
+                this.determineHide();
+                if (this.currentQuery.length != this.searchBar.val().length) {
+                    this.currentQuery = this.searchBar.val();
+                    this.dispatchSearch();
+                }
+            }
+        );
+
+        // We only want to hid if user focuses and already typed.
+        this.searchBar.focus(this.determineHide.bind(this));
+        this.searchBar.blur(() => { this.searchDarkener.hide(); this.searchSuggestion.hide(); });
+    }
+
+    dispatchSearch() {
+        if (this.currentQuery.length < 3) {
+            return;
+        }
+
+        // Dispatches the search result to all available tables.
+        console.log(this.currentQuery)
+        $.get(`/search?query=${this.currentQuery}`, (data) => {
+            this.searchSuggestion.empty();
+            console.log(data);
+            for (let table_key in data) {
+                let results = data[table_key];
+                for (let r of results) {
+                    this.searchSuggestion.append(`${table_key}: ${JSON.stringify(r)}<br /><br />`);
+                    this.searchSuggestion.show();
+                }
+            }
+        }).fail((d, textStatus, error) => {console.log(error);});
+    }
+
+    determineHide() {
+        if (this.searchBar.val() == "") {
+            this.searchDarkener.hide();
+            this.searchSuggestion.hide();
+            return true;
+        }
+
+        this.searchSuggestion.show();
+        this.searchDarkener.show();
+    }
+}
+
+function generalSetup() {
+    // Hide search suggestions until user inputs.
+    let searchManager = new SearchManager(
+        $("#main-search-bar"),
+        $("#search-suggestions"),
+        $("#main-search-bar-submit"),
+        $("#cover-entire-screen")
+    );
+
+}
+
+// Logic dealing with the search function.
 $(document).ready(() => {
+    generalSetup();
+
     // Generate data action.
     let generateTotal = 200;
     $("#gen-data").click(() => {
@@ -31,7 +118,6 @@ $(document).ready(() => {
         // of the buttons pressed.
         let endpoint = "/" + GEN_ENDPOINT_LOOKUP[tableTrack] + "/";
         $.get(endpoint + generateTotal + "/", (data) => {
-            console.log(data);
             $("#status").hide().html("Generated total datapoints: " + data["total"]).show();
             updateTable();
         })

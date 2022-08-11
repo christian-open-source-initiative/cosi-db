@@ -1,7 +1,7 @@
 use rocket::{fs::FileServer, Build, Rocket};
 
 use super::cosi_db::controller::api::*;
-use super::cosi_db::controller::dashboard::index;
+use super::cosi_db::controller::dashboard::{index, search};
 
 pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
     rb.mount("/public", FileServer::from("public")).mount(
@@ -13,7 +13,8 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             generate_address,
             get_address,
             generate_household,
-            get_household
+            get_household,
+            search
         ],
     )
 }
