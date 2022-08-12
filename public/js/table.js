@@ -7,9 +7,7 @@ class Table {
             if (prevRef !== undefined) {
                 prevRef.removeClass("hover-click-highlight");
             }
-            console.log($(this).attr("oid"));
             let tds = $(`[oid=${$(this).attr("oid")}] td`)
-            console.log(tds);
             tds.addClass("hover-click-highlight");
             prevRef = tds;
         });

@@ -43,7 +43,6 @@ class SearchManager {
         }
 
         // Dispatches the search result to all available tables.
-        console.log(this.currentQuery)
         $.get(`/search?query=${this.currentQuery}`, (data) => {
             this.updateSearchSuggestions(data);
         }).fail((d, textStatus, error) => {console.log(error);});
