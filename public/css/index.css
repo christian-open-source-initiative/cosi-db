@@ -147,3 +147,11 @@ th:last-child { border-top-right-radius: 10px; }
 .search-highlight {
     background-color: #ebeba5;
 }
+
+tr:hover td {
+    background-color: #645f5f;
+}
+
+.hover-click-highlight {
+    background-color: #555050;
+}

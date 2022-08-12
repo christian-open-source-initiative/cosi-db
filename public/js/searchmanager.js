@@ -31,7 +31,7 @@ class SearchManager {
 
         // We only want to hid if user focuses and already typed.
         this.searchBar.focus(this.determineHide.bind(this));
-        // this.searchBar.blur(() => { this.searchDarkener.hide(); this.searchSuggestion.hide(); });
+        this.searchBar.blur(() => { this.searchDarkener.hide(); this.searchSuggestion.hide(); });
     }
 
     dispatchSearch() {
