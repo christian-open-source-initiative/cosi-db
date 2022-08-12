@@ -28,75 +28,9 @@ for (const idx of TABLE_IDX) {
     GEN_ENDPOINT_LOOKUP[idx] = "gen_" + ENDPOINT[idx];
 }
 
-class SearchManager {
-    constructor(searchBar, searchSuggestion, searchButton, searchDarkener) {
-        this.searchBar = searchBar;
-        this.searchSuggestion = searchSuggestion;
-        this.searchButton = searchButton;
-        this.searchDarkener = searchDarkener;
-
-        // Initial states
-        this.searchSuggestion.hide();
-        this.searchDarkener.hide();
-        // We don't want to spam the server
-        this.currentQuery = "";
-
-        // Requires binding due to function reference.
-        this.searchBar.keyup(
-            (event) => {
-                if (event.key == "Escape") {
-                    this.searchDarkener.hide();
-                    this.searchSuggestion.hide();
-                    // Unfocus so that we can refocus if start typing.
-                    this.searchDarkener.blur();
-                    return;
-                }
-                this.determineHide();
-                if (this.currentQuery.length != this.searchBar.val().length) {
-                    this.currentQuery = this.searchBar.val();
-                    this.dispatchSearch();
-                }
-            }
-        );
-
-        // We only want to hid if user focuses and already typed.
-        this.searchBar.focus(this.determineHide.bind(this));
-        this.searchBar.blur(() => { this.searchDarkener.hide(); this.searchSuggestion.hide(); });
-    }
-
-    dispatchSearch() {
-        if (this.currentQuery.length < 3) {
-            return;
-        }
-
-        // Dispatches the search result to all available tables.
-        console.log(this.currentQuery)
-        $.get(`/search?query=${this.currentQuery}`, (data) => {
-            this.searchSuggestion.empty();
-            console.log(data);
-            for (let table_key in data) {
-                let results = data[table_key];
-                for (let r of results) {
-                    this.searchSuggestion.append(`${table_key}: ${JSON.stringify(r)}<br /><br />`);
-                    this.searchSuggestion.show();
-                }
-            }
-        }).fail((d, textStatus, error) => {console.log(error);});
-    }
-
-    determineHide() {
-        if (this.searchBar.val() == "") {
-            this.searchDarkener.hide();
-            this.searchSuggestion.hide();
-            return true;
-        }
-
-        this.searchSuggestion.show();
-        this.searchDarkener.show();
-    }
-}
-
-function generalSetup() {
+// Logic dealing with the search function.
+$(document).ready(() => {
+    // General setup.
     // Hide search suggestions until user inputs.
     let searchManager = new SearchManager(
         $("#main-search-bar"),
@@ -105,18 +39,43 @@ function generalSetup() {
         $("#cover-entire-screen")
     );
 
-}
+    let table = new Table($("#data-table"));
 
-// Logic dealing with the search function.
-$(document).ready(() => {
-    generalSetup();
+    // Logic to rerender the table by fetching data from endpoint.
+    let updateTable = function(appendFilter = "") {
+        // Update table.
+        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + "?page=0" + appendFilter;
+        table.tableDiv.hide();
+
+        let tName = ENDPOINT[tableTrack];
+        $("#table-name").html(tName.charAt(0).toUpperCase() + tName.slice(1));
+        $.get(fetchEndpoint, (result) => {
+            table.render(result["data"]);
+        });
+    };
+
+    // Register callbacks.
+    // TODO: Not sure how to encapsulate this when ownership of table state is elsewhere.
+    // Reaction to clicking search suggestions.
+    $("#search-suggestions").on("click", ".search-suggestion-entry", function() {
+        // TODO: Placeholder for now until we can scroll to result. Regenerate table.
+        let fullMatch = $(this).children(".search-suggestion-result").attr("data");
+        let entry = $(this).children(".search-suggestion-table").attr("entry");
+        let tableName = $(this).children(".search-suggestion-table").attr("table");
+
+        tableTrack = R_ENDPOINT[tableName.toLowerCase()];
+        updateTable(`&${entry}=${fullMatch}`);
+        $("#main-search-bar").val("");
+        searchManager.determineHide();
+    });
 
     // Generate data action.
     let generateTotal = 200;
-    $("#gen-data").click(() => {
+    $("#gen-data").on("click", () => {
         // Resolve the appropriate endpoint depending on the state
         // of the buttons pressed.
         let endpoint = "/" + GEN_ENDPOINT_LOOKUP[tableTrack] + "/";
+        table.tableDiv.hide();
         $.get(endpoint + generateTotal + "/", (data) => {
             $("#status").hide().html("Generated total datapoints: " + data["total"]).show();
             updateTable();
@@ -124,60 +83,17 @@ $(document).ready(() => {
         .fail((d, textStatus, error) => {console.log(error);});
     });
 
-
-    // Logic to rerender the table by fetching data from endpoint.
-    let updateTable = function() {
-        let table = $("#data-table");
-        table.empty().hide();
-
-        // Update table.
-        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + "?page=0";
-        $.get(fetchEndpoint, (data) => {
-            let actualData = data["data"];
-            if (actualData.length == 0) {
-                table.html("No Data!");
-                return;
-            }
-
-            // Headers
-            let headerRow = $("<thead>");
-            table.append(headerRow);
-            let keys = Object.keys(actualData[0]);
-            for (let h = 0; h < keys.length; ++h) {
-                headerRow.append($("<th>").html(keys[h]));
-            }
-            for (let i = 0; i < actualData.length; ++i) {
-                let row = table[0].insertRow(-1);
-
-                for (let h = 0; h < keys.length; ++h) {
-                    let k = keys[h];
-                    if (k == "_id") {
-                        $(row.insertCell(-1)).html(actualData[i][k]["$oid"]);
-                    }
-                    else {
-                        $(row.insertCell(-1)).html(actualData[i][k]);
-                    }
-                }
-            }
-
-            // Show with smooth transition delay.
-            table.show(1000);
-        });
-
-    };
-
-    // Register callbacks.
-    $("#address-select").click(() => {
+    $("#address-select").on("click", () => {
         tableTrack = ADDRESS_TABLE_IDX;
         updateTable();
     });
 
-    $("#household-select").click(() => {
+    $("#household-select").on("click", () => {
         tableTrack = HOUSEHOLD_TABLE_IDX;
         updateTable();
     });
 
-    $("#people-select").click(() => {
+    $("#people-select").on("click", () => {
         tableTrack = PEOPLE_TABLE_IDX;
         updateTable();
     });

@@ -8,6 +8,8 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="public/js/jquery.js"></script>
+  <script src="public/js/searchmanager.js"></script>
+  <script src="public/js/table.js"></script>
   <script src="public/js/dashboard.js"></script>
 </head>
 <body>
@@ -30,6 +32,8 @@
         <button type="button" id="household-select">Household Table</button>
         <button type="button" id="people-select">People Table</button>
         <button type="button" id="gen-data">Generate Data</button>
+
+        <h2 id="table-name"></h2>
     
         <div id="status"></div>
     
