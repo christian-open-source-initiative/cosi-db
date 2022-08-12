@@ -31,7 +31,10 @@ class SearchManager {
 
         // We only want to hid if user focuses and already typed.
         this.searchBar.focus(this.determineHide.bind(this));
-        this.searchBar.blur(() => { this.searchDarkener.hide(); this.searchSuggestion.hide(); });
+        this.searchBar.blur(() => { 
+            // Provide some delay for click on suggestions. A bit hacky. TODO: Add selection tracking aware.
+            setTimeout(() => {this.searchDarkener.hide(); this.searchSuggestion.hide()}, 100);
+        });
     }
 
     dispatchSearch() {
@@ -48,8 +51,10 @@ class SearchManager {
 
     updateSearchSuggestions(data) {
         this.searchSuggestion.empty();
+        let finalRenderPerTable = {};
         for (let tableKey in data) {
             let resultsPerTable = data[tableKey];
+            finalRenderPerTable[tableKey] = [];
             for (let r of resultsPerTable) {
                 let d = r["data"];
                 let entryMatch = r["entry_match"];
@@ -59,13 +64,21 @@ class SearchManager {
                 let idx = matchData.toLowerCase().indexOf(this.currentQuery.toLowerCase());
                 let eidx = idx + this.currentQuery.length;
                 let textWrap = `<mark class="search-highlight"> ${matchData.substring(idx, eidx)}</mark>`;
-                matchData = matchData.substring(0, idx - 1) + textWrap + matchData.substring(eidx);
+                let matchDataHighlight = matchData.substring(0, idx - 1) + textWrap + matchData.substring(eidx);
 
                 // Render generation.
-                let searchResult = `<div class="search-suggestion-result">${matchData}</div>`
-                let searchTable = `<div class="search-suggestion-table">${tableKey}::${entryMatch}</div>`
+                let searchResult = `<div class="search-suggestion-result" data="${matchData}">${matchDataHighlight}</div>`
+                let searchTable = `<div class="search-suggestion-table" entry="${entryMatch}" table="${tableKey}">${tableKey}::${entryMatch}</div>`
                 let render = `<div class="search-suggestion-entry">${searchResult}${searchTable}</div>`
-                this.searchSuggestion.append(`${render}`);
+                finalRenderPerTable[tableKey].push(render);
+            }
+        }
+
+        // Bound each table to at most n results for now.
+        for (let tableKey in finalRenderPerTable) {
+            const n = Math.min(3, finalRenderPerTable[tableKey].length);
+            for (let i = 0; i < n; ++i) {
+                this.searchSuggestion.append(finalRenderPerTable[tableKey][i]);
             }
         }
         this.searchSuggestion.show();

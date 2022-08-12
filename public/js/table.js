@@ -15,9 +15,6 @@ class Table {
         });
     }
 
-    cellOnHover() {
-    }
-
     render(data) {
         const displaySpeed = 1000;
         this.tableDiv.hide().empty();

@@ -32,6 +32,8 @@
         <button type="button" id="household-select">Household Table</button>
         <button type="button" id="people-select">People Table</button>
         <button type="button" id="gen-data">Generate Data</button>
+
+        <h2 id="table-name"></h2>
     
         <div id="status"></div>
     

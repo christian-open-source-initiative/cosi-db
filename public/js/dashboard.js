@@ -41,6 +41,34 @@ $(document).ready(() => {
 
     let table = new Table($("#data-table"));
 
+    // Logic to rerender the table by fetching data from endpoint.
+    let updateTable = function(appendFilter = "") {
+        // Update table.
+        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + "?page=0" + appendFilter;
+        table.tableDiv.hide();
+
+        let tName = ENDPOINT[tableTrack];
+        $("#table-name").html(tName.charAt(0).toUpperCase() + tName.slice(1));
+        $.get(fetchEndpoint, (result) => {
+            table.render(result["data"]);
+        });
+    };
+
+    // Register callbacks.
+    // TODO: Not sure how to encapsulate this when ownership of table state is elsewhere.
+    // Reaction to clicking search suggestions.
+    $("#search-suggestions").on("click", ".search-suggestion-entry", function() {
+        // TODO: Placeholder for now until we can scroll to result. Regenerate table.
+        let fullMatch = $(this).children(".search-suggestion-result").attr("data");
+        let entry = $(this).children(".search-suggestion-table").attr("entry");
+        let tableName = $(this).children(".search-suggestion-table").attr("table");
+
+        tableTrack = R_ENDPOINT[tableName.toLowerCase()];
+        updateTable(`&${entry}=${fullMatch}`);
+        $("#main-search-bar").val("");
+        searchManager.determineHide();
+    });
+
     // Generate data action.
     let generateTotal = 200;
     $("#gen-data").on("click", () => {
@@ -55,17 +83,6 @@ $(document).ready(() => {
         .fail((d, textStatus, error) => {console.log(error);});
     });
 
-    // Logic to rerender the table by fetching data from endpoint.
-    let updateTable = function() {
-        // Update table.
-        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + "?page=0";
-        table.tableDiv.hide();
-        $.get(fetchEndpoint, (result) => {
-            table.render(result["data"]);
-        });
-    };
-
-    // Register callbacks.
     $("#address-select").on("click", () => {
         tableTrack = ADDRESS_TABLE_IDX;
         updateTable();
