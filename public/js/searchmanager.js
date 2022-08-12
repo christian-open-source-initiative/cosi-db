@@ -31,7 +31,7 @@ class SearchManager {
 
         // We only want to hid if user focuses and already typed.
         this.searchBar.focus(this.determineHide.bind(this));
-        this.searchBar.blur(() => { this.searchDarkener.hide(); this.searchSuggestion.hide(); });
+        // this.searchBar.blur(() => { this.searchDarkener.hide(); this.searchSuggestion.hide(); });
     }
 
     dispatchSearch() {
@@ -42,16 +42,33 @@ class SearchManager {
         // Dispatches the search result to all available tables.
         console.log(this.currentQuery)
         $.get(`/search?query=${this.currentQuery}`, (data) => {
-            this.searchSuggestion.empty();
-            console.log(data);
-            for (let table_key in data) {
-                let results = data[table_key];
-                for (let r of results) {
-                    this.searchSuggestion.append(`${table_key}: ${JSON.stringify(r)}<br /><br />`);
-                    this.searchSuggestion.show();
-                }
-            }
+            this.updateSearchSuggestions(data);
         }).fail((d, textStatus, error) => {console.log(error);});
+    }
+
+    updateSearchSuggestions(data) {
+        this.searchSuggestion.empty();
+        for (let tableKey in data) {
+            let resultsPerTable = data[tableKey];
+            for (let r of resultsPerTable) {
+                let d = r["data"];
+                let entryMatch = r["entry_match"];
+
+                // Find the highlight and insert highlight tag.
+                let matchData = d[entryMatch];
+                let idx = matchData.toLowerCase().indexOf(this.currentQuery.toLowerCase());
+                let eidx = idx + this.currentQuery.length;
+                let textWrap = `<mark class="search-highlight"> ${matchData.substring(idx, eidx)}</mark>`;
+                matchData = matchData.substring(0, idx - 1) + textWrap + matchData.substring(eidx);
+
+                // Render generation.
+                let searchResult = `<div class="search-suggestion-result">${matchData}</div>`
+                let searchTable = `<div class="search-suggestion-table">${tableKey}::${entryMatch}</div>`
+                let render = `<div class="search-suggestion-entry">${searchResult}${searchTable}</div>`
+                this.searchSuggestion.append(`${render}`);
+            }
+        }
+        this.searchSuggestion.show();
     }
 
     determineHide() {
