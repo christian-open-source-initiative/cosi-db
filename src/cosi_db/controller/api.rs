@@ -7,7 +7,7 @@ use rocket::response::content::RawJson;
 use rocket::response::status::Custom;
 
 // mongo
-use mongodb::{bson::doc, bson::from_document, bson::Bson, options::FindOptions};
+use mongodb::{bson::doc, bson::from_document, bson::Bson, bson::Document, options::FindOptions};
 
 // cosi_db
 use crate::cosi_db::controller::common::PaginateData;
