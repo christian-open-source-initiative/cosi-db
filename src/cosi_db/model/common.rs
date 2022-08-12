@@ -4,7 +4,7 @@ use mongodb::{
 };
 use mongodb::{Collection, Cursor};
 
-use futures::stream::TryStreamExt;
+use futures::stream::{StreamExt, TryStreamExt};
 
 use crate::cosi_db::controller::common::get_connection;
 use crate::cosi_db::errors::{COSIError, COSIResult};
@@ -97,6 +97,19 @@ where
         let cursor: Cursor<I> = col.find(filter, options).await?;
         let results = cursor.try_collect().await?;
         return Ok(Self::to_orm(results).await?);
+    }
+
+    async fn find_document(
+        filter: Option<Document>,
+        options: Option<FindOptions>,
+    ) -> COSIResult<Vec<Document>> {
+        let col = Self::get_raw_document().await;
+        let mut cursor: Cursor<Document> = col.find(filter, options).await?;
+        let mut results = Vec::new();
+        while let Some(doc) = cursor.next().await {
+            results.push(doc?);
+        }
+        return Ok(results);
     }
 
     async fn insert_datum(data: &I, options: Option<InsertOneOptions>) -> COSIResult<Bson> {

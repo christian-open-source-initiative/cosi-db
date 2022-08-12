@@ -150,7 +150,13 @@ $(document).ready(() => {
                 let row = table[0].insertRow(-1);
 
                 for (let h = 0; h < keys.length; ++h) {
-                    $(row.insertCell(-1)).html(actualData[i][keys[h]]);
+                    let k = keys[h];
+                    if (k == "_id") {
+                        $(row.insertCell(-1)).html(actualData[i][k]["$oid"]);
+                    }
+                    else {
+                        $(row.insertCell(-1)).html(actualData[i][k]);
+                    }
                 }
             }
 
