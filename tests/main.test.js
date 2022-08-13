@@ -169,7 +169,6 @@ describe("CRUD", () => {
                                         "country": "Middle Earth"
                                     });
 
-            console.log(JSON.parse(response.text));
             verifyData(response.text);
         });
     });
