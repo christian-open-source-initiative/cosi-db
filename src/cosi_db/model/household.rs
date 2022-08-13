@@ -13,9 +13,8 @@ use rocket::form::FromForm;
 use crate::cosi_db::errors::{COSIError, COSIResult};
 
 use crate::cosi_db::model::address::Address;
-use crate::cosi_db::model::common::COSIForm;
-use crate::cosi_db::model::common::{COSICollection, Generator};
-use crate::cosi_db::model::person::Person;
+use crate::cosi_db::model::common::{COSICollection, COSIForm, Generator, OID};
+use crate::cosi_db::model::person::{Person, PersonImpl};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Household {
@@ -24,27 +23,28 @@ pub struct Household {
     pub persons: Vec<Person>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct HouseholdImpl {
     pub house_name: String,
-    pub address: ObjectId,
-    pub persons: Vec<ObjectId>,
+    pub address: OID,
+    pub persons: Vec<OID>,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
-pub struct HouseholdForm {
+pub struct HouseholdOptional {
     pub house_name: Option<String>,
     pub address: Option<String>,
     pub persons: Option<Vec<String>>,
 }
 
-impl COSIForm for HouseholdForm {}
+impl COSIForm for HouseholdImpl {}
+impl COSIForm for HouseholdOptional {}
 
 impl From<Household> for HouseholdImpl {
     fn from(h: Household) -> HouseholdImpl {
         HouseholdImpl {
             house_name: h.house_name,
-            address: ObjectId::default(),
+            address: <OID as std::default::Default>::default(),
             persons: vec![],
         }
     }
@@ -61,7 +61,7 @@ impl From<HouseholdImpl> for Household {
 }
 
 #[async_trait]
-impl COSICollection<'_, Household, HouseholdImpl, HouseholdForm> for Household {
+impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Household {
     fn get_table_name() -> String {
         return "household".to_string();
     }
@@ -101,13 +101,13 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdForm> for Household {
                     let people_cursor = people_raw.find(doc! {"$or": persons_doc}, None).await?;
 
                     let persons_results: Vec<Document> = people_cursor.try_collect().await?;
-                    let persons_id: Vec<ObjectId> = persons_results
+                    let persons_id: Vec<OID> = persons_results
                         .iter()
-                        .map(|pd| pd.get("_id").unwrap().as_object_id().unwrap())
+                        .map(|pd| pd.get("_id").unwrap().as_object_id().unwrap().into())
                         .collect();
                     results.push(HouseholdImpl {
                         house_name: orm_i.house_name.clone(),
-                        address: addr_doc.get("_id").unwrap().as_object_id().unwrap(),
+                        address: addr_doc.get("_id").unwrap().as_object_id().unwrap().into(),
                         persons: persons_id,
                     })
                 }
@@ -124,13 +124,17 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdForm> for Household {
         let person_col = Person::get_collection().await;
         for i in imp {
             let address = address_col
-                .find_one(doc! {"_id": i.address}, None)
+                .find_one(doc! {"_id": ObjectId::from(i.address)}, None)
                 .await?
                 .ok_or(COSIError::msg("Unable to find provided address."))?;
             let persons_cursor = person_col
-                .find(doc! {"_id": {"$in": i.persons}}, None)
+                .find(
+                    doc! {"_id": {"$in": OID::vec_to_object_id(&i.persons)}},
+                    None,
+                )
                 .await?;
-            let persons = persons_cursor.try_collect().await?;
+            let person_impl: Vec<PersonImpl> = persons_cursor.try_collect().await?;
+            let persons: Vec<Person> = person_impl.iter().map(|x| x.clone().into()).collect();
 
             result.push(Household {
                 house_name: i.house_name,
