@@ -370,7 +370,6 @@ dependencies = [
  "copy_to_output",
  "futures",
  "glob",
- "lazy_static",
  "lipsum",
  "mongodb",
  "names",
