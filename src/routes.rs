@@ -1,6 +1,7 @@
 use rocket::{fs::FileServer, Build, Rocket};
 
 use super::cosi_db::controller::api::*;
+use super::cosi_db::controller::auth::*;
 use super::cosi_db::controller::dashboard::{index, search};
 
 pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
@@ -17,7 +18,10 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             generate_household,
             get_household,
             insert_household,
-            search
+            search,
+            // Auth
+            login,
+            login_logged
         ],
     )
 }

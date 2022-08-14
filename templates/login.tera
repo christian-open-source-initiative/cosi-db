@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>COSI DB Login</title>
+  <meta name="description" content="COSI DB Login">
+  <link rel="stylesheet" href="public/css/base.css"/>
+  <link rel="stylesheet" href="public/css/auth.css"/>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="public/js/jquery.js"></script>
+
+</head>
+<body>
+    <div class="center-content">
+        <form>
+            <label for="email">Email</label>
+            <input type="text" id="email" />
+            <br /> <br />
+
+            <label for="password">Password</label>
+            <input type="password" id=""password />
+            <br /> <br />
+
+            <input type="submit" value="Login"/>
+        </form>
+    </div>
+</body>
+</html>
