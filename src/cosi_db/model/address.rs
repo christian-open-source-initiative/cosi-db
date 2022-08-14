@@ -26,7 +26,7 @@ pub struct Address {
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
-pub struct AddressForm {
+pub struct AddressOptional {
     pub line_one: Option<String>,
     pub line_two: Option<String>,
     pub line_three: Option<String>,
@@ -36,7 +36,10 @@ pub struct AddressForm {
     pub county: Option<Option<String>>,
     pub country: Option<Option<String>>,
 }
-impl COSIForm for AddressForm {}
+
+pub type AddressImpl = Address;
+impl COSIForm for AddressImpl {}
+impl COSIForm for AddressOptional {}
 
 impl Default for Address {
     fn default() -> Self {
@@ -54,7 +57,7 @@ impl Default for Address {
 }
 
 #[async_trait]
-impl COSICollection<'_, Address, Address, AddressForm> for Address {
+impl COSICollection<'_, Address, AddressImpl, AddressOptional> for Address {
     fn get_table_name() -> String {
         return "address".to_string();
     }

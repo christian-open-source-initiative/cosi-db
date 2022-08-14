@@ -85,7 +85,7 @@ macro_rules! generate_pageable_getter {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>&<search_query..>") in {
                     #[get($v_path)]
-                    pub async fn [<get_ $T:lower>](page: Option<u64>, search_query: [<$T Form>]) -> RawJson<String> {
+                    pub async fn [<get_ $T:lower>](page: Option<u64>, search_query: [<$T Optional>]) -> RawJson<String> {
                         let page = page.unwrap_or(0);
 
                         let col = $T::get_collection().await;
@@ -125,10 +125,11 @@ macro_rules! generate_pageable_inserter {
     ($T:ident) => {
         $crate::paste::paste! {
             $crate::with_builtin_macros::with_builtin!{
-                let $v_path = concat!("/insert_", stringify!([<$T: lower>]), "?<insert_query..>") in {
-                    #[get($v_path)]
-                    pub async fn [<insert_ $T:lower>](insert_query: [<$T Form>]) -> Custom<RawJson<String>> {
-                        let search_convert = $T::convert_form_insert(insert_query);
+                let $v_path = concat!("/insert_", stringify!([<$T: lower>])) in {
+                    #[post($v_path, data="<insert_query>")]
+                    pub async fn [<insert_ $T:lower>](insert_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
+                        let insert_query_obj = insert_query.into_inner();
+                        let search_convert = $T::convert_form_insert(insert_query_obj);
                         return match search_convert {
                             Ok(search_obj) => {
                                 // Query any search_queries

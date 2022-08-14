@@ -31,7 +31,18 @@ pub struct Person {
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
-pub struct PersonForm {
+pub struct PersonImpl {
+    pub first_name: String,
+    pub middle_name: String,
+    pub last_name: String,
+    pub nicks: Vec<String>, // Vectors default to empty array.
+    pub dob: Option<String>,
+    pub age: Option<u8>,
+    pub sex: Sex,
+}
+
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
+pub struct PersonOptional {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
@@ -41,8 +52,44 @@ pub struct PersonForm {
     pub sex: Option<Sex>,
 }
 
-impl PersonForm {
-    fn _sanitize(form: &PersonForm) -> COSIResult<()> {
+impl From<Person> for PersonImpl {
+    fn from(p: Person) -> PersonImpl {
+        PersonImpl {
+            first_name: p.first_name,
+            middle_name: p.middle_name,
+            last_name: p.last_name,
+            nicks: p.nicks,
+            dob: if p.dob.is_some() {
+                Some(p.dob.unwrap().to_string())
+            } else {
+                None
+            },
+            age: p.age,
+            sex: p.sex,
+        }
+    }
+}
+
+impl From<PersonImpl> for Person {
+    fn from(p: PersonImpl) -> Person {
+        Person {
+            first_name: p.first_name,
+            middle_name: p.middle_name,
+            last_name: p.last_name,
+            nicks: p.nicks,
+            dob: if p.dob.is_some() {
+                Some(NaiveDate::parse_from_str(&p.dob.unwrap(), "%Y-%m-%d").unwrap())
+            } else {
+                None
+            },
+            age: p.age,
+            sex: p.sex,
+        }
+    }
+}
+
+impl PersonOptional {
+    fn _sanitize(form: &PersonOptional) -> COSIResult<()> {
         let check = |b: bool, err_msg: Vec<&str>| {
             if !b {
                 Err(COSIError::msg(err_msg.join(" ")))
@@ -73,19 +120,40 @@ impl PersonForm {
     }
 }
 
-impl COSIForm for PersonForm {
+impl COSIForm for PersonImpl {
     fn sanitize_insert(&self) -> COSIResult<mongodb::bson::Document>
     where
         Self: Serialize,
     {
         // Add some common user errors.
-        PersonForm::_sanitize(self)?;
+        // Reuse the same santize definition.
+        // TODO: into syntax is possible here.
+        PersonOptional::_sanitize(&PersonOptional {
+            first_name: Some(self.first_name.clone()),
+            middle_name: Some(self.middle_name.clone()),
+            last_name: Some(self.last_name.clone()),
+            nicks: self.nicks.clone(),
+            dob: Some(self.dob.clone()),
+            age: Some(self.age),
+            sex: Some(self.sex),
+        })?;
         return self.convert_to_document(true);
     }
 }
 
+impl COSIForm for PersonOptional {
+    fn sanitize_insert(&self) -> COSIResult<mongodb::bson::Document>
+    where
+        Self: Serialize,
+    {
+        // Add some common user errors.
+        PersonOptional::_sanitize(self)?;
+        return self.convert_to_document(false);
+    }
+}
+
 #[async_trait]
-impl COSICollection<'_, Person, Person, PersonForm> for Person {
+impl COSICollection<'_, Person, PersonImpl, PersonOptional> for Person {
     fn get_table_name() -> String {
         return "person".to_string();
     }
