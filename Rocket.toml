@@ -1,2 +1,9 @@
 [default]
 template_dir = "templates"
+
+[default.databases.mongodb]
+url = "mongodb://admin:admin@localhost:27017/cosi_db?authSource=admin"
+min_connections = 12
+max_connections = 64
+connect_timeout = 5
+idle_timeout = 120

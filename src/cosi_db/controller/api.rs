@@ -6,12 +6,15 @@ use rocket::form::Form;
 use rocket::http::Status;
 use rocket::response::content::RawJson;
 use rocket::response::status::Custom;
+use rocket_db_pools::Connection;
 
 // mongo
-use mongodb::{bson::doc, bson::from_document, bson::Bson, bson::Document, options::FindOptions};
+use mongodb::bson::{doc, from_document, Bson, Document};
+use mongodb::options::FindOptions;
+use mongodb::Client;
 
 // cosi_db
-use crate::cosi_db::controller::common::PaginateData;
+use crate::cosi_db::controller::common::{Logs, PaginateData};
 use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::common::Generator;
 

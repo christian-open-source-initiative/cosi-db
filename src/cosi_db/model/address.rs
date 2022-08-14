@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
+use mongodb::Client;
 use rand::{thread_rng, Rng};
 
 use lipsum::lipsum_words_from_seed;
@@ -65,7 +66,7 @@ impl COSICollection<'_, Address, AddressImpl, AddressOptional> for Address {
 
 #[async_trait]
 impl Generator<Address> for Address {
-    async fn generate(size: u32) -> COSIResult<Vec<Address>> {
+    async fn generate(client: &Client, size: u32) -> COSIResult<Vec<Address>> {
         let mut result = Vec::new();
         let mut rng = thread_rng();
 

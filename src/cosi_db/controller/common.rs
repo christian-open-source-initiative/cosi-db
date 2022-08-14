@@ -1,13 +1,5 @@
-use lazy_static::lazy_static;
-use mongodb::Database;
+use rocket_db_pools::Database;
 use serde::{Deserialize, Serialize};
-
-// std
-use std::collections::HashMap;
-use std::sync::Mutex;
-
-// cosi_db
-use crate::cosi_db::connection::{CosiDB, MongoConnection};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PaginateData<T> {
@@ -16,34 +8,12 @@ pub struct PaginateData<T> {
     pub data: Vec<T>,
 }
 
-// Lazy static helps us not have to type a few classes to do the intialization for us.
-lazy_static! {
-    // We share connections accross all threads.
-    static ref CONNECTIONS: Mutex<HashMap<String, Database>> = Mutex::new(HashMap::new());
-}
-
-pub async fn initialize_connections() {
-    let connections = ["address", "household", "person"];
-    for c in connections {
-        let db_connect = CosiDB::new("admin", "admin", None)
-            .await
-            .unwrap()
-            .client
-            .database("cosi_db");
-        CONNECTIONS
-            .lock()
-            .unwrap()
-            .insert(c.to_string(), db_connect);
-    }
-}
-
-pub async fn get_connection(key: &str) -> Database {
-    // Cloning connection clones meta-data but not the actually connection itself.
-    CONNECTIONS.lock().unwrap().get(key).unwrap().clone()
-}
-
 // Helper macros to generate endpoints.
 // Use paste to auto-generate a helper macro.
+
+#[derive(Database)]
+#[database("mongodb")]
+pub struct Logs(mongodb::Client);
 
 // GENERATORS
 #[macro_export]
@@ -53,15 +23,15 @@ macro_rules! generate_generators {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/gen_", stringify!([<$T: lower>]),  "/<total>") in {
                     #[get($v_path)]
-                    pub async fn [<generate_ $T:lower>](total: u8) -> RawJson<String> {
-
+                    pub async fn [<generate_ $T:lower>](connect: Connection<Logs>, total: u8) -> RawJson<String> {
                         #[cfg(debug_assertions)]
                         {
-                            let data = $T::generate(total as u32).await.unwrap();
+                            let client: &Client = &*connect;
+                            let data = $T::generate(client, total as u32).await.unwrap();
 
-                            let col = $T::get_collection().await;
+                            let col = $T::get_collection(client).await;
                             col.drop(None).await.unwrap();
-                            col.insert_many($T::to_impl(data).await.unwrap(), None).await.unwrap();
+                            col.insert_many($T::to_impl(client, data).await.unwrap(), None).await.unwrap();
 
                             let total = col.estimated_document_count(None).await.unwrap();
                             return RawJson(format!("{{\"total\": {}}}", total));
@@ -85,10 +55,11 @@ macro_rules! generate_pageable_getter {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>&<search_query..>") in {
                     #[get($v_path)]
-                    pub async fn [<get_ $T:lower>](page: Option<u64>, search_query: [<$T Optional>]) -> RawJson<String> {
+                    pub async fn [<get_ $T:lower>](connect: Connection<Logs>, page: Option<u64>, search_query: [<$T Optional>]) -> RawJson<String> {
+                        let client: &Client = &*connect;
                         let page = page.unwrap_or(0);
 
-                        let col = $T::get_collection().await;
+                        let col = $T::get_collection(client).await;
 
                         // Page calculate.
                         let total_result: u64 = col.estimated_document_count(None).await.unwrap();
@@ -103,7 +74,7 @@ macro_rules! generate_pageable_getter {
                         let search_doc = $T::convert_form_query(search_query).unwrap();
                         // Query any search_queries
                         // let data: Vec<$T> = $T::find_data(Some(search_doc), Some(find_options)).await.unwrap();
-                        let data: Vec<Document> = $T::find_document(Some(search_doc), Some(find_options)).await.unwrap();
+                        let data: Vec<Document> = $T::find_document(client, Some(search_doc), Some(find_options)).await.unwrap();
 
                         RawJson(
                             serde_json::to_string(&PaginateData {
@@ -127,13 +98,14 @@ macro_rules! generate_pageable_inserter {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/insert_", stringify!([<$T: lower>])) in {
                     #[post($v_path, data="<insert_query>")]
-                    pub async fn [<insert_ $T:lower>](insert_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
+                    pub async fn [<insert_ $T:lower>](connect: Connection<Logs>, insert_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
+                        let client: &Client = &*connect;
                         let insert_query_obj = insert_query.into_inner();
                         let search_convert = $T::convert_form_insert(insert_query_obj);
                         return match search_convert {
                             Ok(search_obj) => {
                                 // Query any search_queries
-                                let bson_id: Bson = $T::insert_datum(&from_document(search_obj).unwrap(), None).await.unwrap();
+                                let bson_id: Bson = $T::insert_datum(client, &from_document(search_obj).unwrap(), None).await.unwrap();
                                 Custom(Status::Ok, RawJson(
                                     serde_json::to_string(&bson_id).unwrap()
                                 ))
