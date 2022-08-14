@@ -1,10 +1,13 @@
 use rocket::response::content::{RawHtml, RawJson};
+use rocket_db_pools::Connection;
 use rocket_dyn_templates::{context, Template};
 use serde::{Deserialize, Serialize};
 
 // mongo
 use mongodb::bson::doc;
+use mongodb::Client;
 
+use crate::cosi_db::controller::common::Logs;
 use crate::cosi_db::model::address::Address;
 use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::household::Household;
@@ -22,7 +25,9 @@ struct SearchTable<T> {
 }
 
 #[get("/search?<query>")]
-pub async fn search(query: &str) -> RawJson<String> {
+pub async fn search(connect: Connection<Logs>, query: &str) -> RawJson<String> {
+    let client: &Client = &*connect;
+
     // TODO add tables parameter.
     let rstring = format!("(?i).*{}.*", query.to_lowercase());
     let a_entry = vec!["line_one", "line_two", "line_three", "city"];
@@ -30,9 +35,13 @@ pub async fn search(query: &str) -> RawJson<String> {
 
     // Naively search each entry for potential related values.
     for entry in a_entry {
-        let av = Address::find_data(Some(doc! {entry: {"$regex": rstring.clone()}}), None)
-            .await
-            .unwrap();
+        let av = Address::find_data(
+            client,
+            Some(doc! {entry: {"$regex": rstring.clone()}}),
+            None,
+        )
+        .await
+        .unwrap();
         let mut address_result: Vec<SearchTable<Address>> = av
             .iter()
             .map(|x| SearchTable {
@@ -47,9 +56,13 @@ pub async fn search(query: &str) -> RawJson<String> {
     let mut household_data: Vec<SearchTable<Household>> = Vec::new();
 
     for entry in h_entry {
-        let av = Household::find_data(Some(doc! {entry: {"$regex": rstring.clone()}}), None)
-            .await
-            .unwrap();
+        let av = Household::find_data(
+            client,
+            Some(doc! {entry: {"$regex": rstring.clone()}}),
+            None,
+        )
+        .await
+        .unwrap();
         let mut household_result: Vec<SearchTable<Household>> = av
             .iter()
             .map(|x| SearchTable {
@@ -63,9 +76,13 @@ pub async fn search(query: &str) -> RawJson<String> {
     let p_entry = vec!["first_name", "middle_name", "last_name"];
     let mut person_data: Vec<SearchTable<Person>> = Vec::new();
     for entry in p_entry {
-        let av = Person::find_data(Some(doc! {entry: {"$regex": rstring.clone()}}), None)
-            .await
-            .unwrap();
+        let av = Person::find_data(
+            client,
+            Some(doc! {entry: {"$regex": rstring.clone()}}),
+            None,
+        )
+        .await
+        .unwrap();
         let mut person_result: Vec<SearchTable<Person>> = av
             .iter()
             .map(|x| SearchTable {

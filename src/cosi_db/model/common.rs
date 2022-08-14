@@ -5,12 +5,11 @@ use rocket::form::{DataField, FromFormField, ValueField};
 use std::str::FromStr;
 
 use mongodb::bson::{oid::ObjectId, to_document, Bson, Document};
-use mongodb::{Collection, Cursor};
+use mongodb::{Client, Collection, Cursor};
 
 use futures::stream::{StreamExt, TryStreamExt};
 
-use crate::cosi_db::controller::common::get_connection;
-use crate::cosi_db::errors::{COSIError, COSIResult};
+use crate::cosi_db::errors::COSIResult;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -67,7 +66,7 @@ impl<'a> FromFormField<'a> for OID {
 
 #[async_trait]
 pub trait Generator<T> {
-    async fn generate(size: u32) -> COSIResult<Vec<T>>;
+    async fn generate(client: &Client, size: u32) -> COSIResult<Vec<T>>;
 }
 
 pub trait COSIForm {
@@ -130,23 +129,23 @@ where
     for<'r> F: Clone + Sized + Serialize + DeserializeOwned + Unpin + Send + Sync + COSIForm + 'r,
 {
     fn get_table_name() -> String;
-    async fn get_raw_document() -> Collection<Document> {
+    async fn get_raw_document(client: &Client) -> Collection<Document> {
         let tname = Self::get_table_name();
-        return get_connection(&tname).await.collection::<Document>(&tname);
+        return client.database("cosi_db").collection::<Document>(&tname);
     }
 
-    async fn get_collection() -> Collection<I> {
+    async fn get_collection(client: &Client) -> Collection<I> {
         let tname = Self::get_table_name();
-        get_connection(&tname).await.collection::<I>(&tname)
+        return client.database("cosi_db").collection::<I>(&tname);
     }
 
-    async fn to_impl(orm: Vec<T>) -> COSIResult<Vec<I>> {
+    async fn to_impl(client: &Client, orm: Vec<T>) -> COSIResult<Vec<I>> {
         // This extra call allows for async side-effects.
         // Default implementation is non-bulk. Can be slow.
         Ok(orm.iter().map(|v| v.clone().into()).collect())
     }
 
-    async fn to_orm(imp: Vec<I>) -> COSIResult<Vec<T>> {
+    async fn to_orm(client: &Client, imp: Vec<I>) -> COSIResult<Vec<T>> {
         // This extra call allows for async side-effects.
         // Default implementation is non-bulk. Can be slow.
         Ok(imp.iter().map(|v| v.clone().into()).collect())
@@ -154,20 +153,22 @@ where
 
     // Find with some extra processing for associated tables.
     async fn find_data(
+        client: &Client,
         filter: Option<Document>,
         options: Option<FindOptions>,
     ) -> COSIResult<Vec<T>> {
-        let col = Self::get_collection().await;
+        let col = Self::get_collection(client).await;
         let cursor: Cursor<I> = col.find(filter, options).await?;
         let results = cursor.try_collect().await?;
-        return Ok(Self::to_orm(results).await?);
+        return Ok(Self::to_orm(client, results).await?);
     }
 
     async fn find_document(
+        client: &Client,
         filter: Option<Document>,
         options: Option<FindOptions>,
     ) -> COSIResult<Vec<Document>> {
-        let col = Self::get_raw_document().await;
+        let col = Self::get_raw_document(client).await;
         let mut cursor: Cursor<Document> = col.find(filter, options).await?;
         let mut results = Vec::new();
         while let Some(doc) = cursor.next().await {
@@ -176,8 +177,12 @@ where
         return Ok(results);
     }
 
-    async fn insert_datum(data: &I, options: Option<InsertOneOptions>) -> COSIResult<Bson> {
-        let col = Self::get_collection().await;
+    async fn insert_datum(
+        client: &Client,
+        data: &I,
+        options: Option<InsertOneOptions>,
+    ) -> COSIResult<Bson> {
+        let col = Self::get_collection(client).await;
         let result = col.insert_one(data, options).await?;
         return Ok(result.inserted_id);
     }

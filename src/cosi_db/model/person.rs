@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use chrono::NaiveDate;
 use mongodb::bson::doc;
+use mongodb::Client;
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
@@ -161,7 +162,7 @@ impl COSICollection<'_, Person, PersonImpl, PersonOptional> for Person {
 
 #[async_trait]
 impl Generator<Sex> for Sex {
-    async fn generate(size: u32) -> COSIResult<Vec<Sex>> {
+    async fn generate(client: &Client, size: u32) -> COSIResult<Vec<Sex>> {
         let mut rng = thread_rng();
         let mut result = Vec::new();
 
@@ -181,8 +182,8 @@ impl Generator<Sex> for Sex {
 
 #[async_trait]
 impl Generator<Person> for Person {
-    async fn generate(size: u32) -> COSIResult<Vec<Person>> {
-        let sexes = Sex::generate(size).await?;
+    async fn generate(client: &Client, size: u32) -> COSIResult<Vec<Person>> {
+        let sexes = Sex::generate(client, size).await?;
         let mut result = Vec::new();
         let mut generator = names::Generator::with_naming(Name::Plain);
         let mut get_name = || generator.next().unwrap();

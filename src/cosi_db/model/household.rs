@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, from_document, to_document, Document};
+use mongodb::Client;
 use rocket::futures::TryStreamExt;
 
 use names::Name;
@@ -66,17 +67,17 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
         return "household".to_string();
     }
 
-    async fn to_impl(mut orm: Vec<Household>) -> COSIResult<Vec<HouseholdImpl>> {
+    async fn to_impl(client: &Client, mut orm: Vec<Household>) -> COSIResult<Vec<HouseholdImpl>> {
         // Slow, fetch results each and every one.
-        let collection = Self::get_collection().await;
+        let collection = Self::get_collection(client).await;
         let mut queries = vec![];
         for o in &orm {
             queries.push(collection.find_one(doc! {"house_name": o.house_name.clone()}, None));
         }
         let q_result = futures::future::join_all(queries).await;
 
-        let address_raw = Address::get_raw_document().await;
-        let people_raw = Person::get_raw_document().await;
+        let address_raw = Address::get_raw_document(client).await;
+        let people_raw = Person::get_raw_document(client).await;
         let mut results: Vec<HouseholdImpl> = vec![];
 
         for r in q_result.iter().rev() {
@@ -117,11 +118,11 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
         return Ok(results);
     }
 
-    async fn to_orm(imp: Vec<HouseholdImpl>) -> COSIResult<Vec<Household>> {
+    async fn to_orm(client: &Client, imp: Vec<HouseholdImpl>) -> COSIResult<Vec<Household>> {
         let mut result = vec![];
 
-        let address_col = Address::get_collection().await;
-        let person_col = Person::get_collection().await;
+        let address_col = Address::get_collection(client).await;
+        let person_col = Person::get_collection(client).await;
         for i in imp {
             let address = address_col
                 .find_one(doc! {"_id": ObjectId::from(i.address)}, None)
@@ -149,14 +150,14 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
 
 #[async_trait]
 impl Generator<Household> for Household {
-    async fn generate(size: u32) -> COSIResult<Vec<Household>> {
+    async fn generate(client: &Client, size: u32) -> COSIResult<Vec<Household>> {
         // Generates data dependent on "address" and "person" tables.
         // If no values exist, this function would return a vector of zero.
         let mut result = Vec::new();
 
         // Random sample results and link them together.
-        let person_col = Person::get_collection().await;
-        let address_col = Address::get_collection().await;
+        let person_col = Person::get_collection(client).await;
+        let address_col = Address::get_collection(client).await;
 
         let person_agg = person_col
             .aggregate([doc! {"$sample": {"size": size}}], None)
