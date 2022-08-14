@@ -18,6 +18,6 @@ use crate::cosi_db::controller::common::Logs;
 async fn rocket() -> Rocket<Build> {
     let rocket_build = routes::register_route(rocket::build())
         .attach(Template::fairing())
-        .attach(Initializer::<Logs>::with_name("cosi_db"));
+        .attach(Initializer::<Logs>::with_name("mongo"));
     rocket_build
 }
