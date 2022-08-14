@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use mongodb::bson::doc;
 use mongodb::Client;
 
-use crate::cosi_db::controller::common::Logs;
+use crate::cosi_db::connection::COSIMongo;
 use crate::cosi_db::model::address::Address;
 use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::household::Household;
@@ -25,7 +25,7 @@ struct SearchTable<T> {
 }
 
 #[get("/search?<query>")]
-pub async fn search(connect: Connection<Logs>, query: &str) -> RawJson<String> {
+pub async fn search(connect: Connection<COSIMongo>, query: &str) -> RawJson<String> {
     let client: &Client = &*connect;
 
     // TODO add tables parameter.

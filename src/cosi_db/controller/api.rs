@@ -14,7 +14,8 @@ use mongodb::options::FindOptions;
 use mongodb::Client;
 
 // cosi_db
-use crate::cosi_db::controller::common::{Logs, PaginateData};
+use crate::cosi_db::connection::COSIMongo;
+use crate::cosi_db::controller::common::PaginateData;
 use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::common::Generator;
 

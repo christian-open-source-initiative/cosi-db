@@ -162,7 +162,7 @@ impl COSICollection<'_, Person, PersonImpl, PersonOptional> for Person {
 
 #[async_trait]
 impl Generator<Sex> for Sex {
-    async fn generate(client: &Client, size: u32) -> COSIResult<Vec<Sex>> {
+    async fn generate(_client: &Client, size: u32) -> COSIResult<Vec<Sex>> {
         let mut rng = thread_rng();
         let mut result = Vec::new();
 

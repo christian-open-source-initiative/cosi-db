@@ -21,7 +21,8 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             search,
             // Auth
             login,
-            login_logged
+            login_logged,
+            login_submit
         ],
     )
 }
