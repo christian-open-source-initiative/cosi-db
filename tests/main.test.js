@@ -1,15 +1,11 @@
-import request from 'supertest';
-import assert from 'assert';
+import session from "supertest-session";
 
 import { ALL_PAGEABLE_ENDPOINTS, ALL_GEN_ENDPOINTS } from "./endpoints.js";
 
 var totalDatapointsPerTable = 200;
+var cosiRequest = session("127.0.0.1:8000");
 
 // Basic helpers
-function cosiRequest() {
-    return request("127.0.0.1:8000");
-}
-
 function expectKeys(jsonData, keys) {
     expect(Object.keys(jsonData)).toEqual(keys);
 }
@@ -18,7 +14,7 @@ function expectKeys(jsonData, keys) {
 beforeAll(async ()=> {
     // Before tests begin, populate table with values.
     for (let endpoint of ALL_GEN_ENDPOINTS) {
-        let response = await cosiRequest().get(`/${endpoint}/${totalDatapointsPerTable}`)
+        let response = await cosiRequest.get(`/${endpoint}/${totalDatapointsPerTable}`)
                                            .expect(200)
                                            .expect("Content-Type", /json/);
 
@@ -26,12 +22,23 @@ beforeAll(async ()=> {
         expectKeys(jsonData, ["total"]);
         expect(jsonData["total"]).toBe(totalDatapointsPerTable)
     }
+
+    // Login
+    await cosiRequest
+            .post("/login")
+            .type("form")
+            .send({
+                "email": "admin@projectcosi.org",
+                "token": "admin"
+            })
+            .expect(200)
+            .expect("Content-Type", /json/);
 });
 
 // Testing
 describe("Test Root", () => {
     test("/ GET", async () => {
-        cosiRequest().get("/").expect(200);
+        cosiRequest.get("/").expect(200);
     })
 });
 
@@ -40,15 +47,7 @@ describe("CRUD", () => {
     // Loging before starting tests.
     describe("Login", () => {
         test("/login POST", async () => {
-            const response = await cosiRequest()
-                                    .post("/login")
-                                    .type("form")
-                                    .query({
-                                        "email": "admin@projectcosi.org",
-                                        "token": "admin"
-                                    })
-                                    .expect(200)
-                                    .expect("Content-Type", /json/)
+
         });
     });
 
@@ -64,7 +63,7 @@ describe("CRUD", () => {
         for (let endpoint of ALL_PAGEABLE_ENDPOINTS) {
             test(`/${endpoint} GET`, async () => {
                 // Basic endpoint response verification.
-                const response = await cosiRequest()
+                const response = await cosiRequest
                                         .get(`/${endpoint}`)
                                         .query({page: 0})
                                         .expect(200)
@@ -77,7 +76,7 @@ describe("CRUD", () => {
             });
     
             test(`/${endpoint} Empty page load`, async() => {
-                const allData = await cosiRequest()
+                const allData = await cosiRequest
                                         .get(`/${endpoint}`)
                                         .expect(200)
                                         .query({page: Number.MAX_SAFE_INTEGER})
@@ -89,7 +88,7 @@ describe("CRUD", () => {
             test(`/${endpoint} Invalid page load`, async() => {
                 const fakePages = ["cosi", "-1", "!@#$%^&*()-_+=`"];
                 for (const page of fakePages){
-                    const allData = await cosiRequest()
+                    const allData = await cosiRequest
                                         .get(`/${endpoint}`)
                                         .query({page: `${page}`})
                                         .expect(200)
@@ -102,7 +101,7 @@ describe("CRUD", () => {
             });
     
             test(`/${endpoint} Correct page count`, async() => {
-                const allData = await cosiRequest()
+                const allData = await cosiRequest
                                         .get(`/${endpoint}`)
                                         .expect(200)
                                         .expect("Content-Type", /json/);
@@ -116,7 +115,7 @@ describe("CRUD", () => {
                 let pages = [];
                 // Concatenate all data to single array
                 for(let page = 0; page < Math.ceil(totalDatapointsPerTable/maxDatapoints); page++){
-                    let request = await cosiRequest()
+                    let request = await cosiRequest
                                         .get(`/${endpoint}`)
                                         .query({page: `${page}`})
                                         .expect(200)
@@ -135,7 +134,7 @@ describe("CRUD", () => {
                 // Assert that all tables can load data page in < 350ms
                 let start_time = Date.now();
                 // Exclude normal 200 and content asserts so they don't impact performance
-                const response = await cosiRequest()
+                const response = await cosiRequest
                                         .get(`/${endpoint}`)
                                         .query({page: 0})
                 let endTime = Date.now();
@@ -153,7 +152,7 @@ describe("CRUD", () => {
 
         const endpointPerson = "insert_person";
         test(`/${endpointPerson} POST`, async () => {
-            const response = await cosiRequest()
+            const response = await cosiRequest
                                     .post(`/${endpointPerson}`)
                                     .type("form")
                                     .send({
@@ -171,7 +170,7 @@ describe("CRUD", () => {
 
         const endpointAddress = "insert_address";
         test(`/${endpointAddress} POST`, async () => {
-            const response = await cosiRequest()
+            const response = await cosiRequest
                                     .post(`/${endpointAddress}`)
                                     .type("form")
                                     .send({
