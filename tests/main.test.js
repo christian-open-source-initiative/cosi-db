@@ -43,14 +43,6 @@ describe("Test Root", () => {
 });
 
 describe("CRUD", () => {
-    // Assumes the gen_login has already been called.
-    // Loging before starting tests.
-    describe("Login", () => {
-        test("/login POST", async () => {
-
-        });
-    });
-
     // Check all basic GET endpoints.
     // Each get page should have max 100 datapoints.
     describe("Verify Getters", () => {
