@@ -23,6 +23,7 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             login,
             login_logged,
             login_submit,
+            logout,
             gen_login
         ],
     )

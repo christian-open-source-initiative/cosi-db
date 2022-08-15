@@ -173,7 +173,7 @@ pub async fn login_submit(
     }
 }
 
-#[post("/logout")]
+#[get("/logout")]
 pub fn logout(cookies: &CookieJar<'_>) -> Flash<Redirect> {
     cookies.remove_private(Cookie::named("user_id"));
     cookies.remove_private(Cookie::named("user_token"));
