@@ -13,16 +13,16 @@
 </head>
 <body>
     <div class="center-content">
-        <form>
+        <form action="/login" method="POST">
             <label for="email">Email</label>
-            <input type="text" id="email" />
+            <input type="text" name="email" />
             <br /> <br />
 
-            <label for="password">Password</label>
-            <input type="password" id=""password />
+            <label for="token">Password</label>
+            <input type="password" name="token" />
             <br /> <br />
 
-            <input type="submit" value="Login"/>
+            <input type="submit" value="Login" />
         </form>
     </div>
 </body>

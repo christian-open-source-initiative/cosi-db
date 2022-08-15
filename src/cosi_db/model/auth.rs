@@ -9,6 +9,7 @@ use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
 
 use mongodb::bson::doc;
+use mongodb::bson::oid::ObjectId;
 
 use serde::{Deserialize, Serialize};
 
@@ -73,7 +74,7 @@ impl<'r> FromRequest<'r> for User {
                 match uid {
                     None => Vec::new(),
                     Some(ref v) => {
-                        let search_doc = Some(doc! {"_id": v});
+                        let search_doc = Some(doc! {"_id": ObjectId::parse_str(&v).unwrap()});
                         // TODO: Connection error handling.
                         User::find_data(client, search_doc, None).await.unwrap()
                     }
