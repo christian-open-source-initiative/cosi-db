@@ -74,7 +74,10 @@ impl<'r> FromRequest<'r> for User {
                 match uid {
                     None => Vec::new(),
                     Some(ref v) => {
-                        let search_doc = Some(doc! {"_id": ObjectId::parse_str(&v).unwrap()});
+                        let search_doc = Some(doc! {
+                            "_id": ObjectId::parse_str(&v).unwrap(),
+                            "token": token
+                        });
                         // TODO: Connection error handling.
                         User::find_data(client, search_doc, None).await.unwrap()
                     }

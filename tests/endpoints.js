@@ -7,7 +7,8 @@ const ALL_PAGEABLE_ENDPOINTS = [
 const ALL_GEN_ENDPOINTS = [
     "gen_person",
     "gen_address",
-    "gen_household"
+    "gen_household",
+    "gen_login"
 ];
 
 // All available endpoints in program.

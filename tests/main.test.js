@@ -35,8 +35,23 @@ describe("Test Root", () => {
     })
 });
 
-
 describe("CRUD", () => {
+    // Assumes the gen_login has already been called.
+    // Loging before starting tests.
+    describe("Login", () => {
+        test("/login POST", async () => {
+            const response = await cosiRequest()
+                                    .post("/login")
+                                    .type("form")
+                                    .query({
+                                        "email": "admin@projectcosi.org",
+                                        "token": "admin"
+                                    })
+                                    .expect(200)
+                                    .expect("Content-Type", /json/)
+        });
+    });
+
     // Check all basic GET endpoints.
     // Each get page should have max 100 datapoints.
     describe("Verify Getters", () => {

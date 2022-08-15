@@ -48,13 +48,18 @@ pub fn login() -> RawHtml<Template> {
     RawHtml(Template::render("login", context! {}))
 }
 
-#[get("/gen_login")]
-pub async fn gen_login(connect: Connection<COSIMongo>) -> RawJson<String> {
+#[get("/gen_login/<points>")]
+pub async fn gen_login(points: u32, connect: Connection<COSIMongo>) -> RawJson<String> {
+    // TODO: Ignores points for now.
     let client: &Client = &*connect;
 
     // Delete prior data.
-    User::get_collection(client).await.drop(None).await;
-    UserLogin::get_collection(client).await.drop(None).await;
+    User::get_collection(client).await.drop(None).await.unwrap();
+    UserLogin::get_collection(client)
+        .await
+        .drop(None)
+        .await
+        .unwrap();
 
     // Add new data.
     let oid = User::insert_datum(
@@ -75,7 +80,7 @@ pub async fn gen_login(connect: Connection<COSIMongo>) -> RawJson<String> {
         &oid.as_object_id().unwrap().to_hex(),
         &mut calc_password,
     );
-    let roid = UserLogin::insert_datum(
+    UserLogin::insert_datum(
         client,
         &UserLogin {
             user_id: OID(oid.as_object_id().unwrap()),
@@ -86,7 +91,7 @@ pub async fn gen_login(connect: Connection<COSIMongo>) -> RawJson<String> {
     .await
     .unwrap();
 
-    return render_result_json("result", &roid.as_object_id().unwrap().to_hex());
+    return RawJson(format!("{{\"{}\": {}}}", "total", points));
 }
 
 #[post("/login", data = "<user_form>")]
@@ -114,7 +119,6 @@ pub async fn login_submit(
             if d_vec.len() == 0 {
                 return render_result_json("err", "Invalid user or password.");
             } else if d_vec.len() > 1 {
-                println!("{:?}", d_vec);
                 return render_result_json("err", "Internal server error.");
             }
 
@@ -161,7 +165,7 @@ pub async fn login_submit(
                 None,
             )
             .await;
-            if let Err(e) = update_result {
+            if let Err(_) = update_result {
                 return render_result_json("err", "Internal server error.");
             }
 

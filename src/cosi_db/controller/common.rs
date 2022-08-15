@@ -17,7 +17,7 @@ macro_rules! generate_generators {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/gen_", stringify!([<$T: lower>]),  "/<total>") in {
                     #[get($v_path)]
-                    pub async fn [<generate_ $T:lower>](connect: Connection<COSIMongo>, total: u8) -> RawJson<String> {
+                    pub async fn [<gen_ $T:lower>](connect: Connection<COSIMongo>, total: u8) -> RawJson<String> {
                         #[cfg(debug_assertions)]
                         {
                             let client: &Client = &*connect;
@@ -49,7 +49,7 @@ macro_rules! generate_pageable_getter {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>&<search_query..>") in {
                     #[get($v_path)]
-                    pub async fn [<get_ $T:lower>](connect: Connection<COSIMongo>, page: Option<u64>, search_query: [<$T Optional>]) -> RawJson<String> {
+                    pub async fn [<get_ $T:lower>](_user: User, connect: Connection<COSIMongo>, page: Option<u64>, search_query: [<$T Optional>]) -> RawJson<String> {
                         let client: &Client = &*connect;
                         let page = page.unwrap_or(0);
 
@@ -91,7 +91,7 @@ macro_rules! generate_pageable_inserter {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/insert_", stringify!([<$T: lower>])) in {
                     #[post($v_path, data="<insert_query>")]
-                    pub async fn [<insert_ $T:lower>](connect: Connection<COSIMongo>, insert_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
+                    pub async fn [<insert_ $T:lower>](_user: User, connect: Connection<COSIMongo>, insert_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
                         let client: &Client = &*connect;
                         let insert_query_obj = insert_query.into_inner();
                         let search_convert = $T::convert_form_insert(insert_query_obj);

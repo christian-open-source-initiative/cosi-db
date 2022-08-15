@@ -16,8 +16,8 @@ use mongodb::Client;
 // cosi_db
 use crate::cosi_db::connection::COSIMongo;
 use crate::cosi_db::controller::common::PaginateData;
-use crate::cosi_db::model::common::COSICollection;
-use crate::cosi_db::model::common::Generator;
+use crate::cosi_db::model::auth::User;
+use crate::cosi_db::model::common::{COSICollection, Generator};
 
 use crate::{generate_generators, generate_pageable_getter, generate_pageable_inserter};
 
