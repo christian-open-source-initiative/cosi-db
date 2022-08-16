@@ -50,48 +50,55 @@ pub fn login() -> RawHtml<Template> {
 
 #[get("/gen_login/<points>")]
 pub async fn gen_login(points: u32, connect: Connection<COSIMongo>) -> RawJson<String> {
-    // TODO: Ignores points for now.
-    let client: &Client = &*connect;
+    #[cfg(debug_assertions)]
+    {
+        // TODO: Ignores points for now.
+        let client: &Client = &*connect;
 
-    // Delete prior data.
-    User::get_collection(client).await.drop(None).await.unwrap();
-    UserLogin::get_collection(client)
-        .await
-        .drop(None)
+        // Delete prior data.
+        User::get_collection(client).await.drop(None).await.unwrap();
+        UserLogin::get_collection(client)
+            .await
+            .drop(None)
+            .await
+            .unwrap();
+
+        // Add new data.
+        let oid = User::insert_datum(
+            client,
+            &User {
+                username: "admin".to_string(),
+                email: "admin@projectcosi.org".to_string(),
+                token: String::new(),
+            },
+            None,
+        )
         .await
         .unwrap();
 
-    // Add new data.
-    let oid = User::insert_datum(
-        client,
-        &User {
-            username: "admin".to_string(),
-            email: "admin@projectcosi.org".to_string(),
-            token: String::new(),
-        },
-        None,
-    )
-    .await
-    .unwrap();
+        let mut calc_password: Credential = [0u8; CREDENTIAL_LEN];
+        hash_password(
+            "admin",
+            &oid.as_object_id().unwrap().to_hex(),
+            &mut calc_password,
+        );
+        UserLogin::insert_datum(
+            client,
+            &UserLogin {
+                user_id: OID(oid.as_object_id().unwrap()),
+                password: calc_password,
+            },
+            None,
+        )
+        .await
+        .unwrap();
 
-    let mut calc_password: Credential = [0u8; CREDENTIAL_LEN];
-    hash_password(
-        "admin",
-        &oid.as_object_id().unwrap().to_hex(),
-        &mut calc_password,
-    );
-    UserLogin::insert_datum(
-        client,
-        &UserLogin {
-            user_id: OID(oid.as_object_id().unwrap()),
-            password: calc_password,
-        },
-        None,
-    )
-    .await
-    .unwrap();
-
-    return RawJson(format!("{{\"{}\": {}}}", "total", points));
+        return RawJson(format!("{{\"{}\": {}}}", "total", points));
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        return RawJson("{}".to_string());
+    }
 }
 
 #[post("/login", data = "<user_form>")]
