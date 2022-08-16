@@ -9,21 +9,37 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="public/js/jquery.js"></script>
+  <script src="public/js/auth.js"></script>
 
 </head>
 <body>
-    <div class="center-content">
-        <form action="/login" method="POST">
-            <label for="email">Email</label>
-            <input type="text" name="email" />
-            <br /> <br />
-
-            <label for="token">Password</label>
-            <input type="password" name="token" />
-            <br /> <br />
-
-            <input type="submit" value="Login" />
-        </form>
+    <div id="cover-entire-screen"></div>
+    <div id="auth-outer">
+        <div id="auth-bubble-center">
+            <div id="auth-top-text">
+                <div id="auto-top-text-left">
+                    <h1>COSI DB</h1>
+                    <p>A library of information.</p>
+                </div>
+                <div id="auto-top-text-right">
+                    <img id="logo" src="/public/img/cosi_logo.png" />
+                </div>
+                <!-- clear fix -->
+                <div style="clear: both;"></div>
+            </div>
+            <div id="auth-status"></div>
+            <form action="/login" method="POST" id="login-form">
+                <br />
+                <input type="text" name="email" placeholder="Email" />
+                <br /> 
+        
+                <br />
+                <input type="password" name="token" placeholder="Password" />
+                <br /> <br />
+        
+                <input type="submit" value="Login" />
+            </form>
+        </div>
     </div>
 </body>
 </html>
