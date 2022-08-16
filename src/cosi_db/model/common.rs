@@ -1,4 +1,4 @@
-use mongodb::{options::FindOptions, options::InsertOneOptions};
+use mongodb::options::{FindOptions, InsertOneOptions, UpdateOptions};
 use rocket::async_trait;
 use rocket::data::ToByteUnit;
 use rocket::form::{DataField, FromFormField, ValueField};
@@ -139,13 +139,13 @@ where
         return client.database("cosi_db").collection::<I>(&tname);
     }
 
-    async fn to_impl(client: &Client, orm: Vec<T>) -> COSIResult<Vec<I>> {
+    async fn to_impl(_client: &Client, orm: Vec<T>) -> COSIResult<Vec<I>> {
         // This extra call allows for async side-effects.
         // Default implementation is non-bulk. Can be slow.
         Ok(orm.iter().map(|v| v.clone().into()).collect())
     }
 
-    async fn to_orm(client: &Client, imp: Vec<I>) -> COSIResult<Vec<T>> {
+    async fn to_orm(_client: &Client, imp: Vec<I>) -> COSIResult<Vec<T>> {
         // This extra call allows for async side-effects.
         // Default implementation is non-bulk. Can be slow.
         Ok(imp.iter().map(|v| v.clone().into()).collect())
@@ -185,6 +185,17 @@ where
         let col = Self::get_collection(client).await;
         let result = col.insert_one(data, options).await?;
         return Ok(result.inserted_id);
+    }
+
+    async fn update_datum(
+        client: &Client,
+        query: &Document,
+        data: &Document,
+        options: Option<UpdateOptions>,
+    ) -> COSIResult<Option<Bson>> {
+        let col = Self::get_collection(client).await;
+        let result = col.update_one(query.clone(), data.clone(), options).await?;
+        return Ok(result.upserted_id);
     }
 
     // Used for processing formdata and input to internal representation.

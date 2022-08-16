@@ -7,15 +7,25 @@ use serde::{Deserialize, Serialize};
 use mongodb::bson::doc;
 use mongodb::Client;
 
-use crate::cosi_db::controller::common::Logs;
+// rocket
+use rocket::response::{Flash, Redirect};
+
+// cosi_db
+use crate::cosi_db::connection::COSIMongo;
 use crate::cosi_db::model::address::Address;
+use crate::cosi_db::model::auth::User;
 use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::household::Household;
 use crate::cosi_db::model::person::Person;
 
-#[get("/")]
-pub fn index() -> RawHtml<Template> {
+#[get("/", rank = 2)]
+pub fn index(_user: User) -> RawHtml<Template> {
     RawHtml(Template::render("dashboard", context! {}))
+}
+
+#[get("/", rank = 3)]
+pub fn index_redirect() -> Flash<Redirect> {
+    Flash::success(Redirect::to("/login"), "User needs to be logged in.")
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -25,7 +35,7 @@ struct SearchTable<T> {
 }
 
 #[get("/search?<query>")]
-pub async fn search(connect: Connection<Logs>, query: &str) -> RawJson<String> {
+pub async fn search(_user: User, connect: Connection<COSIMongo>, query: &str) -> RawJson<String> {
     let client: &Client = &*connect;
 
     // TODO add tables parameter.
