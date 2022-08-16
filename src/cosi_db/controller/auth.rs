@@ -143,21 +143,11 @@ pub async fn login_submit(
 
             let u_login = &u_logins[0];
             let u_login_user_id: ObjectId = u_login.user_id.clone().into();
-
             let db_oid = u_login_user_id.to_hex();
 
-            let mut salt = Vec::with_capacity(db_oid.len());
-            salt.extend(db_oid.as_bytes());
-
             let mut calc_password: Credential = [0u8; CREDENTIAL_LEN];
-            pbkdf2::derive(
-                pbkdf2::PBKDF2_HMAC_SHA256,
-                NonZeroU32::new(50000).unwrap(),
-                &salt,
-                user_form_obj.token.unwrap().clone().as_bytes(),
-                &mut calc_password,
-            );
-
+            let pass_to_hash = user_form_obj.token.unwrap();
+            hash_password(&pass_to_hash, &db_oid, &mut calc_password);
             if calc_password != u_login.password {
                 return render_result_json("err", "Incorrect username or password.");
             }
