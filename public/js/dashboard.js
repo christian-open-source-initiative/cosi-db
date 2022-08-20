@@ -30,6 +30,32 @@ for (const idx of TABLE_IDX) {
 
 // Logic dealing with the search function.
 $(document).ready(() => {
+    // Scroll effects.
+    var screenHeight = $(window).height();
+    let tbNav= $("#table-left-arrow,#table-right-arrow,#table-left,#table-right");
+    const startPercent = 80;
+    tbNav.css({"top": `${startPercent}%`});
+    $(window).scroll(function() {
+        let threshold = 0.5 * screenHeight;
+        if ($(window).scrollTop() > threshold) {
+            tbNav.css({"top": "50%"});
+        }
+        else {
+            let mPercent = startPercent - (startPercent - 50) * $(window).scrollTop() / threshold;
+            tbNav.css({"top": `${mPercent}%`});
+        }
+    });
+
+    let tbClick = $(".table-move-click");
+    let tbBackground = $("#table-left,#table-right")
+    tbClick.on("mouseover", function() {
+       tbBackground.css("background-color", "#3d526e");
+    });
+    tbClick.on("mouseout", function() {
+       tbBackground.css("background-color", "#1b2430");
+    });
+
+
     // General setup.
     // Hide search suggestions until user inputs.
     let searchManager = new SearchManager(
