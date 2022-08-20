@@ -26,8 +26,8 @@ class Table {
         let headerRow = $("<thead>");
         this.tableDiv.append(headerRow);
         let keys = Object.keys(data[0]);
-        keys.splice(keys.indexOf("_id"), 1);
         for (let h = 0; h < keys.length; ++h) {
+            if (keys[h] == "_id") { continue; }
             headerRow.append($("<th>").html(keys[h]));
         }
 
@@ -38,6 +38,7 @@ class Table {
 
             for (let h = 0; h < keys.length; ++h) {
                 let k = keys[h];
+                if (k == "_id") { oid = data[i][k]["$oid"]; continue; }
                 $(row.insertCell(-1)).html(data[i][k]).attr("entry-name", k);
             }
 
