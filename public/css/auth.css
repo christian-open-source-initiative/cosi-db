@@ -71,11 +71,11 @@ input[type="submit"] {
     font-size: 1.2rem;
     border-radius: 25px;
     border-style: none;
-    background-color: #79a1ff;
+    background-color: #5f46e9;
 }
 
 input[type="submit"]:hover {
-    background-color: #598afc;
+    background-color: #5338ec;
 }
 
 label {

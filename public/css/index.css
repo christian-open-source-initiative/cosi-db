@@ -43,7 +43,6 @@ tr:hover td {
     background-color: #555050;
 }
 
-
 /* Search bar! */
 #search-bar-div {
     box-sizing: border-box;
@@ -114,7 +113,6 @@ tr:hover td {
     padding: 1rem;
     display: inline-block;
     margin: 0;
-    float: right;
     color:#645f5f;
 }
 

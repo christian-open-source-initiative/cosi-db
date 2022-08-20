@@ -12,6 +12,73 @@ body {
     color: white;
 }
 
+nav {
+    height: 4rem;
+    background-color: #5f46e9;
+    background-image: linear-gradient(#5f46e9, #442adb);
+}
+
+nav * {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+nav ul {
+    list-style-type: none;
+    display: block;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+nav li {
+    display: inline;
+    float: left;
+}
+
+nav li a {
+    display: block;
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+nav li a:after {
+    font-style: normal;
+    text-decoration: none;
+    color: white;
+}
+
+nav li a:hover {
+    color: white;
+}
+
+.nav-text {
+    padding: 1rem;
+}
+
+nav #logo-text {
+    padding-left: 0.5rem;
+}
+
+nav #logo-text a {
+    padding-left: 0;
+}
+
+nav #logo-container {
+    width: auto;
+    padding: 0;
+    margin: 0;
+    padding-left: 1.5rem;
+    padding-top: 0.4rem;
+}
+
+nav #logo {
+    height: 3rem;
+}
+
 .center-content {
     width: 75%;
     margin: 0 auto;
