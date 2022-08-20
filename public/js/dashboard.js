@@ -28,6 +28,8 @@ for (const idx of TABLE_IDX) {
     GEN_ENDPOINT_LOOKUP[idx] = "gen_" + ENDPOINT[idx];
 }
 
+let CURRENT_PAGE = 0;
+
 // Logic dealing with the search function.
 $(document).ready(() => {
     // Scroll effects.
@@ -46,15 +48,30 @@ $(document).ready(() => {
         }
     });
 
-    let tbClick = $(".table-move-click");
-    let tbBackground = $("#table-left,#table-right")
-    tbClick.on("mouseover", function() {
-       tbBackground.css("background-color", "#3d526e");
-    });
-    tbClick.on("mouseout", function() {
-       tbBackground.css("background-color", "#1b2430");
-    });
+    let tblClick = $("#table-left-move-click");
+    let tbrClick = $("#table-right-move-click");
+    let tbClicks = [tblClick, tbrClick];
 
+    let tblBackground = $("#table-left")
+    let tbrBackground = $("#table-right")
+    let tbBackground = [tblBackground, tbrBackground];
+    let incrementer = [-1, 1];
+    for (let i = 0; i < tbClicks.length; ++i) {
+        tbClicks[i].on("mouseover", function() {
+            tbBackground[i].css("background-color", "#3d526e");
+        });
+        tbClicks[i].on("mouseout", function() {
+            tbBackground[i].css("background-color", "#1b2430");
+        });
+        tbClicks[i].on("click", function(e) {
+            e.preventDefault();
+            console.log(CURRENT_PAGE);
+            CURRENT_PAGE += incrementer[i];
+            updateTable(appendFilter="", page=CURRENT_PAGE);
+        });
+
+        tbClicks[i].hide();
+    }
 
     // General setup.
     // Hide search suggestions until user inputs.
@@ -68,15 +85,29 @@ $(document).ready(() => {
     let table = new Table($("#data-table"));
 
     // Logic to rerender the table by fetching data from endpoint.
-    let updateTable = function(appendFilter = "") {
+    let updateTable = function(appendFilter = "", page=0) {
         // Update table.
-        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + "?page=0" + appendFilter;
+        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + `?page=${page}` + appendFilter;
         table.tableDiv.hide();
 
         let tName = ENDPOINT[tableTrack];
         $("#table-name").html(tName.charAt(0).toUpperCase() + tName.slice(1));
         $.get(fetchEndpoint, (result) => {
             table.render(result["data"]);
+            let totalPages = result["total_pages"]
+            if (totalPages == 1) {
+                tbrClick.hide();
+                tblClick.hide();
+            } else if (page + 1 == totalPages) {
+                tbrClick.hide();
+                tblClick.show();
+            } else if (page == 0) {
+                tblClick.hide();
+                tbrClick.show();
+            } else {
+                tblClick.show();
+                tbrClick.show();
+            }
         });
     };
 
@@ -111,16 +142,19 @@ $(document).ready(() => {
 
     $("#address-select").on("click", () => {
         tableTrack = ADDRESS_TABLE_IDX;
+        CURRENT_PAGE = 0;
         updateTable();
     });
 
     $("#household-select").on("click", () => {
         tableTrack = HOUSEHOLD_TABLE_IDX;
+        CURRENT_PAGE = 0;
         updateTable();
     });
 
     $("#people-select").on("click", () => {
         tableTrack = PEOPLE_TABLE_IDX;
+        CURRENT_PAGE = 0;
         updateTable();
     });
 

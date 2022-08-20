@@ -16,13 +16,13 @@
 <body>
     <div id="cover-entire-screen"></div>
 
-    <a class="table-move-click" href="/">
+    <a id="table-left-move-click" href="/">
       <div id="table-left">
       </div>
       <i class="fa fa-chevron-left" id="table-left-arrow" aria-hidden="true"></i>
     </a>
 
-    <a class="table-move-click" href="/">
+    <a id="table-right-move-click" href="/">
       <div id="table-right">
       </div>
       <i class="fa fa-chevron-right" id="table-right-arrow" aria-hidden="true"></i>
