@@ -162,7 +162,6 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
         let mut persons_results: Vec<Bson> = Vec::new();
         for person_entry in person_entries.as_array().unwrap() {
             let oid = person_entry.as_object_id().unwrap();
-            println!("{:?}", oid);
             let person = person_col
                 .find_one(doc! {"_id": oid}, None)
                 .await
