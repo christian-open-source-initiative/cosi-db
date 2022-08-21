@@ -69,11 +69,13 @@
         <button type="button" id="gen-data">Generate Data</button>
 
         <h2 id="table-name"></h2>
+        <h4 class="page-count"></h4>
     
         <div id="status"></div>
     
         <div id="loading">Now loading...</div>
         <table id="data-table"></table>
+        <h4 class="page-count"></h4>
       </div>
     </div>
 </body>

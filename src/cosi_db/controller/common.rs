@@ -56,7 +56,13 @@ macro_rules! generate_pageable_getter {
                         let col = $T::get_collection(client).await;
 
                         // Page calculate.
-                        let total_result: u64 = col.estimated_document_count(None).await.unwrap();
+                        let search_doc = $T::convert_form_query(search_query).unwrap();
+                        let total_result:u64 = if search_doc.len() != 0 {
+                            col.count_documents(Some(search_doc.clone()), None).await.unwrap()
+                        } else {
+                            col.estimated_document_count(None).await.unwrap()
+                        };
+
                         let limit_size: i64 = 100;
                         let total_pages: u64 = (total_result as f64 / limit_size as f64).ceil() as u64;
 
@@ -65,7 +71,6 @@ macro_rules! generate_pageable_getter {
                             .skip(limit_size as u64 * page)
                             .build();
 
-                        let search_doc = $T::convert_form_query(search_query).unwrap();
                         // Query any search_queries
                         let data: Vec<Document> = $T::find_document(client, Some(search_doc), Some(find_options)).await.unwrap();
 

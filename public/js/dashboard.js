@@ -108,6 +108,8 @@ $(document).ready(() => {
                 tblClick.show();
                 tbrClick.show();
             }
+
+            $(".page-count").html(`page ${page + 1} of ${totalPages}`);
         });
     };
 
