@@ -66,7 +66,6 @@ $(document).ready(() => {
         });
         tbClicks[i].on("click", function(e) {
             e.preventDefault();
-            console.log(CURRENT_PAGE);
             CURRENT_PAGE += incrementer[i];
             updateTable(appendFilter="", page=CURRENT_PAGE);
         });
