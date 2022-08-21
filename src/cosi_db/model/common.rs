@@ -174,6 +174,12 @@ where
         while let Some(doc) = cursor.next().await {
             results.push(doc?);
         }
+
+        {
+            for r in results.iter_mut() {
+                Self::process_foreign_keys(client, r).await;
+            }
+        }
         return Ok(results);
     }
 
@@ -197,6 +203,8 @@ where
         let result = col.update_one(query.clone(), data.clone(), options).await?;
         return Ok(result.upserted_id);
     }
+
+    async fn process_foreign_keys<'b>(_client: &'b Client, _raw_doc: &'b mut Document) {}
 
     // Used for processing formdata and input to internal representation.
     // This function technically doesn't need to be here as it is just a softwrapper

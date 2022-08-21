@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
-use mongodb::bson::{doc, from_document, to_document, Document};
+use mongodb::bson::{doc, from_document, to_bson, to_document, Bson, Document};
 use mongodb::Client;
 use rocket::futures::TryStreamExt;
 
@@ -145,6 +145,32 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
         }
 
         return Ok(result);
+    }
+
+    async fn process_foreign_keys<'b>(client: &'b Client, raw_doc: &'b mut Document) {
+        let address_col = Address::get_collection(client).await;
+        let address_entry = raw_doc.get("address").unwrap().as_object_id().unwrap();
+        let address = address_col
+            .find_one(doc! {"_id": address_entry}, None)
+            .await
+            .unwrap()
+            .unwrap();
+        raw_doc.insert("address", to_bson(&address).unwrap());
+
+        let person_col = Person::get_collection(client).await;
+        let person_entries = raw_doc.get("persons").unwrap();
+        let mut persons_results: Vec<Bson> = Vec::new();
+        for person_entry in person_entries.as_array().unwrap() {
+            let oid = person_entry.as_object_id().unwrap();
+            println!("{:?}", oid);
+            let person = person_col
+                .find_one(doc! {"_id": oid}, None)
+                .await
+                .unwrap()
+                .unwrap();
+            persons_results.push(to_bson(&person).unwrap());
+        }
+        raw_doc.insert("persons", persons_results);
     }
 }
 

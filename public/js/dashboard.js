@@ -15,6 +15,7 @@ ENDPOINT[ADDRESS_TABLE_IDX] = "address";
 ENDPOINT[PEOPLE_TABLE_IDX] = "person";
 ENDPOINT[HOUSEHOLD_TABLE_IDX] = "household";
 
+
 let R_ENDPOINT = {};
 for (let k in ENDPOINT) {
     R_ENDPOINT[ENDPOINT[k]] = k;
@@ -93,7 +94,7 @@ $(document).ready(() => {
         let tName = ENDPOINT[tableTrack];
         $("#table-name").html(tName.charAt(0).toUpperCase() + tName.slice(1));
         $.get(fetchEndpoint, (result) => {
-            table.render(result["data"]);
+            table.render(tName, result["data"]);
             let totalPages = result["total_pages"]
             if (totalPages == 1) {
                 tbrClick.hide();
@@ -126,20 +127,6 @@ $(document).ready(() => {
         updateTable(`&${entry}=${fullMatch}`);
         $("#main-search-bar").val("");
         searchManager.determineHide();
-    });
-
-    // Generate data action.
-    let generateTotal = 200;
-    $("#gen-data").on("click", () => {
-        // Resolve the appropriate endpoint depending on the state
-        // of the buttons pressed.
-        let endpoint = "/" + GEN_ENDPOINT_LOOKUP[tableTrack] + "/";
-        table.tableDiv.hide();
-        $.get(endpoint + generateTotal + "/", (data) => {
-            $("#status").hide().html("Generated total datapoints: " + data["total"]).show();
-            updateTable();
-        })
-        .fail((d, textStatus, error) => {console.log(error);});
     });
 
     $("#address-select").on("click", () => {
