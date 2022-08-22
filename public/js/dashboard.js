@@ -15,6 +15,7 @@ ENDPOINT[ADDRESS_TABLE_IDX] = "address";
 ENDPOINT[PEOPLE_TABLE_IDX] = "person";
 ENDPOINT[HOUSEHOLD_TABLE_IDX] = "household";
 
+
 let R_ENDPOINT = {};
 for (let k in ENDPOINT) {
     R_ENDPOINT[ENDPOINT[k]] = k;
@@ -28,8 +29,50 @@ for (const idx of TABLE_IDX) {
     GEN_ENDPOINT_LOOKUP[idx] = "gen_" + ENDPOINT[idx];
 }
 
+let CURRENT_PAGE = 0;
+
 // Logic dealing with the search function.
 $(document).ready(() => {
+    // Scroll effects.
+    var screenHeight = $(window).height();
+    let tbNav= $("#table-left-arrow,#table-right-arrow,#table-left,#table-right");
+    const startPercent = 80;
+    tbNav.css({"top": `${startPercent}%`});
+    $(window).scroll(function() {
+        let threshold = 0.5 * screenHeight;
+        if ($(window).scrollTop() > threshold) {
+            tbNav.css({"top": "50%"});
+        }
+        else {
+            let mPercent = startPercent - (startPercent - 50) * $(window).scrollTop() / threshold;
+            tbNav.css({"top": `${mPercent}%`});
+        }
+    });
+
+    let tblClick = $("#table-left-move-click");
+    let tbrClick = $("#table-right-move-click");
+    let tbClicks = [tblClick, tbrClick];
+
+    let tblBackground = $("#table-left")
+    let tbrBackground = $("#table-right")
+    let tbBackground = [tblBackground, tbrBackground];
+    let incrementer = [-1, 1];
+    for (let i = 0; i < tbClicks.length; ++i) {
+        tbClicks[i].on("mouseover", function() {
+            tbBackground[i].css("background-color", "#3d526e");
+        });
+        tbClicks[i].on("mouseout", function() {
+            tbBackground[i].css("background-color", "#1b2430");
+        });
+        tbClicks[i].on("click", function(e) {
+            e.preventDefault();
+            CURRENT_PAGE += incrementer[i];
+            updateTable(appendFilter="", page=CURRENT_PAGE);
+        });
+
+        tbClicks[i].hide();
+    }
+
     // General setup.
     // Hide search suggestions until user inputs.
     let searchManager = new SearchManager(
@@ -42,15 +85,31 @@ $(document).ready(() => {
     let table = new Table($("#data-table"));
 
     // Logic to rerender the table by fetching data from endpoint.
-    let updateTable = function(appendFilter = "") {
+    let updateTable = function(appendFilter = "", page=0) {
         // Update table.
-        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + "?page=0" + appendFilter;
+        let fetchEndpoint = "/" + GET_ENDPOINT_LOOKUP[tableTrack] + `?page=${page}` + appendFilter;
         table.tableDiv.hide();
 
         let tName = ENDPOINT[tableTrack];
         $("#table-name").html(tName.charAt(0).toUpperCase() + tName.slice(1));
         $.get(fetchEndpoint, (result) => {
-            table.render(result["data"]);
+            table.render(tName, result["data"]);
+            let totalPages = result["total_pages"]
+            if (totalPages == 1) {
+                tbrClick.hide();
+                tblClick.hide();
+            } else if (page + 1 == totalPages) {
+                tbrClick.hide();
+                tblClick.show();
+            } else if (page == 0) {
+                tblClick.hide();
+                tbrClick.show();
+            } else {
+                tblClick.show();
+                tbrClick.show();
+            }
+
+            $(".page-count").html(`page ${page + 1} of ${totalPages}`);
         });
     };
 
@@ -69,32 +128,21 @@ $(document).ready(() => {
         searchManager.determineHide();
     });
 
-    // Generate data action.
-    let generateTotal = 200;
-    $("#gen-data").on("click", () => {
-        // Resolve the appropriate endpoint depending on the state
-        // of the buttons pressed.
-        let endpoint = "/" + GEN_ENDPOINT_LOOKUP[tableTrack] + "/";
-        table.tableDiv.hide();
-        $.get(endpoint + generateTotal + "/", (data) => {
-            $("#status").hide().html("Generated total datapoints: " + data["total"]).show();
-            updateTable();
-        })
-        .fail((d, textStatus, error) => {console.log(error);});
-    });
-
     $("#address-select").on("click", () => {
         tableTrack = ADDRESS_TABLE_IDX;
+        CURRENT_PAGE = 0;
         updateTable();
     });
 
     $("#household-select").on("click", () => {
         tableTrack = HOUSEHOLD_TABLE_IDX;
+        CURRENT_PAGE = 0;
         updateTable();
     });
 
     $("#people-select").on("click", () => {
         tableTrack = PEOPLE_TABLE_IDX;
+        CURRENT_PAGE = 0;
         updateTable();
     });
 

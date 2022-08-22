@@ -1,3 +1,11 @@
+// Certain tables have foreign key references that need rendering.
+// This tracks what to display as clickable in those values.
+let FOREIGN = {};
+FOREIGN["household"] = {
+    "persons": ["first_name", "last_name"],
+    "address": ["line_one", "line_two", "line_three"]
+};
+
 class Table {
     constructor(tableDiv) {
         this.tableDiv = tableDiv
@@ -13,7 +21,7 @@ class Table {
         });
     }
 
-    render(data) {
+    render(tableName, data) {
         const displaySpeed = 1000;
         this.tableDiv.hide().empty();
         if (data.length == 0) {
@@ -27,10 +35,12 @@ class Table {
         this.tableDiv.append(headerRow);
         let keys = Object.keys(data[0]);
         for (let h = 0; h < keys.length; ++h) {
+            if (keys[h] == "_id") { continue; }
             headerRow.append($("<th>").html(keys[h]));
         }
 
         // Body generate.
+        let foreignKeys = tableName in FOREIGN ? FOREIGN[tableName]: {}; // Can be undefined.
         for (let i = 0; i < data.length; ++i) {
             let row = this.tableDiv[0].insertRow(-1);
             let oid = undefined;
@@ -39,9 +49,32 @@ class Table {
                 let k = keys[h];
                 if (k == "_id") {
                     oid = data[i][k]["$oid"];
-                    $(row.insertCell(-1)).html(oid).attr("entry-name", k);
-                }
-                else {
+                    continue; 
+                } else if (k in foreignKeys) {
+                    let externalKeys = foreignKeys[k]
+                    let extValue = data[i][k];
+
+                    let retrieve = (keys, d) => {
+                        let result = [];
+                        for (let k of keys) {
+                            result.push(d[k])
+                        }
+                        return result.join(" ");
+                    };
+
+                    let finalRender = "";
+                    if (Array.isArray(extValue)) {
+                        let results = [];
+                        for (let ev of extValue) {
+                            results.push(retrieve(externalKeys, ev));
+                        }
+                        finalRender = results.join(", ");
+                    } else {
+                        finalRender = retrieve(externalKeys, extValue);
+                    }
+
+                    $(row.insertCell(-1)).html(finalRender).attr("entry-name", k);
+                } else {
                     $(row.insertCell(-1)).html(data[i][k]).attr("entry-name", k);
                 }
             }

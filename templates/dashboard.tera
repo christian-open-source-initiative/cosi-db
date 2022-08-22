@@ -16,11 +16,43 @@
 <body>
     <div id="cover-entire-screen"></div>
 
+    <a id="table-left-move-click" href="/">
+      <div id="table-left">
+      </div>
+      <i class="fa fa-chevron-left" id="table-left-arrow" aria-hidden="true"></i>
+    </a>
+
+    <a id="table-right-move-click" href="/">
+      <div id="table-right">
+      </div>
+      <i class="fa fa-chevron-right" id="table-right-arrow" aria-hidden="true"></i>
+    </a>
+
+    <nav>
+      <ul>
+        <li>
+          <a href="/" id="logo-container">
+            <img src="public/img/cosi_logo.png" id="logo" />
+          </a>
+        </li>
+        <li class="nav-text" id="logo-text">
+          <a href="/">
+            COSI DB
+          </a>
+        </li>
+        <li class="nav-text" style="float: right;">
+          <a href="/logout" id="">
+            Log Out
+          </a>
+        </li>
+      </ul>
+    </nav>
+
     <!-- out-div necessary for cover-entire-screen -->
     <div id="outer-div">
       <div class="center-content">
-        <h1>COSI DB</h1>
-        <h3>Search</h3>
+        <h1>Search</h1>
+        <br />
         <div id="search-bar-div">
           <input type="search" id="main-search-bar" class="search-bar-general" placeholder="Type something such as name, address, or event." />
           <button type="submit" id="main-search-bar-submit" class="search-bar-general"><i class="fa fa-search"></i></button>
@@ -29,17 +61,20 @@
         <br /> <br />
     
         <!-- Table Selection -->
-        <button type="button" id="address-select">Address Table</button>
-        <button type="button" id="household-select">Household Table</button>
-        <button type="button" id="people-select">People Table</button>
-        <button type="button" id="gen-data">Generate Data</button>
+        Or select a table to view:
+        <br /> <br />
+        <button type="button" id="address-select" class="table-selection-button">Address Table</button>
+        <button type="button" id="household-select" class="table-selection-button">Household Table</button>
+        <button type="button" id="people-select" class="table-selection-button">People Table</button>
 
         <h2 id="table-name"></h2>
+        <h4 class="page-count"></h4>
     
         <div id="status"></div>
     
         <div id="loading">Now loading...</div>
         <table id="data-table"></table>
+        <h4 class="page-count"></h4>
       </div>
     </div>
 </body>
