@@ -73,7 +73,6 @@ macro_rules! generate_pageable_getter {
 
                         // Query any search_queries
                         let data: Vec<Document> = $T::find_document(client, Some(search_doc), Some(find_options)).await.unwrap();
-
                         RawJson(
                             serde_json::to_string(&PaginateData {
                                 page: page,

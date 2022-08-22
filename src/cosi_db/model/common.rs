@@ -145,7 +145,7 @@ where
         Ok(orm.iter().map(|v| v.clone().into()).collect())
     }
 
-    async fn to_orm(_client: &Client, imp: Vec<I>) -> COSIResult<Vec<T>> {
+    async fn to_orm(_client: &Client, imp: &Vec<I>) -> COSIResult<Vec<T>> {
         // This extra call allows for async side-effects.
         // Default implementation is non-bulk. Can be slow.
         Ok(imp.iter().map(|v| v.clone().into()).collect())
@@ -160,7 +160,7 @@ where
         let col = Self::get_collection(client).await;
         let cursor: Cursor<I> = col.find(filter, options).await?;
         let results = cursor.try_collect().await?;
-        return Ok(Self::to_orm(client, results).await?);
+        return Ok(Self::to_orm(client, &results).await?);
     }
 
     async fn find_document(
@@ -170,16 +170,12 @@ where
     ) -> COSIResult<Vec<Document>> {
         let col = Self::get_raw_document(client).await;
         let mut cursor: Cursor<Document> = col.find(filter, options).await?;
-        let mut results = Vec::new();
+        let mut results: Vec<Document> = Vec::new();
         while let Some(doc) = cursor.next().await {
             results.push(doc?);
         }
 
-        {
-            for r in results.iter_mut() {
-                Self::process_foreign_keys(client, r).await;
-            }
-        }
+        Self::process_foreign_keys(client, &mut results).await;
         return Ok(results);
     }
 
@@ -204,7 +200,7 @@ where
         return Ok(result.upserted_id);
     }
 
-    async fn process_foreign_keys<'b>(_client: &'b Client, _raw_doc: &'b mut Document) {}
+    async fn process_foreign_keys<'b>(_client: &'b Client, _raw_doc: &'b mut Vec<Document>) {}
 
     // Used for processing formdata and input to internal representation.
     // This function technically doesn't need to be here as it is just a softwrapper
