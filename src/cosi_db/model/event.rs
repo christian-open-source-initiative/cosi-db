@@ -20,31 +20,42 @@ pub enum Reoccurring {
     Months,
 }
 
+#[derive(Copy, Clone, Debug, FromFormField, Deserialize, Serialize)]
+pub enum Days {
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Event {
-    meeting_days: Vec<u8>,
-    start_datetime: NaiveDateTime,
-    end_datetime: Option<NaiveDateTime>,
-    freq: u8,
-    reoccuring: Option<Reoccurring>,
+    pub meeting_days: Vec<Days>,
+    pub start_datetime: NaiveDateTime,
+    pub end_datetime: Option<NaiveDateTime>,
+    pub freq: u8,
+    pub reoccuring: Option<Reoccurring>,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct EventImpl {
-    meeting_days: Vec<u8>,
-    start_datetime: String,
-    end_datetime: Option<String>,
-    freq: u8,
-    reoccuring: Option<Reoccurring>,
+    pub meeting_days: Vec<Days>,
+    pub start_datetime: String,
+    pub end_datetime: Option<String>,
+    pub freq: u8,
+    pub reoccuring: Option<Reoccurring>,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct EventOptional {
-    meeting_days: Option<Vec<u8>>,
-    start_datetime: Option<String>,
-    end_datetime: Option<Option<String>>,
-    freq: Option<u8>,
-    reoccuring: Option<Reoccurring>,
+    pub meeting_days: Option<Vec<Days>>,
+    pub start_datetime: Option<String>,
+    pub end_datetime: Option<Option<String>>,
+    pub freq: Option<u8>,
+    pub reoccuring: Option<Reoccurring>,
 }
 
 impl From<Event> for EventImpl {
@@ -99,7 +110,7 @@ impl Generator<Event> for Event {
             let start_day = rng.gen_range(2, 28);
             let start_month = rng.gen_range(1, 12);
             result.push(Event {
-                meeting_days: vec![0, 1],
+                meeting_days: vec![Days::Monday, Days::Wednesday],
                 start_datetime: create_date(start_month, start_day),
                 end_datetime: Some(create_date(start_month, start_day + rng.gen_range(2, 17))),
                 freq: 0,

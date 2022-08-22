@@ -8,19 +8,19 @@ use lipsum::lipsum_words_from_seed;
 use rocket::form::{FromForm, FromFormField};
 
 // cosi_db
-use super::common::{COSICollection, COSIForm, Generator};
 use crate::cosi_db::errors::{COSIError, COSIResult};
+use crate::cosi_db::model::common::{COSICollection, COSIForm, Generator, OID};
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct Group {
-    group_name: String,
-    group_desc: String,
+    pub group_name: String,
+    pub group_desc: String,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct GroupOptional {
-    group_name: Option<String>,
-    group_desc: Option<String>,
+    pub group_name: Option<String>,
+    pub group_desc: Option<String>,
 }
 
 pub type GroupImpl = Group;
@@ -51,4 +51,12 @@ impl Generator<Group> for Group {
 
         return Ok(result);
     }
+}
+
+// Group relations
+#[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
+pub struct GroupRelation {
+    pub person_id: OID,
+    pub group_id: OID,
+    pub role: String,
 }
