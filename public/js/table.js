@@ -47,12 +47,13 @@ class Table {
 
             for (let h = 0; h < keys.length; ++h) {
                 let k = keys[h];
+                let value = data[i][k];
                 if (k == "_id") {
-                    oid = data[i][k]["$oid"];
+                    oid = value["$oid"];
                     continue; 
                 } else if (k in foreignKeys) {
                     let externalKeys = foreignKeys[k]
-                    let extValue = data[i][k];
+                    let extValue = value;
 
                     let retrieve = (keys, d) => {
                         let result = [];
@@ -75,7 +76,11 @@ class Table {
 
                     $(row.insertCell(-1)).html(finalRender).attr("entry-name", k);
                 } else {
-                    $(row.insertCell(-1)).html(data[i][k]).attr("entry-name", k);
+                    if (Array.isArray(value)) {
+                        $(row.insertCell(-1)).html(value.join(", ")).attr("entry-name", k);
+                    } else {
+                        $(row.insertCell(-1)).html(value).attr("entry-name", k);
+                    }
                 }
             }
 
