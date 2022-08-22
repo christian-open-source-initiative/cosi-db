@@ -50,3 +50,9 @@ use crate::cosi_db::model::group::{Group, GroupImpl, GroupOptional};
 generate_generators! { Group }
 generate_pageable_getter! { Group }
 generate_pageable_inserter! { Group }
+
+// Group Relation
+use crate::cosi_db::model::group::{GroupRelation, GroupRelationImpl, GroupRelationOptional};
+generate_generators! { GroupRelation }
+generate_pageable_getter! { GroupRelation }
+generate_pageable_inserter! { GroupRelation }

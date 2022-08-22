@@ -53,6 +53,20 @@ pub struct PersonOptional {
     pub sex: Option<Sex>,
 }
 
+impl Default for Person {
+    fn default() -> Self {
+        Person {
+            first_name: "".to_string(),
+            middle_name: "".to_string(),
+            last_name: "".to_string(),
+            nicks: vec![],
+            dob: None,
+            age: None,
+            sex: Sex::Undefined,
+        }
+    }
+}
+
 impl From<Person> for PersonImpl {
     fn from(p: Person) -> PersonImpl {
         PersonImpl {

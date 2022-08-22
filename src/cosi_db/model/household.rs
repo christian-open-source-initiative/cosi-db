@@ -41,6 +41,8 @@ pub struct HouseholdOptional {
 impl COSIForm for HouseholdImpl {}
 impl COSIForm for HouseholdOptional {}
 
+// These do not fetch OID values. Rather, the COSIForm helpers which are async can interact with the
+// database. You can consider these conversions as local conversions.
 impl From<Household> for HouseholdImpl {
     fn from(h: Household) -> HouseholdImpl {
         HouseholdImpl {

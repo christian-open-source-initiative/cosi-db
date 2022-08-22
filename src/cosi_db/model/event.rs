@@ -22,13 +22,13 @@ pub enum Reoccurring {
 
 #[derive(Copy, Clone, Debug, FromFormField, Deserialize, Serialize)]
 pub enum Days {
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday,
+    M,
+    Tu,
+    W,
+    Th,
+    F,
+    Sa,
+    Su,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -110,7 +110,7 @@ impl Generator<Event> for Event {
             let start_day = rng.gen_range(2, 28);
             let start_month = rng.gen_range(1, 12);
             result.push(Event {
-                meeting_days: vec![Days::Monday, Days::Wednesday],
+                meeting_days: vec![Days::M, Days::W],
                 start_datetime: create_date(start_month, start_day),
                 end_datetime: Some(create_date(start_month, start_day + rng.gen_range(2, 17))),
                 freq: 0,

@@ -31,6 +31,10 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             gen_group,
             get_group,
             insert_group,
+            // Group Relation
+            gen_grouprelation,
+            get_grouprelation,
+            insert_grouprelation,
             // Search
             search,
             // Auth
