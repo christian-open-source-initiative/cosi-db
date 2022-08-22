@@ -2,13 +2,16 @@ const ALL_PAGEABLE_ENDPOINTS = [
     "get_person",
     "get_address",
     "get_household",
+    "get_group",
     "get_event"
 ];
 
+// Should be in order of least-dependent.
 const ALL_GEN_ENDPOINTS = [
     "gen_person",
     "gen_address",
     "gen_household",
+    "gen_group",
     "gen_event",
     "gen_login"
 ];

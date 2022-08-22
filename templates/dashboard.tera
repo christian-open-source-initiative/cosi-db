@@ -66,6 +66,8 @@
         <button type="button" id="address-select" class="table-selection-button">Address Table</button>
         <button type="button" id="household-select" class="table-selection-button">Household Table</button>
         <button type="button" id="people-select" class="table-selection-button">People Table</button>
+        <button type="button" id="group-select" class="table-selection-button">Group Table</button>
+        <button type="button" id="event-select" class="table-selection-button">Event Table</button>
 
         <h2 id="table-name"></h2>
         <h4 class="page-count"></h4>

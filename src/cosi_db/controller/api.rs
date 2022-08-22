@@ -44,3 +44,9 @@ use crate::cosi_db::model::event::{Event, EventImpl, EventOptional};
 generate_generators! { Event }
 generate_pageable_getter! { Event }
 generate_pageable_inserter! { Event }
+
+// Group
+use crate::cosi_db::model::group::{Group, GroupImpl, GroupOptional};
+generate_generators! { Group }
+generate_pageable_getter! { Group }
+generate_pageable_inserter! { Group }

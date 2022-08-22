@@ -27,6 +27,10 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             gen_event,
             get_event,
             insert_event,
+            // Group
+            gen_group,
+            get_group,
+            insert_group,
             // Search
             search,
             // Auth

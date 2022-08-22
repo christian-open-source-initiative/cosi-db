@@ -2,10 +2,14 @@
 let ADDRESS_TABLE_IDX = 0;
 let PEOPLE_TABLE_IDX = 1;
 let HOUSEHOLD_TABLE_IDX = 3;
+let GROUP_TABLE_IDX = 3;
+let EVENT_TABLE_IDX = 4;
 let TABLE_IDX = [
     ADDRESS_TABLE_IDX,
     PEOPLE_TABLE_IDX,
-    HOUSEHOLD_TABLE_IDX
+    HOUSEHOLD_TABLE_IDX,
+    GROUP_TABLE_IDX,
+    EVENT_TABLE_IDX
 ];
 // Init tracker to default value.
 let tableTrack = PEOPLE_TABLE_IDX;
@@ -14,6 +18,8 @@ let ENDPOINT = {};
 ENDPOINT[ADDRESS_TABLE_IDX] = "address";
 ENDPOINT[PEOPLE_TABLE_IDX] = "person";
 ENDPOINT[HOUSEHOLD_TABLE_IDX] = "household";
+ENDPOINT[GROUP_TABLE_IDX] = "group";
+ENDPOINT[EVENT_TABLE_IDX] = "event";
 
 
 let R_ENDPOINT = {};
@@ -142,6 +148,18 @@ $(document).ready(() => {
 
     $("#people-select").on("click", () => {
         tableTrack = PEOPLE_TABLE_IDX;
+        CURRENT_PAGE = 0;
+        updateTable();
+    });
+
+    $("#group-select").on("click", () => {
+        tableTrack = GROUP_TABLE_IDX;
+        CURRENT_PAGE = 0;
+        updateTable();
+    });
+
+    $("#event-select").on("click", () => {
+        tableTrack = EVENT_TABLE_IDX;
         CURRENT_PAGE = 0;
         updateTable();
     });
