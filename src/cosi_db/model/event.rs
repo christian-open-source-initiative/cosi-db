@@ -90,17 +90,18 @@ impl Generator<Event> for Event {
         let mut rng = thread_rng();
 
         // Generates only multi-day events.
-        let gen_date = |day: u8, rng: &mut ThreadRng| {
-            NaiveDate::from_ymd(2022, rng.gen_range(1, 12), cmp::min(day.into(), 28))
+        let create_date = |month: u8, day: u8| {
+            NaiveDate::from_ymd(2022, cmp::min(month.into(), 12), cmp::min(day.into(), 28))
                 .and_hms(7, 7, 7)
         };
 
         for _ in 0..size {
             let start_day = rng.gen_range(2, 28);
+            let start_month = rng.gen_range(1, 12);
             result.push(Event {
                 meeting_days: vec![0, 1],
-                start_datetime: gen_date(start_day, &mut rng),
-                end_datetime: Some(gen_date(start_day + rng.gen_range(2, 17), &mut rng)),
+                start_datetime: create_date(start_month, start_day),
+                end_datetime: Some(create_date(start_month, start_day + rng.gen_range(2, 17))),
                 freq: 0,
                 reoccuring: None,
             });
