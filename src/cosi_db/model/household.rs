@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
-use mongodb::bson::{doc, from_document, to_bson, to_document, Bson, Document};
+use mongodb::bson::{doc, from_document, to_bson, to_document, Document};
 use mongodb::Client;
 use rocket::futures::TryStreamExt;
 

@@ -1,13 +1,15 @@
 const ALL_PAGEABLE_ENDPOINTS = [
     "get_person",
     "get_address",
-    "get_household"
+    "get_household",
+    "get_event"
 ];
 
 const ALL_GEN_ENDPOINTS = [
     "gen_person",
     "gen_address",
     "gen_household",
+    "gen_event",
     "gen_login"
 ];
 

@@ -38,3 +38,9 @@ use crate::cosi_db::model::household::{Household, HouseholdImpl, HouseholdOption
 generate_generators! { Household }
 generate_pageable_getter! { Household }
 generate_pageable_inserter! { Household }
+
+// Event
+use crate::cosi_db::model::event::{Event, EventImpl, EventOptional};
+generate_generators! { Event }
+generate_pageable_getter! { Event }
+generate_pageable_inserter! { Event }
