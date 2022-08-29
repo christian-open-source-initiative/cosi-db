@@ -133,6 +133,20 @@ describe("CRUD", () => {
                 expect(endTime - start_time).toBeLessThan(350);
             });
         }
+
+        test("/get_eventregistration Check key_type", async() => {
+            const response = await cosiRequest.get(`/get_eventregistration`).query({page: 0});
+            let jsonData = JSON.parse(response.text);
+            let d = jsonData["data"];
+            const keys = ["Person", "Group", "Household"];
+            for (let v of d) {
+                expect(v["key_type"].includes(keys));
+                for (let k of ["Person", "Group", "Household"]) {
+                    let lo = k.toLowerCase();
+                    expect((v["key_type"] == k && v[lo] != "null") || (v["key_type"] != k && v[lo] == "null"))
+                }
+            }
+        });
     });
 
     // Insert after getters so it doesn't change the get count.
