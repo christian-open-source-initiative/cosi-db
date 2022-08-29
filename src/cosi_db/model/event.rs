@@ -13,7 +13,6 @@ use rocket::futures::TryStreamExt;
 
 // cosi_db
 use crate::cosi_db::errors::{COSIError, COSIResult};
-use crate::cosi_db::model::address::{Address, AddressImpl};
 use crate::cosi_db::model::common::{COSICollection, COSIForm, Generator, OID};
 use crate::cosi_db::model::group::{Group, GroupImpl};
 use crate::cosi_db::model::household::{Household, HouseholdImpl};
@@ -183,11 +182,11 @@ impl From<EventRegistration> for EventRegistrationImpl {
     fn from(er: EventRegistration) -> EventRegistrationImpl {
         EventRegistrationImpl {
             event: <OID as std::default::Default>::default(),
-            timestamp: "".to_string(),
+            timestamp: er.timestamp.to_string(),
             person: None,
             group: None,
             household: None,
-            key_type: EventKeyType::Group,
+            key_type: er.key_type,
         }
     }
 }
@@ -196,11 +195,11 @@ impl From<EventRegistrationImpl> for EventRegistration {
     fn from(gr: EventRegistrationImpl) -> EventRegistration {
         EventRegistration {
             event: <Event as std::default::Default>::default(),
-            timestamp: NaiveDate::from_ymd(2020, 6, 7).and_hms(7, 7, 7),
+            timestamp: NaiveDateTime::parse_from_str(&gr.timestamp, "%Y-%m-%d %H:%M:%S").unwrap(),
             person: None,
             group: None,
             household: None,
-            key_type: EventKeyType::Group,
+            key_type: gr.key_type,
         }
     }
 }
@@ -215,32 +214,21 @@ impl COSICollection<'_, EventRegistration, EventRegistrationImpl, EventRegistrat
 
     async fn to_impl(
         client: &Client,
-        mut orm: Vec<EventRegistration>,
+        orm: Vec<EventRegistration>,
     ) -> COSIResult<Vec<EventRegistrationImpl>> {
-        let collection = Self::get_collection(client).await;
-
-        let event_raw = Event::get_raw_document(client).await;
-        let group_raw = Person::get_raw_document(client).await;
-        let house_raw = Household::get_raw_document(client).await;
         let person_raw = Person::get_raw_document(client).await;
 
         let mut final_results = Vec::new();
         let get_id = |d: &Document| -> OID { d.get("_id").unwrap().as_object_id().unwrap().into() };
         for o in &orm {
+            let mut er_result = EventRegistrationImpl::from(o.clone());
+
             let event_impl = Event::to_impl(client, vec![o.event.clone()]).await?[0].clone();
             let event = Event::find_document(client, Some(to_document(&event_impl)?), None)
                 .await?
                 .pop()
                 .unwrap();
-            let mut er_result = EventRegistrationImpl {
-                event: get_id(&event),
-                timestamp: o.timestamp.to_string(),
-                person: None,
-                group: None,
-                household: None,
-                key_type: o.key_type,
-            };
-
+            er_result.event = get_id(&event);
             match &o.key_type {
                 &EventKeyType::Group => {
                     let group_impl =
@@ -288,20 +276,14 @@ impl COSICollection<'_, EventRegistration, EventRegistrationImpl, EventRegistrat
         let household_col = Household::get_collection(client).await;
         let event_col = Event::get_collection(client).await;
         for i in imp {
+            let mut er_result = EventRegistration::from(i.clone());
+
             let event = event_col
                 .find_one(doc! {"_id": ObjectId::from(i.event.clone())}, None)
                 .await?
                 .ok_or(COSIError::msg("Unable to find provided event."))?;
             let e_orm = Event::to_orm(client, &vec![event]).await?[0].clone();
-            let mut er_result = EventRegistration {
-                event: e_orm,
-                timestamp: NaiveDateTime::parse_from_str(&i.timestamp, "%Y-%m-%d %H:%M:%S")?,
-                person: None,
-                group: None,
-                household: None,
-                key_type: i.key_type,
-            };
-
+            er_result.event = e_orm;
             match &er_result.key_type {
                 &EventKeyType::Group => {
                     // Inefficient conversion.

@@ -2,14 +2,13 @@ use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, from_document, to_bson, to_document, Document};
 use mongodb::Client;
-use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
 use names::Name;
 use serde::{Deserialize, Serialize};
 
 use lipsum::lipsum_words_from_seed;
-use rocket::form::{FromForm, FromFormField};
+use rocket::form::FromForm;
 use rocket::futures::TryStreamExt;
 use std::default::Default;
 
@@ -124,10 +123,6 @@ impl COSICollection<'_, GroupRelation, GroupRelationImpl, GroupRelationOptional>
         client: &Client,
         orm: Vec<GroupRelation>,
     ) -> COSIResult<Vec<GroupRelationImpl>> {
-        let collection = Self::get_collection(client).await;
-
-        let people_raw = Person::get_raw_document(client).await;
-        let group_raw = Group::get_raw_document(client).await;
         let mut results: Vec<GroupRelationImpl> = vec![];
 
         // Find a valid person and group.
