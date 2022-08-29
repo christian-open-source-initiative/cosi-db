@@ -122,7 +122,7 @@ impl COSICollection<'_, GroupRelation, GroupRelationImpl, GroupRelationOptional>
 
     async fn to_impl(
         client: &Client,
-        mut orm: Vec<GroupRelation>,
+        orm: Vec<GroupRelation>,
     ) -> COSIResult<Vec<GroupRelationImpl>> {
         let collection = Self::get_collection(client).await;
 
@@ -132,14 +132,17 @@ impl COSICollection<'_, GroupRelation, GroupRelationImpl, GroupRelationOptional>
 
         // Find a valid person and group.
         for o in &orm {
-            let person = people_raw
-                .find_one(to_document(&o.person)?, None)
+            let person_impl = Person::to_impl(client, vec![o.person.clone()]).await?[0].clone();
+            let person = Person::find_document(client, Some(to_document(&person_impl)?), None)
                 .await?
-                .ok_or(COSIError::msg("Unable to fetch Person table."))?;
-            let group = group_raw
-                .find_one(to_document(&o.group)?, None)
+                .pop()
+                .unwrap();
+
+            let group_impl = Group::to_impl(client, vec![o.group.clone()]).await?[0].clone();
+            let group = Group::find_document(client, Some(to_document(&group_impl)?), None)
                 .await?
-                .ok_or(COSIError::msg("Unable to fetch Group table."))?;
+                .pop()
+                .unwrap();
             results.push(GroupRelationImpl {
                 person: person.get("_id").unwrap().as_object_id().unwrap().into(),
                 group: group.get("_id").unwrap().as_object_id().unwrap().into(),

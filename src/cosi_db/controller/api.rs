@@ -45,6 +45,14 @@ generate_generators! { Event }
 generate_pageable_getter! { Event }
 generate_pageable_inserter! { Event }
 
+// Event Registration
+use crate::cosi_db::model::event::{
+    EventRegistration, EventRegistrationImpl, EventRegistrationOptional,
+};
+generate_generators! { EventRegistration }
+generate_pageable_getter! { EventRegistration }
+generate_pageable_inserter! { EventRegistration }
+
 // Group
 use crate::cosi_db::model::group::{Group, GroupImpl, GroupOptional};
 generate_generators! { Group }
