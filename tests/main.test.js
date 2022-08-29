@@ -135,13 +135,14 @@ describe("CRUD", () => {
         }
 
         test("/get_eventregistration Check key_type", async() => {
+            // Checks that key_type implies only one foreign key is set.
             const response = await cosiRequest.get(`/get_eventregistration`).query({page: 0});
             let jsonData = JSON.parse(response.text);
             let d = jsonData["data"];
             const keys = ["Person", "Group", "Household"];
             for (let v of d) {
                 expect(v["key_type"].includes(keys));
-                for (let k of ["Person", "Group", "Household"]) {
+                for (let k of keys) {
                     let lo = k.toLowerCase();
                     expect((v["key_type"] == k && v[lo] != "null") || (v["key_type"] != k && v[lo] == "null"))
                 }
