@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use mongodb::bson::oid::ObjectId;
-use mongodb::bson::{doc, from_document, to_bson, to_document, Bson, Document};
+use mongodb::bson::{doc, from_document, to_bson, to_document, Document};
 use mongodb::Client;
 use rocket::futures::TryStreamExt;
 
@@ -41,6 +41,8 @@ pub struct HouseholdOptional {
 impl COSIForm for HouseholdImpl {}
 impl COSIForm for HouseholdOptional {}
 
+// These do not fetch OID values. Rather, the COSIForm helpers which are async can interact with the
+// database. You can consider these conversions as local conversions.
 impl From<Household> for HouseholdImpl {
     fn from(h: Household) -> HouseholdImpl {
         HouseholdImpl {
@@ -118,14 +120,14 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
         return Ok(results);
     }
 
-    async fn to_orm(client: &Client, imp: Vec<HouseholdImpl>) -> COSIResult<Vec<Household>> {
+    async fn to_orm(client: &Client, imp: &Vec<HouseholdImpl>) -> COSIResult<Vec<Household>> {
         let mut result = vec![];
 
         let address_col = Address::get_collection(client).await;
         let person_col = Person::get_collection(client).await;
         for i in imp {
             let address = address_col
-                .find_one(doc! {"_id": ObjectId::from(i.address)}, None)
+                .find_one(doc! {"_id": ObjectId::from(i.address.clone())}, None)
                 .await?
                 .ok_or(COSIError::msg("Unable to find provided address."))?;
             let persons_cursor = person_col
@@ -138,7 +140,7 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
             let persons: Vec<Person> = person_impl.iter().map(|x| x.clone().into()).collect();
 
             result.push(Household {
-                house_name: i.house_name,
+                house_name: i.house_name.clone(),
                 address: address,
                 persons: persons,
             })
@@ -147,29 +149,18 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
         return Ok(result);
     }
 
-    async fn process_foreign_keys<'b>(client: &'b Client, raw_doc: &'b mut Document) {
-        let address_col = Address::get_collection(client).await;
-        let address_entry = raw_doc.get("address").unwrap().as_object_id().unwrap();
-        let address = address_col
-            .find_one(doc! {"_id": address_entry}, None)
-            .await
-            .unwrap()
-            .unwrap();
-        raw_doc.insert("address", to_bson(&address).unwrap());
-
-        let person_col = Person::get_collection(client).await;
-        let person_entries = raw_doc.get("persons").unwrap();
-        let mut persons_results: Vec<Bson> = Vec::new();
-        for person_entry in person_entries.as_array().unwrap() {
-            let oid = person_entry.as_object_id().unwrap();
-            let person = person_col
-                .find_one(doc! {"_id": oid}, None)
-                .await
-                .unwrap()
-                .unwrap();
-            persons_results.push(to_bson(&person).unwrap());
+    async fn process_foreign_keys<'b>(client: &'b Client, raw_doc: &'b mut Vec<Document>) {
+        let h_impls: Vec<HouseholdImpl> = raw_doc
+            .iter()
+            .map(|x| from_document(x.clone()).unwrap())
+            .collect();
+        // This will fetch the foreign keys for us.
+        let orms: Vec<Household> = Self::to_orm(client, &h_impls).await.unwrap();
+        let it = raw_doc.iter_mut().zip(orms);
+        for (rd, o) in it {
+            rd.insert("address", to_bson(&o.address).unwrap());
+            rd.insert("persons", to_bson(&o.persons).unwrap());
         }
-        raw_doc.insert("persons", persons_results);
     }
 }
 

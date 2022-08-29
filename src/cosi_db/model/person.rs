@@ -47,10 +47,24 @@ pub struct PersonOptional {
     pub first_name: Option<String>,
     pub middle_name: Option<String>,
     pub last_name: Option<String>,
-    pub nicks: Vec<String>, // Vectors default to empty array.
+    pub nicks: Option<Vec<String>>,
     pub dob: Option<Option<String>>,
     pub age: Option<Option<u8>>,
     pub sex: Option<Sex>,
+}
+
+impl Default for Person {
+    fn default() -> Self {
+        Person {
+            first_name: "".to_string(),
+            middle_name: "".to_string(),
+            last_name: "".to_string(),
+            nicks: vec![],
+            dob: None,
+            age: None,
+            sex: Sex::Undefined,
+        }
+    }
 }
 
 impl From<Person> for PersonImpl {
@@ -60,11 +74,7 @@ impl From<Person> for PersonImpl {
             middle_name: p.middle_name,
             last_name: p.last_name,
             nicks: p.nicks,
-            dob: if p.dob.is_some() {
-                Some(p.dob.unwrap().to_string())
-            } else {
-                None
-            },
+            dob: p.dob.map(|x| x.to_string()),
             age: p.age,
             sex: p.sex,
         }
@@ -78,11 +88,9 @@ impl From<PersonImpl> for Person {
             middle_name: p.middle_name,
             last_name: p.last_name,
             nicks: p.nicks,
-            dob: if p.dob.is_some() {
-                Some(NaiveDate::parse_from_str(&p.dob.unwrap(), "%Y-%m-%d").unwrap())
-            } else {
-                None
-            },
+            dob: p
+                .dob
+                .map(|x| NaiveDate::parse_from_str(&x, "%Y-%m-%d").unwrap()),
             age: p.age,
             sex: p.sex,
         }
@@ -133,7 +141,7 @@ impl COSIForm for PersonImpl {
             first_name: Some(self.first_name.clone()),
             middle_name: Some(self.middle_name.clone()),
             last_name: Some(self.last_name.clone()),
-            nicks: self.nicks.clone(),
+            nicks: Some(self.nicks.clone()),
             dob: Some(self.dob.clone()),
             age: Some(self.age),
             sex: Some(self.sex),
@@ -203,7 +211,11 @@ impl Generator<Person> for Person {
                 first_name: get_name(),
                 middle_name: get_name(),
                 last_name: get_name(),
-                nicks: vec![],
+                nicks: if age < 20 {
+                    vec![]
+                } else {
+                    vec![get_name(), get_name()]
+                },
                 dob: Some(gen_date(age, &mut rng)),
                 age: Some(age),
                 sex: sexes[i as usize],

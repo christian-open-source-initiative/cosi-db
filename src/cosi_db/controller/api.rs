@@ -38,3 +38,29 @@ use crate::cosi_db::model::household::{Household, HouseholdImpl, HouseholdOption
 generate_generators! { Household }
 generate_pageable_getter! { Household }
 generate_pageable_inserter! { Household }
+
+// Event
+use crate::cosi_db::model::event::{Event, EventImpl, EventOptional};
+generate_generators! { Event }
+generate_pageable_getter! { Event }
+generate_pageable_inserter! { Event }
+
+// Event Registration
+use crate::cosi_db::model::event::{
+    EventRegistration, EventRegistrationImpl, EventRegistrationOptional,
+};
+generate_generators! { EventRegistration }
+generate_pageable_getter! { EventRegistration }
+generate_pageable_inserter! { EventRegistration }
+
+// Group
+use crate::cosi_db::model::group::{Group, GroupImpl, GroupOptional};
+generate_generators! { Group }
+generate_pageable_getter! { Group }
+generate_pageable_inserter! { Group }
+
+// Group Relation
+use crate::cosi_db::model::group::{GroupRelation, GroupRelationImpl, GroupRelationOptional};
+generate_generators! { GroupRelation }
+generate_pageable_getter! { GroupRelation }
+generate_pageable_inserter! { GroupRelation }
