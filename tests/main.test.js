@@ -190,7 +190,9 @@ describe("CRUD", () => {
                                         "middle_name": "plumber",
                                         "last_name": "mario",
                                         "dob": "1985-09-13",
-                                        "sex": "Male"})
+                                        "sex": "Male",
+                                        "notes": "A helpful local plumber who can jump!"
+                                    })
                                     .expect(200)
                                     .expect("Content-Type", /json/)
 

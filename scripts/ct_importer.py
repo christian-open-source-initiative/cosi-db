@@ -41,6 +41,11 @@ def nan_to_empty(v):
         return ""
     return v
 
+def nan_to_none(v):
+    if str(v) == "nan":
+        return None
+    return v
+
 def import_person(people_df, session):
     # Import people
     person_track = {}
@@ -57,7 +62,12 @@ def import_person(people_df, session):
             "middle_name": "",
             "last_name": person["LastName"],
             "dob": f_date,
-            "sex": get_gender(person["Gender"])
+            "home_phone": nan_to_none(person["HomePhone"]),
+            "mobile_phone": nan_to_none(person["MobilePhone"]),
+            "work_phone": nan_to_none(person["WorkPhone"]),
+            "sex": get_gender(person["Gender"]),
+            "notes": nan_to_empty(person["Allergy/child notes"]),
+            "emergency_contact": nan_to_empty(person["Emergency Contact"])
         }
 
         result = cosi_post("insert_person", session=session, params=p)
@@ -77,7 +87,8 @@ def import_address(people_df, person_oid_track, session):
             "line_three": "",
             "city": nan_to_empty(person["City"]),
             "region": nan_to_empty(person["State"]),
-            "postal_code": nan_to_empty(person["ZipCode"])
+            "postal_code": nan_to_empty(person["ZipCode"]),
+            "country": "United States",
         }
 
         if a["line_one"] == "":
@@ -107,7 +118,6 @@ def import_address(people_df, person_oid_track, session):
             last_names.append(p_keys[p_values.index(poid)][1])
 
         household_name = max(set(last_names), key=last_names.count)
-        print(json.dumps(people))
         res = cosi_post("insert_household", session=session, params={
             "house_name": household_name + " Household",
             "address": address_oid,
@@ -116,6 +126,30 @@ def import_address(people_df, person_oid_track, session):
 
         assert "err" not in res, res
 
+
+def import_group(group_df, person_oid_track, session):
+    group_desc = {}
+    group_track = defaultdict(list)
+    for _, row in group_df.iterrows():
+        group_track[row["GroupName"]].append([(row["FirstName"], row["LastName"], row["Address1"]), row["GroupMemberType"]])
+        group_desc[row["GroupName"]] = row["GroupDescription"]
+
+    for group_name, tups in group_track.items():
+        g = {
+            "group_name": group_name,
+            "group_desc": group_desc[group_name]
+        }
+
+        res = cosi_post("insert_group", session, g)
+        oid = res["$oid"]
+        for people in tups:
+            pg = {
+                "person": person_oid_track[people[0]],
+                "group": oid,
+                "role": people[1]
+            }
+
+            cosi_post("insert_grouprelation", session, pg)
 
 def main():
     with requests.sessions.Session() as session:
@@ -135,12 +169,16 @@ def main():
     people_file = "people.csv"
     groups_file = "groups.csv"
     people_df = pandas.read_csv(people_file, encoding="ISO-8859-1")
+    group_df = pandas.read_csv(groups_file, encoding="ISO-8859-1")
 
     print("Importing Person Data")
     person_oid_track = import_person(people_df, session=session)
 
     print("Importing Address Data")
     import_address(people_df, person_oid_track, session=session)
+
+    print("Importing Group Data")
+    import_group(group_df, person_oid_track, session=session)
 
 
 if __name__ == "__main__":

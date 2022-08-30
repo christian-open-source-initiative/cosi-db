@@ -8,7 +8,7 @@ use names::Name;
 use serde::{Deserialize, Serialize};
 
 use core::convert::From;
-use rocket::form::FromForm;
+use rocket::form::{FromForm, FromFormField};
 
 // cosi_db
 use crate::cosi_db::errors::{COSIError, COSIResult};
@@ -17,11 +17,26 @@ use crate::cosi_db::model::address::Address;
 use crate::cosi_db::model::common::{COSICollection, COSIForm, Generator, OID};
 use crate::cosi_db::model::person::{Person, PersonImpl};
 
+#[derive(Clone, Debug, FromFormField, Serialize, Deserialize)]
+pub enum HouseRelationStatus {
+    Husband,
+    Wife,
+    Child,
+}
+
+#[derive(Clone, Debug, FromForm, Serialize, Deserialize)]
+pub struct HouseRelation {
+    pub person_a: OID,
+    pub person_b: OID,
+    pub relation: HouseRelationStatus,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Household {
     pub house_name: String,
     pub address: Address,
     pub persons: Vec<Person>,
+    pub relations: Vec<HouseRelation>,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
@@ -29,6 +44,7 @@ pub struct HouseholdImpl {
     pub house_name: String,
     pub address: OID,
     pub persons: Vec<OID>,
+    pub relations: Vec<HouseRelation>,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
@@ -36,6 +52,7 @@ pub struct HouseholdOptional {
     pub house_name: Option<String>,
     pub address: Option<String>,
     pub persons: Option<Vec<String>>,
+    pub relations: Option<Vec<HouseRelation>>,
 }
 
 impl COSIForm for HouseholdImpl {}
@@ -49,6 +66,7 @@ impl From<Household> for HouseholdImpl {
             house_name: h.house_name,
             address: <OID as std::default::Default>::default(),
             persons: vec![],
+            relations: vec![],
         }
     }
 }
@@ -59,6 +77,7 @@ impl From<HouseholdImpl> for Household {
             house_name: h.house_name,
             address: <Address as std::default::Default>::default(),
             persons: vec![],
+            relations: vec![],
         }
     }
 }
@@ -112,6 +131,7 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
                         house_name: orm_i.house_name.clone(),
                         address: addr_doc.get("_id").unwrap().as_object_id().unwrap().into(),
                         persons: persons_id,
+                        relations: orm_i.relations.clone(),
                     })
                 }
             }
@@ -143,6 +163,7 @@ impl COSICollection<'_, Household, HouseholdImpl, HouseholdOptional> for Househo
                 house_name: i.house_name.clone(),
                 address: address,
                 persons: persons,
+                relations: i.relations.clone(),
             })
         }
 
@@ -194,7 +215,12 @@ impl Generator<Household> for Household {
             result.push(Household {
                 house_name: get_name(),
                 address: from_document(address)?,
-                persons: vec![from_document(person)?],
+                persons: vec![from_document(person.clone())?],
+                relations: vec![HouseRelation {
+                    person_a: person.get("_id").unwrap().as_object_id().unwrap().into(),
+                    person_b: person.get("_id").unwrap().as_object_id().unwrap().into(),
+                    relation: HouseRelationStatus::Husband,
+                }],
             });
         }
 

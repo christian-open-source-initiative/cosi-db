@@ -27,7 +27,12 @@ pub struct Person {
     pub last_name: String,
     pub nicks: Vec<String>,
     pub dob: Option<NaiveDate>,
+    pub home_phone: Option<String>,
+    pub work_phone: Option<String>,
+    pub mobile_phone: Option<String>,
     pub sex: Sex,
+    pub notes: String,
+    pub emergency_contact: String,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
@@ -37,7 +42,12 @@ pub struct PersonImpl {
     pub last_name: String,
     pub nicks: Vec<String>, // Vectors default to empty array.
     pub dob: Option<String>,
+    pub home_phone: Option<String>,
+    pub work_phone: Option<String>,
+    pub mobile_phone: Option<String>,
     pub sex: Sex,
+    pub notes: String,
+    pub emergency_contact: String,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
@@ -47,18 +57,28 @@ pub struct PersonOptional {
     pub last_name: Option<String>,
     pub nicks: Option<Vec<String>>,
     pub dob: Option<Option<String>>,
+    pub home_phone: Option<Option<String>>,
+    pub work_phone: Option<Option<String>>,
+    pub mobile_phone: Option<Option<String>>,
     pub sex: Option<Sex>,
+    pub notes: Option<String>,
+    pub emergency_contact: Option<String>,
 }
 
 impl Default for Person {
     fn default() -> Self {
         Person {
-            first_name: "".to_string(),
-            middle_name: "".to_string(),
-            last_name: "".to_string(),
+            first_name: String::new(),
+            middle_name: String::new(),
+            last_name: String::new(),
             nicks: vec![],
             dob: None,
+            home_phone: None,
+            work_phone: None,
+            mobile_phone: None,
             sex: Sex::Undefined,
+            notes: String::new(),
+            emergency_contact: String::new(),
         }
     }
 }
@@ -71,7 +91,12 @@ impl From<Person> for PersonImpl {
             last_name: p.last_name,
             nicks: p.nicks,
             dob: p.dob.map(|x| x.to_string()),
+            home_phone: p.home_phone.clone(),
+            work_phone: p.work_phone.clone(),
+            mobile_phone: p.mobile_phone.clone(),
             sex: p.sex,
+            notes: String::new(),
+            emergency_contact: String::new(),
         }
     }
 }
@@ -86,7 +111,12 @@ impl From<PersonImpl> for Person {
             dob: p
                 .dob
                 .map(|x| NaiveDate::parse_from_str(&x, "%Y-%m-%d").unwrap()),
+            home_phone: p.home_phone.clone(),
+            work_phone: p.work_phone.clone(),
+            mobile_phone: p.mobile_phone.clone(),
             sex: p.sex,
+            notes: String::new(),
+            emergency_contact: String::new(),
         }
     }
 }
@@ -137,7 +167,12 @@ impl COSIForm for PersonImpl {
             last_name: Some(self.last_name.clone()),
             nicks: Some(self.nicks.clone()),
             dob: Some(self.dob.clone()),
+            home_phone: Some(self.home_phone.clone()),
+            work_phone: Some(self.work_phone.clone()),
+            mobile_phone: Some(self.mobile_phone.clone()),
             sex: Some(self.sex),
+            notes: Some(self.notes.clone()),
+            emergency_contact: Some(self.emergency_contact.clone()),
         })?;
         return self.convert_to_document(true);
     }
@@ -210,7 +245,12 @@ impl Generator<Person> for Person {
                     vec![get_name(), get_name()]
                 },
                 dob: Some(gen_date(age, &mut rng)),
+                home_phone: Some("7777777777".to_string()),
+                work_phone: Some("9182081084".to_string()),
+                mobile_phone: Some("123142525".to_string()),
                 sex: sexes[i as usize],
+                notes: get_name(),
+                emergency_contact: get_name(),
             });
         }
 
