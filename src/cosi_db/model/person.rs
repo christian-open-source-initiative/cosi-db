@@ -27,7 +27,6 @@ pub struct Person {
     pub last_name: String,
     pub nicks: Vec<String>,
     pub dob: Option<NaiveDate>,
-    pub age: Option<u8>,
     pub sex: Sex,
 }
 
@@ -38,7 +37,6 @@ pub struct PersonImpl {
     pub last_name: String,
     pub nicks: Vec<String>, // Vectors default to empty array.
     pub dob: Option<String>,
-    pub age: Option<u8>,
     pub sex: Sex,
 }
 
@@ -49,7 +47,6 @@ pub struct PersonOptional {
     pub last_name: Option<String>,
     pub nicks: Option<Vec<String>>,
     pub dob: Option<Option<String>>,
-    pub age: Option<Option<u8>>,
     pub sex: Option<Sex>,
 }
 
@@ -61,7 +58,6 @@ impl Default for Person {
             last_name: "".to_string(),
             nicks: vec![],
             dob: None,
-            age: None,
             sex: Sex::Undefined,
         }
     }
@@ -75,7 +71,6 @@ impl From<Person> for PersonImpl {
             last_name: p.last_name,
             nicks: p.nicks,
             dob: p.dob.map(|x| x.to_string()),
-            age: p.age,
             sex: p.sex,
         }
     }
@@ -91,7 +86,6 @@ impl From<PersonImpl> for Person {
             dob: p
                 .dob
                 .map(|x| NaiveDate::parse_from_str(&x, "%Y-%m-%d").unwrap()),
-            age: p.age,
             sex: p.sex,
         }
     }
@@ -143,7 +137,6 @@ impl COSIForm for PersonImpl {
             last_name: Some(self.last_name.clone()),
             nicks: Some(self.nicks.clone()),
             dob: Some(self.dob.clone()),
-            age: Some(self.age),
             sex: Some(self.sex),
         })?;
         return self.convert_to_document(true);
@@ -217,7 +210,6 @@ impl Generator<Person> for Person {
                     vec![get_name(), get_name()]
                 },
                 dob: Some(gen_date(age, &mut rng)),
-                age: Some(age),
                 sex: sexes[i as usize],
             });
         }

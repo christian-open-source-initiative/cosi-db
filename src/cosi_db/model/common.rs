@@ -9,7 +9,7 @@ use mongodb::{Client, Collection, Cursor};
 
 use futures::stream::{StreamExt, TryStreamExt};
 
-use crate::cosi_db::errors::COSIResult;
+use crate::cosi_db::errors::{COSIError, COSIResult};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -137,6 +137,20 @@ where
     async fn get_collection(client: &Client) -> Collection<I> {
         let tname = Self::get_table_name();
         return client.database("cosi_db").collection::<I>(&tname);
+    }
+
+    async fn create_collection(client: &Client) -> COSIResult<()> {
+        let tname = Self::get_table_name();
+        let result = client
+            .database("cosi_db")
+            .create_collection(&tname, None)
+            .await;
+        match result {
+            Ok(()) => {
+                return Ok(());
+            }
+            Err(_v) => return Err(COSIError::msg("Error collection creation.")),
+        }
     }
 
     async fn to_impl(_client: &Client, orm: Vec<T>) -> COSIResult<Vec<I>> {

@@ -2,8 +2,8 @@
 let ADDRESS_TABLE_IDX = 0;
 let PEOPLE_TABLE_IDX = 1;
 let HOUSEHOLD_TABLE_IDX = 3;
-let GROUP_TABLE_IDX = 3;
-let EVENT_TABLE_IDX = 4;
+let GROUP_TABLE_IDX = 4;
+let EVENT_TABLE_IDX = 5;
 let TABLE_IDX = [
     ADDRESS_TABLE_IDX,
     PEOPLE_TABLE_IDX,
@@ -115,7 +115,13 @@ $(document).ready(() => {
                 tbrClick.show();
             }
 
-            $(".page-count").html(`page ${page + 1} of ${totalPages}`);
+            let totalData = totalPages * result["data"].length;
+            if (totalPages == 0) {
+                page = 0;
+            } else {
+                page += 1;
+            }
+            $(".page-count").html(`page ${page} of ${totalPages} (${result["data"].length} of ${totalData} rows total)`);
         });
     };
 

@@ -1,7 +1,8 @@
 import session from "supertest-session";
+import {jest} from "@jest/globals";
+import { ALL_PAGEABLE_ENDPOINTS, ALL_GEN_ENDPOINTS, TABLE_NAMES } from "./endpoints.js";
 
-import { ALL_PAGEABLE_ENDPOINTS, ALL_GEN_ENDPOINTS } from "./endpoints.js";
-
+jest.setTimeout(10000);
 var totalDatapointsPerTable = 200;
 var cosiRequest = session("127.0.0.1:8000");
 
@@ -12,16 +13,7 @@ function expectKeys(jsonData, keys) {
 
 // Test setup
 beforeAll(async ()=> {
-    // Before tests begin, populate table with values.
-    for (let endpoint of ALL_GEN_ENDPOINTS) {
-        let response = await cosiRequest.get(`/${endpoint}/${totalDatapointsPerTable}`)
-                                           .expect(200)
-                                           .expect("Content-Type", /json/);
-
-        let jsonData = JSON.parse(response.text);
-        expectKeys(jsonData, ["total"]);
-        expect(jsonData["total"]).toBe(totalDatapointsPerTable)
-    }
+    await cosiRequest.get("/gen_login/1").expect(200).expect("Content-Type", /json/);
 
     // Login
     await cosiRequest
@@ -33,6 +25,35 @@ beforeAll(async ()=> {
             })
             .expect(200)
             .expect("Content-Type", /json/);
+
+    // Test drop endpoints.
+    for (let tn of TABLE_NAMES) {
+        let response = await cosiRequest.get(`/drop_${tn.toLowerCase()}`)
+                                        .expect(200)
+                                        .expect("Content-Type", /json/);
+
+        let jsonData = JSON.parse(response.text);
+        expectKeys(jsonData, ["dropped"]);
+        expect(jsonData["dropped"]).toBe(true);
+
+        let findResponse = await cosiRequest.get(`/get_${tn.toLowerCase()}`)
+                                            .query({page: 0})
+                                            .expect(200)
+                                            .expect("Content-Type", /json/);
+        jsonData = JSON.parse(findResponse.text);
+        expect(jsonData["data"].length == 0);
+    }
+
+    // Before tests begin, populate table with values.
+    for (let endpoint of ALL_GEN_ENDPOINTS) {
+        let response = await cosiRequest.get(`/${endpoint}/${totalDatapointsPerTable}`)
+                                           .expect(200)
+                                           .expect("Content-Type", /json/);
+
+        let jsonData = JSON.parse(response.text);
+        expectKeys(jsonData, ["total"]);
+        expect(jsonData["total"]).toBe(totalDatapointsPerTable)
+    }
 });
 
 // Testing
@@ -155,6 +176,8 @@ describe("CRUD", () => {
         let verifyData = (data) => {
             let jData = JSON.parse(data);
             expectKeys(jData, ["$oid"]);
+
+            
         };
 
         const endpointPerson = "insert_person";
@@ -167,7 +190,6 @@ describe("CRUD", () => {
                                         "middle_name": "plumber",
                                         "last_name": "mario",
                                         "dob": "1985-09-13",
-                                        "age": 20,
                                         "sex": "Male"})
                                     .expect(200)
                                     .expect("Content-Type", /json/)
