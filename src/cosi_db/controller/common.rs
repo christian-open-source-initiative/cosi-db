@@ -17,7 +17,7 @@ macro_rules! generate_generators {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/gen_", stringify!([<$T: lower>]),  "/<total>") in {
                     #[get($v_path)]
-                    pub async fn [<gen_ $T:lower>](connect: Connection<COSIMongo>, total: u8) -> RawJson<String> {
+                    pub async fn [<gen_ $T:lower>](_user: User, connect: Connection<COSIMongo>, total: u8) -> RawJson<String> {
                         #[cfg(debug_assertions)]
                         {
                             let client: &Client = &*connect;
@@ -110,6 +110,34 @@ macro_rules! generate_pageable_inserter {
                             Err(err) => {
                                 Custom(Status::BadRequest, RawJson(format!("{{\"err\": \"{}\"}}", err)))
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// DROP
+#[macro_export]
+macro_rules! generate_dropper {
+    ($T:ident) => {
+        $crate::paste::paste! {
+            $crate::with_builtin_macros::with_builtin!{
+                let $v_path = concat!("/drop_", stringify!([<$T: lower>])) in {
+                    #[get($v_path)]
+                    pub async fn [<drop_ $T:lower>](_user:User, connect: Connection<COSIMongo>) -> RawJson<String> {
+                        #[cfg(debug_assertions)]
+                        {
+                            let client: &Client = &*connect;
+                            let col = $T::get_collection(client).await;
+                            col.drop(None).await.unwrap();
+                            $T::create_collection(client).await.unwrap();
+                            return RawJson(format!("{{\"dropped\": true}}"));
+                        }
+                        #[cfg(not(debug_assertions))]
+                        {
+                            return RawJson("{}".to_string());
                         }
                     }
                 }

@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="public/css/index.css"/>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <script src="public/js/jquery.js"></script>
-  <script src="public/js/searchmanager.js"></script>
-  <script src="public/js/table.js"></script>
-  <script src="public/js/dashboard.js"></script>
+  <script src="public/js/jquery.js" charset="utf-8" ></script>
+  <script src="public/js/searchmanager.js" charset="utf-8"></script>
+  <script src="public/js/table.js" charset="utf-8"></script>
+  <script src="public/js/dashboard.js" charset="utf-8"></script>
 </head>
 <body>
     <div id="cover-entire-screen"></div>

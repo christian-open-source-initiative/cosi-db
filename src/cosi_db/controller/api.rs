@@ -19,31 +19,37 @@ use crate::cosi_db::controller::common::PaginateData;
 use crate::cosi_db::model::auth::User;
 use crate::cosi_db::model::common::{COSICollection, Generator};
 
-use crate::{generate_generators, generate_pageable_getter, generate_pageable_inserter};
+use crate::{
+    generate_dropper, generate_generators, generate_pageable_getter, generate_pageable_inserter,
+};
 
 // Address
 use crate::cosi_db::model::address::{Address, AddressImpl, AddressOptional};
 generate_generators! { Address }
 generate_pageable_getter! { Address }
 generate_pageable_inserter! { Address }
+generate_dropper! { Address }
 
 // Person
 use crate::cosi_db::model::person::{Person, PersonImpl, PersonOptional};
 generate_generators! { Person }
 generate_pageable_getter! { Person }
 generate_pageable_inserter! { Person }
+generate_dropper! { Person }
 
 // Household
 use crate::cosi_db::model::household::{Household, HouseholdImpl, HouseholdOptional};
 generate_generators! { Household }
 generate_pageable_getter! { Household }
 generate_pageable_inserter! { Household }
+generate_dropper! { Household }
 
 // Event
 use crate::cosi_db::model::event::{Event, EventImpl, EventOptional};
 generate_generators! { Event }
 generate_pageable_getter! { Event }
 generate_pageable_inserter! { Event }
+generate_dropper! { Event }
 
 // Event Registration
 use crate::cosi_db::model::event::{
@@ -52,15 +58,18 @@ use crate::cosi_db::model::event::{
 generate_generators! { EventRegistration }
 generate_pageable_getter! { EventRegistration }
 generate_pageable_inserter! { EventRegistration }
+generate_dropper! { EventRegistration }
 
 // Group
 use crate::cosi_db::model::group::{Group, GroupImpl, GroupOptional};
 generate_generators! { Group }
 generate_pageable_getter! { Group }
 generate_pageable_inserter! { Group }
+generate_dropper! { Group }
 
 // Group Relation
 use crate::cosi_db::model::group::{GroupRelation, GroupRelationImpl, GroupRelationOptional};
 generate_generators! { GroupRelation }
 generate_pageable_getter! { GroupRelation }
 generate_pageable_inserter! { GroupRelation }
+generate_dropper! { GroupRelation }

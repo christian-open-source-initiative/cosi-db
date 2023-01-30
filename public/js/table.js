@@ -77,9 +77,9 @@ class Table {
                     $(row.insertCell(-1)).html(finalRender).attr("entry-name", k);
                 } else {
                     if (Array.isArray(value)) {
-                        $(row.insertCell(-1)).html(value.join(", ")).attr("entry-name", k);
+                        $(row.insertCell(-1)).html(JSON.stringify(value)).attr("entry-name", k);
                     } else {
-                        $(row.insertCell(-1)).html(value).attr("entry-name", k);
+                        $(row.insertCell(-1)).html(decodeURIComponent(value)).attr("entry-name", k);
                     }
                 }
             }
