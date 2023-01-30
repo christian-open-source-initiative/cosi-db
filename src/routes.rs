@@ -16,6 +16,8 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             get_person,
             insert_person,
             drop_person,
+            person,
+            person_redirect,
             // Address
             gen_address,
             get_address,

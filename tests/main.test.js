@@ -188,10 +188,11 @@ describe("CRUD", () => {
                                     .send({
                                         "first_name": "mario",
                                         "middle_name": "plumber",
-                                        "last_name": "mario",
+                                        "last_name": "フブキ",
                                         "dob": "1985-09-13",
                                         "sex": "Male",
-                                        "notes": "A helpful local plumber who can jump!"
+                                        "notes": "A helpful local plumber who can jump!",
+                                        "emergency_contact": ""
                                     })
                                     .expect(200)
                                     .expect("Content-Type", /json/)

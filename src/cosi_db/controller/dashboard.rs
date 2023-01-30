@@ -34,6 +34,16 @@ struct SearchTable<T> {
     entry_match: String,
 }
 
+#[get("/person", rank = 2)]
+pub async fn person(_user: User) -> RawHtml<Template> {
+    RawHtml(Template::render("person", context! {}))
+}
+
+#[get("/person", rank = 3)]
+pub fn person_redirect() -> Flash<Redirect> {
+    Flash::success(Redirect::to("/person"), "User needs to be logged in.")
+}
+
 #[get("/search?<query>")]
 pub async fn search(_user: User, connect: Connection<COSIMongo>, query: &str) -> RawJson<String> {
     let client: &Client = &*connect;
