@@ -118,6 +118,32 @@ macro_rules! generate_pageable_inserter {
     }
 }
 
+#[macro_export]
+macro_rules! generate_pageable_update {
+    ($T:ident) => {
+        $crate::paste::paste! {
+            $crate::with_builtin_macros::with_builtin!{
+                let $v_path = concat!("/update_", stringify!([<$T: lower>]), "?<oid>") in {
+                    #[post($v_path, data="<update_query>")]
+                    pub async fn [<update_ $T:lower>](_user: User, connect: Connection<COSIMongo>, oid: String, update_query: Form<HashMap<String, String>>) -> Custom<RawJson<String>> {
+                        let client: &Client = &*connect;
+                        // update_query has to be a type of HashMap as we would like the user to update
+                        // to null (thus the form has to be nullable) but we don't want update if the form value is not present
+                        // e.g. the value is not given. As a result, we cannot use FromForm auto-parsing.
+                        let raw_data: HashMap<String, String> = update_query.into_inner();
+                        let bson_data = to_bson(&raw_data).unwrap();
+                        println!("{:?}", bson_data);
+                        let bson_id: Option<Bson> = $T::update_datum(client, &doc!{"_id": oid.clone()}, &doc!{"$set": bson_data}, None).await.unwrap();
+                        Custom(Status::Ok, RawJson(
+                            serde_json::to_string(&bson_id).unwrap()
+                        ))
+                    }
+                }
+            }
+        }
+    }
+}
+
 // DROP
 #[macro_export]
 macro_rules! generate_dropper {
