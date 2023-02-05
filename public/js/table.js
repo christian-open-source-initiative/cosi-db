@@ -34,7 +34,7 @@ class Table {
     }
 
     render(tableName, data) {
-        const displaySpeed = 1000;
+        const displaySpeed = 200;
         this.tableDiv.hide().empty();
         if (data.length == 0) {
             this.tableDiv.html("No Data!");
@@ -104,6 +104,6 @@ class Table {
             $(row).attr("oid", oid);
         }
         this.actionToolbar.showButtons();
-        this.tableDiv.show(displaySpeed);
+        this.tableDiv.fadeIn(displaySpeed);
     }
 }
