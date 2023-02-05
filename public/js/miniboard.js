@@ -63,8 +63,7 @@ let PersonState = FormStruct(
     "Person",
     {
         "first_name": {
-            presence: true,
-            allowEmpty: false,
+            presence: {allowEmpty: false},
             length: {
                 maximum: 30
             }
@@ -76,8 +75,7 @@ let PersonState = FormStruct(
             }
         },
         "last_name": {
-            presence: true,
-            allowEmpty: false,
+            presence: {allowEmpty: false},
             length: {
                 maximum: 30
             }
@@ -118,7 +116,8 @@ let PersonState = FormStruct(
 class MiniBoard {
     constructor(render, searchDarkener) {
         this.isVisible = false;
-        this.states = [PersonState];
+        this.states = [];
+        this.curForm = null;
 
         this.searchDarkener = searchDarkener;
         this.render = render;
@@ -187,10 +186,51 @@ class MiniBoard {
             result += `</div>` // close form entry.
         });
 
-        result += `</div>`; // close form group
+        result += "</div>"; // close form group
         result += "</div>"; // close form body
-        result += "</form>";
+        result += "<input type='submit'>"
+        result += "</form>"; // close form
         return result;
+    }
+
+    showErrors(errors) {
+        inputs = this.curForm.find("input");
+        errors.forEach((name, idx) => {
+            let errVal = errors[name];
+
+            let dom = $("input");
+            if (errVal) {
+                dom.addClass("has-error");
+
+            } else {
+                dom.addClass("has-success");
+            }
+        });
+    }
+
+    updateStatusForInput(error, inputName) {
+        let inputDom = $(`input[name="${inputName}"]`);
+        let msgDom = $(`.error-msg[name="${inputName}"]`);
+        msgDom.remove();
+        inputDom.removeClass("has-error");
+        inputDom.removeClass("has-success");
+        if (inputDom.val() == "") {
+            // Don't color if no input.
+            return;
+        }
+        else if (!error) {
+            inputDom.addClass("has-success");
+            return;
+        }
+        inputDom.before(`<div class='error-msg' name='${inputName}'>${error[0]}</div>`);
+        inputDom.addClass("has-error");
+    }
+
+    _handleFormSubmit() {
+      // validate the form against the constraints
+      let errors = validate(this.curForm, this.states[this.states.length-1]._constraints);
+      // then we update the form to reflect the results
+      this.showErrors(errors || {});
     }
 
     displayOn() {
@@ -198,6 +238,25 @@ class MiniBoard {
         this.searchDarkener.show();
         this.render.append(this.getStateRender(curState));
         this.render.show();
+
+        this.curForm = $("#miniboard-form")
+        this.curForm.submit((ev) => {
+            ev.preventDefault();
+            this._handleFormSubmit();
+        });
+
+        // Hook up auto listeners
+        let allInputs = $("input, textarea, select");
+        let that = this;
+        allInputs.each(function() {
+            let input = $(this);
+            let name = input.attr("name");
+            input.change(() => {
+                // Sometimes valid returns undefined fully. We need to have valid state for subsequent calls too.
+                let errors = validate(that.curForm, that.states[that.states.length-1]._constraints) || {};
+                that.updateStatusForInput(errors[name], name);
+            });
+        });
     }
 
     displayOff() {

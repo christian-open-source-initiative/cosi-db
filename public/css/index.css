@@ -213,6 +213,8 @@ tr:hover td {
     padding: 12px 20px;
     margin: 8px 0;
     box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
 
 .miniboard-form-group {
@@ -241,6 +243,20 @@ tr:hover td {
     font-size:0.8rem;
     position:relative;
     top:-4px;
+}
+
+.has-error {
+    border-color: red !important;
+    box-shadow: 0 0 3px red;
+}
+
+.error-msg {
+    color: red;
+}
+
+.has-success {
+    border-color: green !important;
+    box-shadow: 0 0 5px green;
 }
 
 
