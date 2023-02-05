@@ -1,5 +1,6 @@
 //std
 use std::collections::HashMap;
+use std::str::FromStr;
 
 // serde
 use serde_json;
@@ -12,6 +13,7 @@ use rocket::response::status::Custom;
 use rocket_db_pools::Connection;
 
 // mongo
+use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, from_document, to_bson, Bson, Document};
 use mongodb::options::FindOptions;
 use mongodb::Client;
@@ -19,6 +21,7 @@ use mongodb::Client;
 // cosi_db
 use crate::cosi_db::connection::COSIMongo;
 use crate::cosi_db::controller::common::PaginateData;
+use crate::cosi_db::errors::{COSIError, COSIResult};
 use crate::cosi_db::model::auth::User;
 use crate::cosi_db::model::common::{COSICollection, Generator};
 

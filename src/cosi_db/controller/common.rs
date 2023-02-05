@@ -132,11 +132,17 @@ macro_rules! generate_pageable_update {
                         // e.g. the value is not given. As a result, we cannot use FromForm auto-parsing.
                         let raw_data: HashMap<String, String> = update_query.into_inner();
                         let bson_data = to_bson(&raw_data).unwrap();
-                        println!("{:?}", bson_data);
-                        let bson_id: Option<Bson> = $T::update_datum(client, &doc!{"_id": oid.clone()}, &doc!{"$set": bson_data}, None).await.unwrap();
-                        Custom(Status::Ok, RawJson(
-                            serde_json::to_string(&bson_id).unwrap()
-                        ))
+                        let result: COSIResult<u64> = $T::update_datum(client, &doc!{"_id": ObjectId::from_str(&oid).unwrap()}, &doc!{"$set": bson_data}, None).await;
+                        match result {
+                            Ok(update_count) => {
+                                return Custom(Status::Ok, RawJson(
+                                    serde_json::to_string(&update_count).unwrap()
+                                ));
+                            },
+                            Err(_) => {
+                                return Custom(Status::BadRequest, RawJson("{\"err\": \"Invalid id given.\"}".to_string()))
+                            }
+                        }
                     }
                 }
             }

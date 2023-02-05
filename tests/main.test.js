@@ -2,7 +2,7 @@ import session from "supertest-session";
 import {jest} from "@jest/globals";
 import { ALL_PAGEABLE_ENDPOINTS, ALL_GEN_ENDPOINTS, TABLE_NAMES } from "./endpoints.js";
 
-jest.setTimeout(10000);
+jest.setTimeout(1000);
 var totalDatapointsPerTable = 200;
 var cosiRequest = session("127.0.0.1:8000");
 
@@ -178,7 +178,6 @@ describe("CRUD", () => {
         let verifyData = (data) => {
             let jData = JSON.parse(data);
             modifyLater.push(jData);
-            console.log(modifyLater)
             expectKeys(jData, ["$oid"]);
         };
 
@@ -224,17 +223,19 @@ describe("CRUD", () => {
     const updatePerson = "update_person"
     describe("Verify Updaters", () => {
         test(`/${updatePerson} POST`, async () => {
-            console.log(modifyLater);
             const response = await cosiRequest
-                                    .post(`/${updatePerson}?`)
+                                    .post(`/${updatePerson}`)
                                     .type("form")
                                     .query({
                                         oid: modifyLater[0]["$oid"]
                                     })
                                     .send({
                                         "city": "HOPE",
-                                    });
-            verifyData(response.text);
+                                    })
+                                    .expect(200);
+
+            let jData = JSON.parse(response.text);
+            console.log(jData);
         });
     });
 });
