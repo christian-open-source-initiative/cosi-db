@@ -274,8 +274,8 @@ class MiniBoard {
     }
 
     displayOff() {
-        this.render.hide();
-        this.searchDarkener.hide();
+        this.searchDarkener.fadeOut();
+        this.render.hide(300);
         this.isVisible = false;
     }
 }
