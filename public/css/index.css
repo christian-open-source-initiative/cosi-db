@@ -219,6 +219,7 @@ tr:hover td {
     flex: 0 0 100%;
     display: flex;
     align-content: flex-start;
+    flex-flow: row wrap;
     justify-content: flex-start;
 }
 
@@ -232,6 +233,14 @@ tr:hover td {
 
 #miniboard-form-entry-name {
     padding: 1rem;
+}
+
+.miniboard-form-required-asterisk {
+    color:red;
+    display:inline;
+    font-size:0.8rem;
+    position:relative;
+    top:-4px;
 }
 
 

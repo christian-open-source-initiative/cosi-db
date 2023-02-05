@@ -21,7 +21,7 @@ validate.extend(validate.validators.datetime, {
   }
 });
 
-function FormStruct(stateName, constraints, groups=null) {
+function FormStruct(stateName, constraints, groups=null, prefixHtml="") {
     var fields = Object.keys(constraints);
     var count = fields.length;
     function constructor() {
@@ -42,6 +42,9 @@ function FormStruct(stateName, constraints, groups=null) {
         this._action = null;
         this._constraints = constraints;
         this._groups = groups != null ? groups : [count];
+
+        // For use on special things like profile pics, etc.
+        this.prefixHtml = prefixHtml;
 
         this.equals = (other) => {
             for (var i = 0; i < count; ++i) {
@@ -79,10 +82,13 @@ let PersonState = FormStruct(
                 maximum: 30
             }
         },
-        "sex": {
-            presence: false
-        },
         "nicks": {
+            presence: false,
+            length: {
+                maximum: 30
+            }
+        },
+        "sex": {
             presence: false
         },
         "dob": {
@@ -104,7 +110,7 @@ let PersonState = FormStruct(
             presence: false
         },
     },
-    [3, 6, 9, 11]
+    [4, 6, 9, 11]
 );
 
 // Mini board consists of the render itself
@@ -164,7 +170,13 @@ class MiniBoard {
 
             // Used for unique css labeled by state name and then field.
             result += `<div class='miniboard-form-entry' id='miniboard-form-entry-${formName}-${field}'>`
-            result += `<h2 class='miniboard-form-entry-name'>${field}</h2>`;
+            // Required check
+            result += `<h2 class='miniboard-form-entry-name'>${field}`;
+            if (state._constraints[field].presence) {
+                result += "<div class='miniboard-form-required-asterisk'> *</div>";
+            }
+            result += "</h2>"
+
             let extraStyle = "";
             let lengthMeta = state._constraints[field].length;
             if (lengthMeta != null) {
