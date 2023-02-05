@@ -117,6 +117,13 @@ let PersonState = FormStruct(
             }
         },
     },
-    {"sex": {options: SEX_OPTIONS}, "dob": {nullable: true}},
+    {
+     "sex": {options: SEX_OPTIONS},
+     "dob": {nullable: true},
+     "nicks": {nullable: true},
+     "home_phone": {nullable: true},
+     "work_phone": {nullable: true},
+     "mobile_phone": {nullable: true}
+    },
     [4, 6, 10, 11]
 );
