@@ -6,6 +6,17 @@ FOREIGN["household"] = {
     "address": ["line_one", "line_two", "line_three"]
 };
 
+// Special header renames to make things easier to read.
+let RENAME = {
+    "emergency_contact": "emergency",
+    "first_name": "first",
+    "middle_name": "middle",
+    "last_name": "last",
+    "home_phone": "home",
+    "work_phone": "work",
+    "mobile_phone": "mobile"
+}
+
 class Table {
     constructor(tableDiv) {
         this.tableDiv = tableDiv
@@ -36,7 +47,8 @@ class Table {
         let keys = Object.keys(data[0]);
         for (let h = 0; h < keys.length; ++h) {
             if (keys[h] == "_id") { continue; }
-            headerRow.append($("<th>").html(keys[h]));
+            let rename = keys[h] in RENAME ? RENAME[keys[h]] : keys[h];
+            headerRow.append($("<th>").html(rename));
         }
 
         // Body generate.
@@ -50,7 +62,7 @@ class Table {
                 let value = data[i][k];
                 if (k == "_id") {
                     oid = value["$oid"];
-                    continue; 
+                    continue;
                 } else if (k in foreignKeys) {
                     let externalKeys = foreignKeys[k]
                     let extValue = value;

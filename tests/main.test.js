@@ -2,7 +2,7 @@ import session from "supertest-session";
 import {jest} from "@jest/globals";
 import { ALL_PAGEABLE_ENDPOINTS, ALL_GEN_ENDPOINTS, TABLE_NAMES } from "./endpoints.js";
 
-jest.setTimeout(1000);
+jest.setTimeout(10000);
 var totalDatapointsPerTable = 200;
 var cosiRequest = session("127.0.0.1:8000");
 

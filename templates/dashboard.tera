@@ -59,7 +59,7 @@
           <div id="search-suggestions">Search suggestions</div>
         </div>
         <br /> <br />
-    
+
         <!-- Table Selection -->
         Or select a table to view:
         <br /> <br />
@@ -69,15 +69,18 @@
         <button type="button" id="group-select" class="table-selection-button">Group Table</button>
         <button type="button" id="event-select" class="table-selection-button">Event Table</button>
 
+
+      </div>
+    </div>
+    <div id="table-section">
         <h2 id="table-name"></h2>
         <h4 class="page-count"></h4>
-    
+
         <div id="status"></div>
-    
+
         <div id="loading">Now loading...</div>
         <table id="data-table"></table>
         <h4 class="page-count"></h4>
-      </div>
     </div>
 </body>
 </html>
