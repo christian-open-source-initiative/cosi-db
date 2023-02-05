@@ -152,6 +152,7 @@ $(document).ready(() => {
     $("#address-select").on("click", () => {
         tableTrack = ADDRESS_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new AddressState());
         updateTable();
     });
 

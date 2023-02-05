@@ -139,3 +139,35 @@ let GroupState = FormStruct(
         }
     }
 );
+
+let AddressState = FormStruct(
+    "Address",
+    {
+        "line_one": {
+            presence: true
+        },
+        "line_two": {
+            presence: false
+        },
+        "line_three": {
+            presence: false
+        },
+        "city": {
+            presence: true
+        },
+        "region": {
+            presence: true,
+        },
+        "postal_code": {
+            presence: true,
+        },
+        "county": {
+            presence: false
+        },
+        "country": {
+            presence: true
+        },
+    },
+    {},
+    [3,9]
+);
