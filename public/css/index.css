@@ -214,7 +214,7 @@ tr:hover td {
     min-width: 35rem;
 }
 
-#miniboard-form input {
+#miniboard-form input, #miniboard-form select {
     padding: 12px 20px;
     margin: 8px 0;
     box-sizing: border-box;
@@ -260,11 +260,14 @@ tr:hover td {
     color: red;
 }
 
+.success-msg {
+    color: green;
+}
+
 .has-success {
     border-color: green !important;
     box-shadow: 0 0 5px green;
 }
-
 
 /*Specific Form Formatting*/
 .miniboard-form-group {

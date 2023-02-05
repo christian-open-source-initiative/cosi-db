@@ -42,7 +42,7 @@ class MiniBoard {
     confirmChanges() {
         if (!this.isVisible)  {return false;}
         let hasAllEmpty = true;
-        $("#miniboard-form input, #miniboard-form textarea, #miniboard-form select").each(function() {
+        $("#miniboard-form input[type='text'], #miniboard-form textarea").each(function() {
             hasAllEmpty &= $(this).val() == "";
         });
 
@@ -65,6 +65,15 @@ class MiniBoard {
         });
     }
 
+    popState() {
+        if (this.states.length == 0) {
+            return;
+        }
+
+        this.states.pop();
+        this.updateDisplay();
+    }
+
     clearStates() {
         this.render.html("");
         this.displayOff();
@@ -80,6 +89,19 @@ class MiniBoard {
         }
         else {
             this.displayOff();
+        }
+    }
+
+    updateStatus(text, isError=false) {
+        let status = $("#miniboard-form-status");
+        status.removeClass();
+        status.hide();
+        status.text(text)
+        status.fadeIn(200)
+        if (isError) {
+            status.addClass("error-msg");
+        } else {
+            status.addClass("success-msg");
         }
     }
 
@@ -105,6 +127,7 @@ class MiniBoard {
         result += `<div id='miniboard-form-group-${formName}-${groupTrack}' class='miniboard-form-group'>`;
         state._fieldNames.forEach((field, idx) => {
             let constraint = state._constraints[field];
+            let custom = state._custom[field] || {};
             let g = state._groups[groupTrack];
             if (idx >= g) {
                 groupTrack += 1;
@@ -135,6 +158,12 @@ class MiniBoard {
                 result += `<input style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='date' placeholder='${field}' name='${field}' />`;
             } else if(constraint.length && constraint.length.maximum > textAreaThreshold) {
                 result += `<textarea style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='textarea' placeholder='${field}' name='${field}'></textarea>`;
+            } else if(custom.options) {
+                result += `<select style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='select' placeholder='${field}' name='${field}'>`;
+                custom.options.forEach((opt) => {
+                    result += `<option value=${opt}>${opt}</option>`
+                });
+                result += `</select>`
             } else {
                 result += `<input style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='text' placeholder='${field}' name='${field}' />`;
             }
@@ -143,7 +172,8 @@ class MiniBoard {
 
         result += "</div>"; // close form group
         result += "</div>"; // close form body
-        result += "<input type='submit'>"
+        result += "<div id='miniboard-form-status'></div>"
+        result += "<input type='submit' value='Add'/>"
         result += "</form>"; // close form
         return result;
     }
@@ -178,11 +208,38 @@ class MiniBoard {
 
     _handleFormSubmit() {
       // validate the form against the constraints
-      let errors = validate(this.curForm, this.states[this.states.length-1]._constraints);
+      let curState = this.states[this.states.length - 1];
+      let errors = validate(this.curForm, curState._constraints);
       // then we update the form to reflect the results
       if (!errors) {
-        this.curForm.submit();
+        this.updateStatus("Submitting...", false)
+        // We want empty forms to denote nullable.
+        let serializedForm = this.curForm.find(":input").filter((idx, element) => {
+            let dom = $(element);
+            let nullable = (curState._custom[dom.attr("name")] || {} ).nullable == true;
+            return  dom.val() != "" || !nullable;
+        }
+        ).serialize();
+
+        $.ajax({
+            type: "POST",
+            url: this.curForm.attr("action"),
+            data: serializedForm,
+            success: (response) => {
+                this.updateStatus("Successfully added new row!", false)
+                this.popState();
+            },
+            error: (response) => {
+                console.log(response);
+                if (response.responseJSON) {
+                    this.updateStatus(`Error adding data: ${response.responseJSON["err"]}`, true)
+                } else {
+                    this.updateStatus(`Error adding data: ${response.statusText}`, true)
+                }
+            }
+        });
       } else {
+        this.updateStatus("Invalid input detected.", true)
         this.updateAllStatusForInput(errors);
       }
     }

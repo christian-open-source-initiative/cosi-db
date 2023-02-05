@@ -1,6 +1,6 @@
 //** Stores encoding of forms. **/
 
-function FormStruct(stateName, constraints, groups=null, prefixHtml="") {
+function FormStruct(stateName, constraints, custom={}, groups=null, prefixHtml="") {
     var fields = Object.keys(constraints);
     var count = fields.length;
     function constructor() {
@@ -21,6 +21,8 @@ function FormStruct(stateName, constraints, groups=null, prefixHtml="") {
         this._action = null;
         this._constraints = constraints;
         this._groups = groups != null ? groups : [count];
+        // Stores custom render properties.
+        this._custom = custom;
 
         // For use on special things like profile pics, etc.
         this.prefixHtml = prefixHtml;
@@ -36,6 +38,12 @@ function FormStruct(stateName, constraints, groups=null, prefixHtml="") {
     }
     return constructor;
 }
+
+const SEX_OPTIONS = [
+    "Undefined",
+    "Male",
+    "Female"
+];
 
 // State for tracking people.
 let PersonState = FormStruct(
@@ -95,7 +103,7 @@ let PersonState = FormStruct(
                 maximum: 25
             }
         },
-        "emergency": {
+        "emergency_contact": {
             presence: false,
             numericality: true,
             length: {
@@ -109,5 +117,6 @@ let PersonState = FormStruct(
             }
         },
     },
+    {"sex": {options: SEX_OPTIONS}, "dob": {nullable: true}},
     [4, 6, 10, 11]
 );
