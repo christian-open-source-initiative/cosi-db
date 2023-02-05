@@ -13,7 +13,7 @@
 
 </head>
 <body>
-    <div id="cover-entire-screen"></div>
+    <div class="cover-entire-screen"></div>
     <div id="auth-outer">
         <div id="auth-bubble-center">
             <div id="auth-top-text">
@@ -31,12 +31,12 @@
             <form action="/login" method="POST" id="login-form">
                 <br />
                 <input type="text" name="email" placeholder="Email" />
-                <br /> 
-        
+                <br />
+
                 <br />
                 <input type="password" name="token" placeholder="Password" />
                 <br /> <br />
-        
+
                 <input type="submit" value="Login" />
             </form>
         </div>

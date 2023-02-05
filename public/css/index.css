@@ -182,3 +182,63 @@ tr:hover td {
 .search-highlight {
     background-color: #ebeba5;
 }
+
+
+/* Miniboard */
+#miniboard-render {
+    position: fixed;
+    z-index: 10;
+    opacity: 1.0;
+    background-color: #131516;
+    padding: 2rem;
+    overflow: scroll;
+
+    width: 85%;
+    height: 90%;
+
+    /* Center */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#miniboard-form-body {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    padding: 1rem;
+}
+
+#miniboard-form input {
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+.miniboard-form-group {
+    flex: 0 0 100%;
+    display: flex;
+    align-content: flex-start;
+    justify-content: flex-start;
+}
+
+.miniboard-form-entry {
+    margin: 1rem;
+}
+
+#miniboard-form-title {
+    padding: 0.4rem;
+}
+
+#miniboard-form-entry-name {
+    padding: 1rem;
+}
+
+
+/*Specific Form Formatting*/
+/* Person */
+.miniboard-form-group {
+    background-color: #1f262a;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+}

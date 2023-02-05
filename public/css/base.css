@@ -88,7 +88,7 @@ nav #logo {
     padding: 1rem;
 }
 
-#cover-entire-screen {
+.cover-entire-screen {
     background-color: rgb(31, 29, 29);
     opacity: 0.6;
     position: fixed;

@@ -28,7 +28,7 @@
 }
 
 /* Overrides to support background image */
-#cover-entire-screen {
+.cover-entire-screen {
     background-image: url("/public/img/login.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;

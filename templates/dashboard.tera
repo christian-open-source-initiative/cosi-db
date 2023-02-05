@@ -8,13 +8,21 @@
   <link rel="stylesheet" href="public/css/index.css"/>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
   <script src="public/js/jquery.js" charset="utf-8" ></script>
   <script src="public/js/searchmanager.js" charset="utf-8"></script>
   <script src="public/js/table.js" charset="utf-8"></script>
+
+  <script src="public/js/moment.locales.js" charset="utf-8"></script>
+  <script src="public/js/validate.min.js" charset="utf-8"></script>
+  <script src="public/js/miniboard.js" charset="utf-8"></script>
+
   <script src="public/js/dashboard.js" charset="utf-8"></script>
 </head>
 <body>
-    <div id="cover-entire-screen"></div>
+    <div id="miniboard-render"></div>
+    <div id="cover-entire-screen-miniboard" class="cover-entire-screen"></div>
+    <div id="cover-entire-screen-search" class="cover-entire-screen"></div>
 
     <a id="table-left-move-click" href="/">
       <div id="table-left">

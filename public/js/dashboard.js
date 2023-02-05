@@ -80,12 +80,19 @@ $(document).ready(() => {
     }
 
     // General setup.
+    // Miniboard for adding and updating actions.
+    let miniBoard = new MiniBoard(
+        $("#miniboard-render"),
+        $("#cover-entire-screen-miniboard")
+    );
+    miniBoard.addState(ACTION_UPDATE, new PersonState());
+
     // Hide search suggestions until user inputs.
     let searchManager = new SearchManager(
         $("#main-search-bar"),
         $("#search-suggestions"),
         $("#main-search-bar-submit"),
-        $("#cover-entire-screen")
+        $("#cover-entire-screen-search")
     );
 
     let table = new Table($("#data-table"));
