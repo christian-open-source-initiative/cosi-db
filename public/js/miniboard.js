@@ -154,7 +154,7 @@ class MiniBoard {
     getStateRender(state) {
         // Debug for creating default template.
         let result = "<form id='miniboard-form' action='/insert_person' method='post' novalidate>";
-        result += `<h1 id='miniboard-form-title'>Insert ${state._stateName}</h1>`
+        result += `<h1 id='miniboard-form-title'>Add New ${state._stateName}</h1>`
         result += "<div id='miniboard-form-body'>";
 
         let groupTrack = 0;
