@@ -115,7 +115,7 @@ $(document).ready(() => {
                 tbrClick.show();
             }
 
-            let totalData = totalPages * result["data"].length;
+            let totalData = result["total_result"];
             if (totalPages == 0) {
                 page = 0;
             } else {

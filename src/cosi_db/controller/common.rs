@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct PaginateData<T> {
     pub page: u64,
     pub total_pages: u64,
+    pub total_result: u64,
     pub data: Vec<T>,
 }
 
@@ -77,6 +78,7 @@ macro_rules! generate_pageable_getter {
                             serde_json::to_string(&PaginateData {
                                 page: page,
                                 total_pages: total_pages,
+                                total_result: total_result,
                                 data: data
                             }).unwrap()
                         )

@@ -71,6 +71,7 @@ describe("CRUD", () => {
         const returnKeys = [
             "page",
             "total_pages",
+            "total_result",
             "data"
         ];
         for (let endpoint of ALL_PAGEABLE_ENDPOINTS) {
@@ -110,6 +111,7 @@ describe("CRUD", () => {
                     expect(jsonData["page"]).toBe(0);
                     expect(Object.keys(jsonData["data"]).length).toBe(maxDatapoints);
                     expect(jsonData["total_pages"]).toBe(Math.ceil(totalDatapointsPerTable/maxDatapoints));
+                    expect(jsonData["total_result"]).toBe(totalDatapointsPerTable);
                 }
             });
 
@@ -121,7 +123,7 @@ describe("CRUD", () => {
                 let jsonData = JSON.parse(allData.text);
                 let totalPages = jsonData["total_pages"];
                 expect(totalPages).toBe(Math.ceil(totalDatapointsPerTable/maxDatapoints));
-
+                expect(jsonData["total_result"]).toBe(totalDatapointsPerTable);
             });
 
             test(`/${endpoint} No duplicate page data`, async() => {

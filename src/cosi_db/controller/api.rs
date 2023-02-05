@@ -21,7 +21,7 @@ use mongodb::Client;
 // cosi_db
 use crate::cosi_db::connection::COSIMongo;
 use crate::cosi_db::controller::common::PaginateData;
-use crate::cosi_db::errors::{COSIError, COSIResult};
+use crate::cosi_db::errors::COSIResult;
 use crate::cosi_db::model::auth::User;
 use crate::cosi_db::model::common::{COSICollection, Generator};
 
