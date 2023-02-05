@@ -12,6 +12,7 @@
   <script src="public/js/jquery.js" charset="utf-8" ></script>
   <script src="public/js/searchmanager.js" charset="utf-8"></script>
   <script src="public/js/table.js" charset="utf-8"></script>
+  <script src="public/js/actions.js" charset="utf-8"></script>
 
   <script src="public/js/moment.locales.js" charset="utf-8"></script>
   <script src="public/js/validate.min.js" charset="utf-8"></script>
@@ -84,6 +85,9 @@
     <div id="table-section">
         <h2 id="table-name"></h2>
         <h4 class="page-count"></h4>
+        <div id="action-toolbar" style="display:none;">
+          <button type="button" id="add-row" class="table-add-button">Add New</button>
+        </div>
 
         <div id="status"></div>
 

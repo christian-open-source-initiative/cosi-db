@@ -63,6 +63,8 @@ $(document).ready(() => {
     let tbrBackground = $("#table-right")
     let tbBackground = [tblBackground, tbrBackground];
     let incrementer = [-1, 1];
+
+    // Table navigation logic.
     for (let i = 0; i < tbClicks.length; ++i) {
         tbClicks[i].on("mouseover", function() {
             tbBackground[i].css("background-color", "#3d526e");
@@ -85,7 +87,7 @@ $(document).ready(() => {
         $("#miniboard-render"),
         $("#cover-entire-screen-miniboard")
     );
-    miniBoard.addState(ACTION_UPDATE, new PersonState());
+    let actionToolbar = new ActionToolbar(miniBoard, $("#action-toolbar"));
 
     // Hide search suggestions until user inputs.
     let searchManager = new SearchManager(
@@ -95,7 +97,7 @@ $(document).ready(() => {
         $("#cover-entire-screen-search")
     );
 
-    let table = new Table($("#data-table"));
+    let table = new Table(actionToolbar, $("#data-table"));
 
     // Logic to rerender the table by fetching data from endpoint.
     let updateTable = function(appendFilter = "", page=0) {

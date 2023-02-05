@@ -31,6 +31,26 @@ class MiniBoard {
 
         this.searchDarkener = searchDarkener;
         this.render = render;
+
+        // Used for clicking outside the element.
+        this.searchDarkener.click(() => {
+            this.confirmChanges();
+        });
+
+    }
+
+    confirmChanges() {
+        if (!this.isVisible)  {return false;}
+        let hasAllEmpty = true;
+        $("#miniboard-form input, #miniboard-form textarea, #miniboard-form select").each(function() {
+            hasAllEmpty &= $(this).val() == "";
+        });
+
+        if(hasAllEmpty || confirm("You have unsaved changes. Do you wish to discard?")) {
+            this.clearStates();
+            return true;
+        }
+        return false;
     }
 
     addState(action, state) {
@@ -39,6 +59,19 @@ class MiniBoard {
         state._action = action;
         this.states.push(state);
         this.updateDisplay();
+
+        $(window).bind("beforeunload", () => {
+            return "Have you considered saving?";
+        });
+    }
+
+    clearStates() {
+        this.render.html("");
+        this.displayOff();
+        this.states = [];
+        this.curForm = null;
+
+        $(window).bind("beforeunload", null);
     }
 
     updateDisplay() {
@@ -155,10 +188,13 @@ class MiniBoard {
     }
 
     displayOn() {
+        const fadein = 200;
+
         let curState = this.states[this.states.length - 1];
-        this.searchDarkener.show();
+        this.searchDarkener.fadeIn(fadein);
         this.render.append(this.getStateRender(curState));
-        this.render.show();
+        this.render.fadeIn(fadein);
+        this.isVisible = true;
 
         this.curForm = $("#miniboard-form")
         this.curForm.submit((ev) => {
@@ -183,5 +219,6 @@ class MiniBoard {
     displayOff() {
         this.render.hide();
         this.searchDarkener.hide();
+        this.isVisible = false;
     }
 }

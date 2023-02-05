@@ -18,8 +18,9 @@ let RENAME = {
 }
 
 class Table {
-    constructor(tableDiv) {
+    constructor(actionToolbar, tableDiv) {
         this.tableDiv = tableDiv
+        this.actionToolbar = actionToolbar;
 
         let prevRef = undefined;
         $("#data-table").on("click", "tr", function() {
@@ -98,6 +99,7 @@ class Table {
 
             $(row).attr("oid", oid);
         }
+        this.actionToolbar.showButtons();
         this.tableDiv.show(displaySpeed);
     }
 }
