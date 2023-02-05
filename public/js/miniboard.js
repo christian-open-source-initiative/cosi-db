@@ -71,6 +71,7 @@ class MiniBoard {
         }
 
         this.states.pop();
+        this.render.html("");
         this.updateDisplay();
     }
 
