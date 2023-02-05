@@ -21,108 +21,6 @@ validate.extend(validate.validators.datetime, {
   }
 });
 
-function FormStruct(stateName, constraints, groups=null, prefixHtml="") {
-    var fields = Object.keys(constraints);
-    var count = fields.length;
-    function constructor() {
-        for (var i = 0; i < count; ++i) {
-            if (i < arguments.length) {
-                this[fields[i]] = arguments[i];
-            }
-            else {
-                // Set default argument value instead.
-                this[fields[i]] = ""
-            }
-        }
-        // internal field names tracker.
-        this._fieldNames = fields;
-        this._stateName = stateName;
-
-        // Internal tracker that should be set.
-        this._action = null;
-        this._constraints = constraints;
-        this._groups = groups != null ? groups : [count];
-
-        // For use on special things like profile pics, etc.
-        this.prefixHtml = prefixHtml;
-
-        this.equals = (other) => {
-            for (var i = 0; i < count; ++i) {
-                if (this[fields[i]] != other[fields[i]]) {
-                    return false;
-                }
-            }
-            return true;
-        };
-    }
-    return constructor;
-}
-
-// State for tracking people.
-let PersonState = FormStruct(
-    "Person",
-    {
-        "first_name": {
-            presence: {allowEmpty: false},
-            length: {
-                maximum: 30
-            }
-        },
-        "middle_name": {
-            presence: false,
-            length: {
-                maximum: 30
-            }
-        },
-        "last_name": {
-            presence: {allowEmpty: false},
-            length: {
-                maximum: 30
-            }
-        },
-        "nicks": {
-            presence: false,
-            length: {
-                maximum: 30
-            }
-        },
-        "sex": {
-            presence: false
-        },
-        "dob": {
-            presence: false
-        },
-        "home_phone": {
-            presence: false,
-            numericality: true,
-            length: {
-                maximum: 30
-            }
-        },
-        "work_phone": {
-            presence: false,
-            numericality: true,
-            length: {
-                maximum: 30
-            }
-        },
-        "mobile_phone": {
-            presence: false,
-            numericality: true,
-            length: {
-                maximum: 30
-            }
-        },
-        "emergency": {
-            presence: false
-        },
-        "notes": {
-            presence: false
-        },
-    },
-    [4, 6, 9, 11]
-);
-
 // Mini board consists of the render itself
 // as well as the state bar at the top.
 class MiniBoard {
@@ -169,9 +67,11 @@ class MiniBoard {
         result += "<div id='miniboard-form-body'>";
 
         let groupTrack = 0;
+        const textAreaThreshold = 256;
         let formName = state._stateName.toLowerCase();
         result += `<div id='miniboard-form-group-${formName}-${groupTrack}' class='miniboard-form-group'>`;
         state._fieldNames.forEach((field, idx) => {
+            let constraint = state._constraints[field];
             let g = state._groups[groupTrack];
             if (idx >= g) {
                 groupTrack += 1;
@@ -189,12 +89,22 @@ class MiniBoard {
             result += "</h2>"
 
             let extraStyle = "";
-            let lengthMeta = state._constraints[field].length;
+            let lengthMeta = constraint.length;
             if (lengthMeta != null) {
                 let maxLength = lengthMeta.maximum ? lengthMeta.maximum : 20;
-                extraStyle += `width: ${maxLength}rem;`;
+                if (maxLength <= textAreaThreshold) {
+                    extraStyle += `width: ${maxLength}rem;`;
+                }
             }
-            result += `<input style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='text' placeholder='${field}' name='${field}' />`;
+
+            // Different inputs for each validator.
+            if (constraint.datetime && constraint.datetime.dateOnly) {
+                result += `<input style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='date' placeholder='${field}' name='${field}' />`;
+            } else if(constraint.length && constraint.length.maximum > textAreaThreshold) {
+                result += `<textarea style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='textarea' placeholder='${field}' name='${field}'></textarea>`;
+            } else {
+                result += `<input style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='text' placeholder='${field}' name='${field}' />`;
+            }
             result += `</div>` // close form entry.
         });
 
@@ -206,6 +116,7 @@ class MiniBoard {
     }
 
     updateAllStatusForInput(errors) {
+        // Used for finalizing the form.
         $.each(errors, (name, errVal) => {
             this.updateStatusForInput(errVal, name, true);
         });
@@ -215,7 +126,7 @@ class MiniBoard {
         // finalize allows for check of blank input for form.
         // which we normally don't check by default.
         //
-        let inputDom = $(`input[name="${inputName}"]`);
+        let inputDom = $(`input[name="${inputName}"], textarea[name="${inputName}"]`);
         let msgDom = $(`.error-msg[name="${inputName}"]`);
         msgDom.remove();
         inputDom.removeClass("has-error");
@@ -234,12 +145,12 @@ class MiniBoard {
 
     _handleFormSubmit() {
       // validate the form against the constraints
-      let errors = validate(this.curForm, this.states[this.states.length-1]._constraints) || {};
-      console.log(errors);
+      let errors = validate(this.curForm, this.states[this.states.length-1]._constraints);
       // then we update the form to reflect the results
-      this.updateAllStatusForInput(errors);
-      if (errors) {
-
+      if (!errors) {
+        this.curForm.submit();
+      } else {
+        this.updateAllStatusForInput(errors);
       }
     }
 

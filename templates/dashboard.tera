@@ -15,6 +15,7 @@
 
   <script src="public/js/moment.locales.js" charset="utf-8"></script>
   <script src="public/js/validate.min.js" charset="utf-8"></script>
+  <script src="public/js/forms.js" charset="utf-8"></script>
   <script src="public/js/miniboard.js" charset="utf-8"></script>
 
   <script src="public/js/dashboard.js" charset="utf-8"></script>

@@ -209,6 +209,11 @@ tr:hover td {
     padding: 1rem;
 }
 
+#miniboard-form-body textarea {
+    min-height: 10rem;
+    min-width: 35rem;
+}
+
 #miniboard-form input {
     padding: 12px 20px;
     margin: 8px 0;
