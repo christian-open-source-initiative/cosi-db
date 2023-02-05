@@ -164,12 +164,14 @@ $(document).ready(() => {
     $("#people-select").on("click", () => {
         tableTrack = PEOPLE_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new PersonState());
         updateTable();
     });
 
     $("#group-select").on("click", () => {
         tableTrack = GROUP_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new GroupState());
         updateTable();
     });
 

@@ -127,3 +127,15 @@ let PersonState = FormStruct(
     },
     [4, 6, 10, 11]
 );
+
+let GroupState = FormStruct(
+    "Group",
+    {
+        "group_name": {
+            presence: true
+        },
+        "group_desc": {
+            presence: true
+        }
+    }
+);

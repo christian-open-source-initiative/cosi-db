@@ -8,11 +8,17 @@ class ActionToolbar {
         this.miniboard = miniboard;
         this.selected = [];
         this.displayButtons = false;
+        // Should be an instance of FormStruct
+        this.state = null;
 
         $("#add-row").click(() => {
             if (!this.displayButtons) { return ;}
-            this.miniboard.addState(ACTION_UPDATE, new PersonState());
+            this.miniboard.addState(ACTION_INSERT, this.state);
         });
+    }
+
+    setState(state) {
+        this.state = state;
     }
 
     showButtons() {

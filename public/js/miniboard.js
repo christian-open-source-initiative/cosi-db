@@ -117,13 +117,13 @@ class MiniBoard {
 
     getStateRender(state) {
         // Debug for creating default template.
-        let result = "<form id='miniboard-form' action='/insert_person' method='post' novalidate>";
+        let formName = state._stateName.toLowerCase();
+        let result = `<form id='miniboard-form' action='/insert_${formName}' method='post' novalidate>`;
         result += `<h1 id='miniboard-form-title'>Add New ${state._stateName}</h1>`
         result += "<div id='miniboard-form-body'>";
 
         let groupTrack = 0;
         const textAreaThreshold = 256;
-        let formName = state._stateName.toLowerCase();
         result += `<div id='miniboard-form-group-${formName}-${groupTrack}' class='miniboard-form-group'>`;
         state._fieldNames.forEach((field, idx) => {
             let constraint = state._constraints[field];
