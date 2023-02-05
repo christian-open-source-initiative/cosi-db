@@ -93,13 +93,25 @@ let PersonState = FormStruct(
             presence: false
         },
         "home_phone": {
-            presence: false
+            presence: false,
+            numericality: true,
+            length: {
+                maximum: 30
+            }
         },
         "work_phone": {
-            presence: false
+            presence: false,
+            numericality: true,
+            length: {
+                maximum: 30
+            }
         },
         "mobile_phone": {
-            presence: false
+            presence: false,
+            numericality: true,
+            length: {
+                maximum: 30
+            }
         },
         "emergency": {
             presence: false
@@ -193,28 +205,22 @@ class MiniBoard {
         return result;
     }
 
-    showErrors(errors) {
-        inputs = this.curForm.find("input");
-        errors.forEach((name, idx) => {
-            let errVal = errors[name];
-
-            let dom = $("input");
-            if (errVal) {
-                dom.addClass("has-error");
-
-            } else {
-                dom.addClass("has-success");
-            }
+    updateAllStatusForInput(errors) {
+        $.each(errors, (name, errVal) => {
+            this.updateStatusForInput(errVal, name, true);
         });
     }
 
-    updateStatusForInput(error, inputName) {
+    updateStatusForInput(error, inputName, finalize=false) {
+        // finalize allows for check of blank input for form.
+        // which we normally don't check by default.
+        //
         let inputDom = $(`input[name="${inputName}"]`);
         let msgDom = $(`.error-msg[name="${inputName}"]`);
         msgDom.remove();
         inputDom.removeClass("has-error");
         inputDom.removeClass("has-success");
-        if (inputDom.val() == "") {
+        if (!finalize && inputDom.val() == "") {
             // Don't color if no input.
             return;
         }
@@ -228,9 +234,13 @@ class MiniBoard {
 
     _handleFormSubmit() {
       // validate the form against the constraints
-      let errors = validate(this.curForm, this.states[this.states.length-1]._constraints);
+      let errors = validate(this.curForm, this.states[this.states.length-1]._constraints) || {};
+      console.log(errors);
       // then we update the form to reflect the results
-      this.showErrors(errors || {});
+      this.updateAllStatusForInput(errors);
+      if (errors) {
+
+      }
     }
 
     displayOn() {

@@ -223,6 +223,7 @@ tr:hover td {
     align-content: flex-start;
     flex-flow: row wrap;
     justify-content: flex-start;
+    padding: 1rem;
 }
 
 .miniboard-form-entry {
