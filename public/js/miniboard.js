@@ -106,16 +106,6 @@ class MiniBoard {
         }
     }
 
-    _getStateRender(state) {
-        let xmlhttp = new XMLHttpRequest();
-        xmlhttp.open("GET", "public/forms/person_form.html", false);
-        xmlhttp.send();
-        if (xmlhttp.status == 200) {
-            return xmlhttp.responseText;
-        }
-        return "An error occurred, please try again."
-    }
-
     getStateRender(state) {
         // Debug for creating default template.
         let formName = state._stateName.toLowerCase();
