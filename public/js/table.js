@@ -27,9 +27,11 @@ class Table {
             if (prevRef !== undefined) {
                 prevRef.removeClass("hover-click-highlight");
             }
-            let tds = $(`[oid=${$(this).attr("oid")}] td`)
+            let oid = $(this).attr("oid");
+            let tds = $(`[oid=${oid}] td`)
             tds.addClass("hover-click-highlight");
             prevRef = tds;
+            actionToolbar.setSelected(oid);
         });
     }
 
@@ -90,7 +92,7 @@ class Table {
                     $(row.insertCell(-1)).html(finalRender).attr("entry-name", k);
                 } else {
                     if (Array.isArray(value)) {
-                        $(row.insertCell(-1)).html(value.join(",")).attr("entry-name", k);
+                        $(row.insertCell(-1)).html(JSON.stringify(value)).attr("entry-name", k);
                     } else {
                         let v = "";
                         if (value != null) {
@@ -104,6 +106,7 @@ class Table {
             $(row).attr("oid", oid);
         }
         this.actionToolbar.showButtons();
+        this.actionToolbar.setSelected(null);
         this.tableDiv.fadeIn(displaySpeed);
     }
 }

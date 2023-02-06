@@ -21,6 +21,16 @@ validate.extend(validate.validators.datetime, {
   }
 });
 
+function escapeHtml(unsafe)
+{
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
 // Mini board consists of the render itself
 // as well as the state bar at the top.
 class MiniBoard {
@@ -42,11 +52,15 @@ class MiniBoard {
     confirmChanges() {
         if (!this.isVisible)  {return false;}
         let hasAllEmpty = true;
+        let allSameToOriginal = true;
+        let curState = this.states[this.states.length - 1];
         $("#miniboard-form input[type='text'], #miniboard-form textarea").each(function() {
-            hasAllEmpty &= $(this).val() == "";
+            let dom = $(this);
+            hasAllEmpty &= dom.val() == "";
+            allSameToOriginal &= dom.val() == curState[dom.attr("name")];
         });
 
-        if(hasAllEmpty || confirm("You have unsaved changes. Do you wish to discard?")) {
+        if(hasAllEmpty || allSameToOriginal || confirm("You have unsaved changes. Do you wish to discard?")) {
             this.clearStates();
             return true;
         }
@@ -109,13 +123,21 @@ class MiniBoard {
     getStateRender(state) {
         // Debug for creating default template.
         let formName = state._stateName.toLowerCase();
-        let result = `<form id='miniboard-form' action='/insert_${formName}' method='post' novalidate>`;
-        result += `<h1 id='miniboard-form-title'>Add New ${state._stateName}</h1>`
+        let action = state._action;
+        let result = "";
+        if (action == "insert") {
+            result += `<form id='miniboard-form' action='/insert_${formName}' method='post' novalidate>`;
+            result += `<h1 id='miniboard-form-title'>Add New ${state._stateName}</h1>`
+        } else {
+            result += `<form id='miniboard-form' action='/update_${formName}?oid=${state._oid}' method='post' novalidate>`;
+            result += `<h1 id='miniboard-form-title'>Update ${state._stateName}</h1>`
+        }
         result += "<div id='miniboard-form-body'>";
 
         let groupTrack = 0;
         const textAreaThreshold = 256;
         result += `<div id='miniboard-form-group-${formName}-${groupTrack}' class='miniboard-form-group'>`;
+
         state._fieldNames.forEach((field, idx) => {
             let constraint = state._constraints[field];
             let custom = state._custom[field] || {};
@@ -138,21 +160,27 @@ class MiniBoard {
             let extraStyle = "";
             let lengthMeta = constraint.length;
             if (lengthMeta != null) {
-                let maxLength = lengthMeta.maximum ? lengthMeta.maximum : 20;
+                let maxLength = lengthMeta.maximum ? Math.min(lengthMeta.maximum, 50) : 20;
                 if (maxLength <= textAreaThreshold) {
                     extraStyle += `width: ${maxLength * 0.75}rem;`;
                 }
             }
 
             // Different inputs for each validator.
-            let defStyle = `style="${extraStyle}" class="miniboard-form-input" id="miniboard-form-input-${field}" name="${field}"`
+            let defStyle = `style="${extraStyle}" class="miniboard-form-input" id="miniboard-form-input-${field}" name="${field}"`;
+            let defValue = "";
+            if (state[field]) {
+                defValue = `value="${escapeHtml(state[field])}"`;
+            }
+
             if (constraint.datetime && constraint.datetime.dateOnly) {
-                result += `<input ${defStyle} type='date' placeholder='${field}' />`;
+                result += `<input ${defStyle} type='date' placeholder='${field}' ${defValue}/>`;
             } else if (constraint.datetime) {
-                result += `<input ${defStyle} type='datetime-local' placeholder='${field}' />`;
+                result += `<input ${defStyle} type='datetime-local' placeholder='${field}' ${defValue} />`;
             } else if(constraint.length && constraint.length.maximum > textAreaThreshold) {
-                result += `<textarea ${defStyle} type='textarea' placeholder='${field}'></textarea>`;
+                result += `<textarea ${defStyle} type='textarea' placeholder='${field}' ${defValue}></textarea>`;
             } else if(custom.options) {
+                // Options expansion.
                 result += `<select ${defStyle} type='select' placeholder='${field}'>`;
                 if (custom.nullable) {
                     result += `<option disabled selected value>--no-option--</option>`
@@ -162,6 +190,7 @@ class MiniBoard {
                 });
                 result += `</select>`
             } else if (custom.checklist) {
+                // Checklist expansion.
                 result += `<div class="miniform-form-checkbox">`
                 custom.checklist.forEach((opt) => {
                     result += `<div class="miniform-form-checkbox-option">`
@@ -172,7 +201,7 @@ class MiniBoard {
                 result += `</div>`
             }
             else {
-                result += `<input ${defStyle} type='text' placeholder='${field}'/>`;
+                result += `<input ${defStyle} type='text' placeholder='${field}' ${defValue}/>`;
             }
             result += `</div>` // close form entry.
         });
@@ -180,7 +209,11 @@ class MiniBoard {
         result += "</div>"; // close form group
         result += "</div>"; // close form body
         result += "<div id='miniboard-form-status'></div>"
-        result += "<input type='submit' value='Add'/>"
+        if (action == "insert") {
+            result += "<input type='submit' value='Add'/>"
+        } else {
+            result += "<input type='submit' value='Update'/>"
+        }
         result += "</form>"; // close form
         return result;
     }
@@ -239,7 +272,6 @@ class MiniBoard {
                 this.popState();
             },
             error: (response) => {
-                console.log(response);
                 if (response.responseJSON) {
                     this.updateStatus(`Error adding data: ${response.responseJSON["err"]}`, true)
                 } else {

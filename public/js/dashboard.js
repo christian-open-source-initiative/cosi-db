@@ -134,6 +134,14 @@ $(document).ready(() => {
         });
     };
 
+    let getStateClass = (name) => {
+        if (name == "Address") { return AddressState}
+        else if (name == "Person") { return PersonState}
+        else if (name == "Group") { return GroupState}
+        else if (name == "Event") { return EventState}
+        // else if ("Household") { return new HouseholdState(param)}
+    }
+
     // Register callbacks.
     // TODO: Not sure how to encapsulate this when ownership of table state is elsewhere.
     // Reaction to clicking search suggestions.
@@ -144,6 +152,11 @@ $(document).ready(() => {
         let tableName = $(this).children(".search-suggestion-table").attr("table");
 
         tableTrack = R_ENDPOINT[tableName.toLowerCase()];
+
+        // update action toolbar
+        actionToolbar.setState(getStateClass(tableName));
+
+        // get table value
         updateTable(`&${entry}=${fullMatch}`);
         $("#main-search-bar").val("");
         searchManager.determineHide();
@@ -152,7 +165,7 @@ $(document).ready(() => {
     $("#address-select").on("click", () => {
         tableTrack = ADDRESS_TABLE_IDX;
         CURRENT_PAGE = 0;
-        actionToolbar.setState(new AddressState());
+        actionToolbar.setState(getStateClass("Address"));
         updateTable();
     });
 
@@ -165,21 +178,21 @@ $(document).ready(() => {
     $("#people-select").on("click", () => {
         tableTrack = PEOPLE_TABLE_IDX;
         CURRENT_PAGE = 0;
-        actionToolbar.setState(new PersonState());
+        actionToolbar.setState(getStateClass("Person"));
         updateTable();
     });
 
     $("#group-select").on("click", () => {
         tableTrack = GROUP_TABLE_IDX;
         CURRENT_PAGE = 0;
-        actionToolbar.setState(new GroupState());
+        actionToolbar.setState(getStateClass("Group"));
         updateTable();
     });
 
     $("#event-select").on("click", () => {
         tableTrack = EVENT_TABLE_IDX;
         CURRENT_PAGE = 0;
-        actionToolbar.setState(new EventState());
+        actionToolbar.setState(getStateClass("Event"));
         updateTable();
     });
 
