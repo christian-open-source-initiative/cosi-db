@@ -71,6 +71,7 @@ describe("CRUD", () => {
         const returnKeys = [
             "page",
             "total_pages",
+            "total_result",
             "data"
         ];
         for (let endpoint of ALL_PAGEABLE_ENDPOINTS) {
@@ -81,13 +82,13 @@ describe("CRUD", () => {
                                         .query({page: 0})
                                         .expect(200)
                                         .expect("Content-Type", /json/);
-    
+
                 // Further data verification.
                 let jsonData = JSON.parse(response.text);
                 expectKeys(jsonData, returnKeys);
                 expect(Object.keys(jsonData["data"]).length).toBe(maxDatapoints);
             });
-    
+
             test(`/${endpoint} Empty page load`, async() => {
                 const allData = await cosiRequest
                                         .get(`/${endpoint}`)
@@ -97,7 +98,7 @@ describe("CRUD", () => {
                 let jsonData = JSON.parse(allData.text);
                 expect(Object.keys(jsonData["data"]).length).toBe(0);
             });
-    
+
             test(`/${endpoint} Invalid page load`, async() => {
                 const fakePages = ["cosi", "-1", "!@#$%^&*()-_+=`"];
                 for (const page of fakePages){
@@ -110,9 +111,10 @@ describe("CRUD", () => {
                     expect(jsonData["page"]).toBe(0);
                     expect(Object.keys(jsonData["data"]).length).toBe(maxDatapoints);
                     expect(jsonData["total_pages"]).toBe(Math.ceil(totalDatapointsPerTable/maxDatapoints));
+                    expect(jsonData["total_result"]).toBe(totalDatapointsPerTable);
                 }
             });
-    
+
             test(`/${endpoint} Correct page count`, async() => {
                 const allData = await cosiRequest
                                         .get(`/${endpoint}`)
@@ -121,9 +123,9 @@ describe("CRUD", () => {
                 let jsonData = JSON.parse(allData.text);
                 let totalPages = jsonData["total_pages"];
                 expect(totalPages).toBe(Math.ceil(totalDatapointsPerTable/maxDatapoints));
-    
+                expect(jsonData["total_result"]).toBe(totalDatapointsPerTable);
             });
-    
+
             test(`/${endpoint} No duplicate page data`, async() => {
                 let pages = [];
                 // Concatenate all data to single array
@@ -140,9 +142,9 @@ describe("CRUD", () => {
                 // of the set should the the same as the length of the array.
                 let page_set = new Set(pages);
                 expect(pages.length).toBe(page_set.size);
-    
+
             });
-    
+
             test(`/${endpoint} load < 100ms`, async() => {
                 // Assert that all tables can load data page in < 350ms
                 let start_time = Date.now();
@@ -172,12 +174,13 @@ describe("CRUD", () => {
     });
 
     // Insert after getters so it doesn't change the get count.
+    // Track an instance of inserted jsons for later usage.
+    let modifyLater = []
     describe("Verify Setters", () => {
         let verifyData = (data) => {
             let jData = JSON.parse(data);
+            modifyLater.push(jData);
             expectKeys(jData, ["$oid"]);
-
-            
         };
 
         const endpointPerson = "insert_person";
@@ -216,6 +219,25 @@ describe("CRUD", () => {
                                     });
 
             verifyData(response.text);
+        });
+    });
+
+    const updatePerson = "update_person"
+    describe("Verify Updaters", () => {
+        test(`/${updatePerson} POST`, async () => {
+            const response = await cosiRequest
+                                    .post(`/${updatePerson}`)
+                                    .type("form")
+                                    .query({
+                                        oid: modifyLater[0]["$oid"]
+                                    })
+                                    .send({
+                                        "city": "HOPE",
+                                    })
+                                    .expect(200);
+
+            let jData = JSON.parse(response.text);
+            console.log(jData);
         });
     });
 });

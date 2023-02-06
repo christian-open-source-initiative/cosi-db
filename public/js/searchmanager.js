@@ -1,3 +1,7 @@
+/**
+ * Logic for handling search bar at the top, in charge of
+ * also making sure the search bar will have a proper drop-down window.
+ */
 class SearchManager {
     constructor(searchBar, searchSuggestion, searchButton, searchDarkener) {
         this.searchBar = searchBar;
@@ -31,7 +35,7 @@ class SearchManager {
 
         // We only want to hid if user focuses and already typed.
         this.searchBar.focus(this.determineHide.bind(this));
-        this.searchBar.blur(() => { 
+        this.searchBar.blur(() => {
             // Provide some delay for click on suggestions. A bit hacky. TODO: Add selection tracking aware.
             setTimeout(() => {this.searchDarkener.hide(); this.searchSuggestion.hide()}, 100);
         });

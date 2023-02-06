@@ -8,13 +8,23 @@
   <link rel="stylesheet" href="public/css/index.css"/>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
   <script src="public/js/jquery.js" charset="utf-8" ></script>
   <script src="public/js/searchmanager.js" charset="utf-8"></script>
   <script src="public/js/table.js" charset="utf-8"></script>
+  <script src="public/js/actions.js" charset="utf-8"></script>
+
+  <script src="public/js/moment.locales.min.js" charset="utf-8"></script>
+  <script src="public/js/validate.min.js" charset="utf-8"></script>
+  <script src="public/js/forms.js" charset="utf-8"></script>
+  <script src="public/js/miniboard.js" charset="utf-8"></script>
+
   <script src="public/js/dashboard.js" charset="utf-8"></script>
 </head>
 <body>
-    <div id="cover-entire-screen"></div>
+    <div id="miniboard-render"></div>
+    <div id="cover-entire-screen-miniboard" class="cover-entire-screen"></div>
+    <div id="cover-entire-screen-search" class="cover-entire-screen"></div>
 
     <a id="table-left-move-click" href="/">
       <div id="table-left">
@@ -59,7 +69,7 @@
           <div id="search-suggestions">Search suggestions</div>
         </div>
         <br /> <br />
-    
+
         <!-- Table Selection -->
         Or select a table to view:
         <br /> <br />
@@ -69,15 +79,21 @@
         <button type="button" id="group-select" class="table-selection-button">Group Table</button>
         <button type="button" id="event-select" class="table-selection-button">Event Table</button>
 
+
+      </div>
+    </div>
+    <div id="table-section">
         <h2 id="table-name"></h2>
         <h4 class="page-count"></h4>
-    
+        <div id="action-toolbar" style="display:none;">
+          <button type="button" id="add-row" class="table-add-button">Add New</button>
+        </div>
+
         <div id="status"></div>
-    
+
         <div id="loading">Now loading...</div>
         <table id="data-table"></table>
         <h4 class="page-count"></h4>
-      </div>
     </div>
 </body>
 </html>

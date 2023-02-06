@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct PaginateData<T> {
     pub page: u64,
     pub total_pages: u64,
+    pub total_result: u64,
     pub data: Vec<T>,
 }
 
@@ -77,6 +78,7 @@ macro_rules! generate_pageable_getter {
                             serde_json::to_string(&PaginateData {
                                 page: page,
                                 total_pages: total_pages,
+                                total_result: total_result,
                                 data: data
                             }).unwrap()
                         )
@@ -109,6 +111,38 @@ macro_rules! generate_pageable_inserter {
                             },
                             Err(err) => {
                                 Custom(Status::BadRequest, RawJson(format!("{{\"err\": \"{}\"}}", err)))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! generate_pageable_update {
+    ($T:ident) => {
+        $crate::paste::paste! {
+            $crate::with_builtin_macros::with_builtin!{
+                let $v_path = concat!("/update_", stringify!([<$T: lower>]), "?<oid>") in {
+                    #[post($v_path, data="<update_query>")]
+                    pub async fn [<update_ $T:lower>](_user: User, connect: Connection<COSIMongo>, oid: String, update_query: Form<HashMap<String, String>>) -> Custom<RawJson<String>> {
+                        let client: &Client = &*connect;
+                        // update_query has to be a type of HashMap as we would like the user to update
+                        // to null (thus the form has to be nullable) but we don't want update if the form value is not present
+                        // e.g. the value is not given. As a result, we cannot use FromForm auto-parsing.
+                        let raw_data: HashMap<String, String> = update_query.into_inner();
+                        let bson_data = to_bson(&raw_data).unwrap();
+                        let result: COSIResult<u64> = $T::update_datum(client, &doc!{"_id": ObjectId::from_str(&oid).unwrap()}, &doc!{"$set": bson_data}, None).await;
+                        match result {
+                            Ok(update_count) => {
+                                return Custom(Status::Ok, RawJson(
+                                    serde_json::to_string(&update_count).unwrap()
+                                ));
+                            },
+                            Err(_) => {
+                                return Custom(Status::BadRequest, RawJson("{\"err\": \"Invalid id given.\"}".to_string()))
                             }
                         }
                     }

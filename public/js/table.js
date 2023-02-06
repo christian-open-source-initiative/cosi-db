@@ -6,9 +6,21 @@ FOREIGN["household"] = {
     "address": ["line_one", "line_two", "line_three"]
 };
 
+// Special header renames to make things easier to read.
+let RENAME = {
+    "emergency_contact": "emergency",
+    "first_name": "first",
+    "middle_name": "middle",
+    "last_name": "last",
+    "home_phone": "home",
+    "work_phone": "work",
+    "mobile_phone": "mobile"
+}
+
 class Table {
-    constructor(tableDiv) {
+    constructor(actionToolbar, tableDiv) {
         this.tableDiv = tableDiv
+        this.actionToolbar = actionToolbar;
 
         let prevRef = undefined;
         $("#data-table").on("click", "tr", function() {
@@ -22,7 +34,7 @@ class Table {
     }
 
     render(tableName, data) {
-        const displaySpeed = 1000;
+        const displaySpeed = 200;
         this.tableDiv.hide().empty();
         if (data.length == 0) {
             this.tableDiv.html("No Data!");
@@ -36,7 +48,8 @@ class Table {
         let keys = Object.keys(data[0]);
         for (let h = 0; h < keys.length; ++h) {
             if (keys[h] == "_id") { continue; }
-            headerRow.append($("<th>").html(keys[h]));
+            let rename = keys[h] in RENAME ? RENAME[keys[h]] : keys[h];
+            headerRow.append($("<th>").html(rename));
         }
 
         // Body generate.
@@ -50,7 +63,7 @@ class Table {
                 let value = data[i][k];
                 if (k == "_id") {
                     oid = value["$oid"];
-                    continue; 
+                    continue;
                 } else if (k in foreignKeys) {
                     let externalKeys = foreignKeys[k]
                     let extValue = value;
@@ -77,15 +90,20 @@ class Table {
                     $(row.insertCell(-1)).html(finalRender).attr("entry-name", k);
                 } else {
                     if (Array.isArray(value)) {
-                        $(row.insertCell(-1)).html(JSON.stringify(value)).attr("entry-name", k);
+                        $(row.insertCell(-1)).html(value.join(",")).attr("entry-name", k);
                     } else {
-                        $(row.insertCell(-1)).html(decodeURIComponent(value)).attr("entry-name", k);
+                        let v = "";
+                        if (value != null) {
+                            v = decodeURIComponent(value);
+                        }
+                        $(row.insertCell(-1)).html(v).attr("entry-name", k);
                     }
                 }
             }
 
             $(row).attr("oid", oid);
         }
-        this.tableDiv.show(displaySpeed);
+        this.actionToolbar.showButtons();
+        this.tableDiv.fadeIn(displaySpeed);
     }
 }

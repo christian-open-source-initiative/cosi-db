@@ -208,10 +208,16 @@ where
         query: &Document,
         data: &Document,
         options: Option<UpdateOptions>,
-    ) -> COSIResult<Option<Bson>> {
+    ) -> COSIResult<u64> {
         let col = Self::get_collection(client).await;
         let result = col.update_one(query.clone(), data.clone(), options).await?;
-        return Ok(result.upserted_id);
+        if result.matched_count == result.modified_count {
+            return Ok(result.matched_count);
+        } else if let Some(_) = result.upserted_id {
+            return Ok(1);
+        } else {
+            return Err(COSIError::msg("No data was updated."));
+        }
     }
 
     async fn process_foreign_keys<'b>(_client: &'b Client, _raw_doc: &'b mut Vec<Document>) {}

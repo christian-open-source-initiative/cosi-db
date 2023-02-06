@@ -6,22 +6,20 @@
 #data-table {
     border-collapse: collapse;
     margin: auto;
-    overflow:hidden;
+    overflow: hidden;
     border-radius: 10px 10px 0 0;
 }
 
 #data-table th {
     background-color: #1B2430;
     color: #e9e9d8;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding: 2rem 1rem;
 }
 
 #data-table td {
     color: #d4d4b6;
     border: 1px solid #1B2430;
     padding: 15px;
-    min-width: 3rem;
 }
 
 #data-table tr {
@@ -104,6 +102,9 @@ tr:hover td {
     color: white;
 }
 
+#table-section {
+    padding: 1rem;
+}
 
 /* Search bar! */
 #search-bar-div {
@@ -180,4 +181,120 @@ tr:hover td {
 
 .search-highlight {
     background-color: #ebeba5;
+}
+
+/* Actiono Row */
+#add-row {
+    border-radius: 5px;
+    border-style: none;
+    font-size: 1rem;
+    height: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: #efd73e;
+}
+
+/* Miniboard */
+#miniboard-render {
+    position: fixed;
+    z-index: 10;
+    opacity: 1.0;
+    background-color: #131516;
+    padding: 2rem;
+    overflow: scroll;
+
+    width: 85%;
+    height: 90%;
+
+    /* Center */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#miniboard-form-body {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    padding: 1rem;
+}
+
+#miniboard-form-body textarea {
+    min-height: 10rem;
+    min-width: 35rem;
+}
+
+#miniboard-form input, #miniboard-form select {
+    padding: 10px 18px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1.2rem;
+}
+
+.miniboard-form-group {
+    flex: 0 0 100%;
+    display: flex;
+    align-content: flex-start;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    padding: 1rem;
+}
+
+.miniboard-form-entry {
+    margin: 1rem;
+}
+
+#miniboard-form-title {
+    padding: 0.4rem;
+}
+
+#miniboard-form-entry-name {
+    padding: 1rem;
+}
+
+.miniboard-form-required-asterisk {
+    color:red;
+    display:inline;
+    font-size:0.8rem;
+    position:relative;
+    top:-4px;
+}
+
+.has-error {
+    border-color: red !important;
+    box-shadow: 0 0 3px red;
+}
+
+.error-msg {
+    color: red;
+}
+
+.success-msg {
+    color: green;
+}
+
+.has-success {
+    border-color: green !important;
+    box-shadow: 0 0 5px green;
+}
+
+.miniform-form-checkbox-option {
+    display: inline;
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+.miniform-form-checkbox-option input {
+    margin-left: 0.5rem !important;
+    height: 1.3rem;
+    width: 1.3rem;
+}
+
+/*Specific Form Formatting*/
+.miniboard-form-group {
+    background-color: #1f262a;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
 }

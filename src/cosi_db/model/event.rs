@@ -8,6 +8,7 @@ use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 use std::cmp;
 
+use names::Name;
 use rocket::form::{FromForm, FromFormField};
 use rocket::futures::TryStreamExt;
 
@@ -38,38 +39,42 @@ pub enum Days {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Event {
+    pub name: String,
     pub meeting_days: Vec<Days>,
     pub start_datetime: NaiveDateTime,
     pub end_datetime: Option<NaiveDateTime>,
-    pub freq: u8,
+    pub freq: Option<u8>,
     pub reoccuring: Option<Reoccurring>,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct EventImpl {
+    pub name: String,
     pub meeting_days: Vec<Days>,
     pub start_datetime: String,
     pub end_datetime: Option<String>,
-    pub freq: u8,
+    pub freq: Option<u8>,
     pub reoccuring: Option<Reoccurring>,
 }
 
 #[derive(Clone, Debug, Deserialize, FromForm, Serialize)]
 pub struct EventOptional {
+    pub name: Option<String>,
     pub meeting_days: Option<Vec<Days>>,
     pub start_datetime: Option<String>,
     pub end_datetime: Option<Option<String>>,
-    pub freq: Option<u8>,
+    pub freq: Option<Option<u8>>,
     pub reoccuring: Option<Reoccurring>,
 }
 
 impl Default for Event {
     fn default() -> Self {
         Event {
+            name: "".to_string(),
             meeting_days: vec![],
             start_datetime: NaiveDate::from_ymd(2020, 6, 7).and_hms(7, 7, 7),
             end_datetime: None,
-            freq: 0,
+            freq: None,
             reoccuring: None,
         }
     }
@@ -78,6 +83,7 @@ impl Default for Event {
 impl From<Event> for EventImpl {
     fn from(e: Event) -> EventImpl {
         EventImpl {
+            name: e.name.clone(),
             meeting_days: e.meeting_days,
             start_datetime: e.start_datetime.to_string(),
             end_datetime: e.end_datetime.map(|x| x.to_string()),
@@ -92,6 +98,7 @@ impl From<EventImpl> for Event {
         let parse_date_str =
             |v: &str| NaiveDateTime::parse_from_str(v, "%Y-%m-%d %H:%M:%S").unwrap();
         Event {
+            name: e.name.clone(),
             meeting_days: e.meeting_days,
             start_datetime: parse_date_str(&e.start_datetime),
             end_datetime: e.end_datetime.map(|x| parse_date_str(&x)),
@@ -123,14 +130,18 @@ impl Generator<Event> for Event {
                 .and_hms(7, 7, 7)
         };
 
+        let mut generator = names::Generator::with_naming(Name::Plain);
+        let mut get_name = || generator.next().unwrap();
+
         for _ in 0..size {
             let start_day = rng.gen_range(2, 28);
             let start_month = rng.gen_range(1, 12);
             result.push(Event {
+                name: get_name(),
                 meeting_days: vec![Days::M, Days::W],
                 start_datetime: create_date(start_month, start_day),
                 end_datetime: Some(create_date(start_month, start_day + rng.gen_range(2, 17))),
-                freq: 0,
+                freq: None,
                 reoccuring: None,
             });
         }

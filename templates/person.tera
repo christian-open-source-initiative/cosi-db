@@ -13,7 +13,7 @@
   <script src="public/js/person.js" charset="utf-8"></script>
 </head>
 <body>
-    <div id="cover-entire-screen"></div>
+    <div class="cover-entire-screen"></div>
 
     <nav>
       <ul>

@@ -63,6 +63,8 @@ $(document).ready(() => {
     let tbrBackground = $("#table-right")
     let tbBackground = [tblBackground, tbrBackground];
     let incrementer = [-1, 1];
+
+    // Table navigation logic.
     for (let i = 0; i < tbClicks.length; ++i) {
         tbClicks[i].on("mouseover", function() {
             tbBackground[i].css("background-color", "#3d526e");
@@ -80,15 +82,22 @@ $(document).ready(() => {
     }
 
     // General setup.
+    // Miniboard for adding and updating actions.
+    let miniBoard = new MiniBoard(
+        $("#miniboard-render"),
+        $("#cover-entire-screen-miniboard")
+    );
+    let actionToolbar = new ActionToolbar(miniBoard, $("#action-toolbar"));
+
     // Hide search suggestions until user inputs.
     let searchManager = new SearchManager(
         $("#main-search-bar"),
         $("#search-suggestions"),
         $("#main-search-bar-submit"),
-        $("#cover-entire-screen")
+        $("#cover-entire-screen-search")
     );
 
-    let table = new Table($("#data-table"));
+    let table = new Table(actionToolbar, $("#data-table"));
 
     // Logic to rerender the table by fetching data from endpoint.
     let updateTable = function(appendFilter = "", page=0) {
@@ -115,7 +124,7 @@ $(document).ready(() => {
                 tbrClick.show();
             }
 
-            let totalData = totalPages * result["data"].length;
+            let totalData = result["total_result"];
             if (totalPages == 0) {
                 page = 0;
             } else {
@@ -143,6 +152,7 @@ $(document).ready(() => {
     $("#address-select").on("click", () => {
         tableTrack = ADDRESS_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new AddressState());
         updateTable();
     });
 
@@ -155,18 +165,21 @@ $(document).ready(() => {
     $("#people-select").on("click", () => {
         tableTrack = PEOPLE_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new PersonState());
         updateTable();
     });
 
     $("#group-select").on("click", () => {
         tableTrack = GROUP_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new GroupState());
         updateTable();
     });
 
     $("#event-select").on("click", () => {
         tableTrack = EVENT_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new EventState());
         updateTable();
     });
 
