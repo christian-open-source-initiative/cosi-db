@@ -45,6 +45,10 @@ const SEX_OPTIONS = [
     "Female"
 ];
 
+const DAY_OPTIONS = [
+    "M", "Tu", "W", "Th", "F", "Sa", "Su"
+];
+
 // State for tracking people.
 let PersonState = FormStruct(
     "Person",
@@ -170,4 +174,44 @@ let AddressState = FormStruct(
     },
     {},
     [3,9]
+);
+
+let EventState = FormStruct(
+    "Event",
+    {
+        "name": {
+            presence: true,
+            length: {
+                maximum: 64
+            }
+        },
+        "meeting_days": {
+            presence: true
+        },
+        "start_datetime": {
+            datetime: true,
+            presence: true
+        },
+        "end_datetime": {
+            datetime: true
+        },
+        "freq": {
+            numericality: true
+        },
+        "reoccuring": {
+        }
+    },
+    {
+        "meeting_days": {
+            checklist: DAY_OPTIONS
+        },
+        "end_datetime": {
+            nullable: true
+        },
+        "reoccuring": {
+            nullable: true,
+            options: ["Days", "Weeks", "Months"]
+        }
+    },
+    [1, 4, 6]
 );

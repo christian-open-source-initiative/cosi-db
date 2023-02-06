@@ -179,6 +179,7 @@ $(document).ready(() => {
     $("#event-select").on("click", () => {
         tableTrack = EVENT_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(new EventState());
         updateTable();
     });
 

@@ -150,23 +150,39 @@ class MiniBoard {
             if (lengthMeta != null) {
                 let maxLength = lengthMeta.maximum ? lengthMeta.maximum : 20;
                 if (maxLength <= textAreaThreshold) {
-                    extraStyle += `width: ${maxLength}rem;`;
+                    extraStyle += `width: ${maxLength * 0.75}rem;`;
                 }
             }
 
             // Different inputs for each validator.
+            let defStyle = `style="${extraStyle}" class="miniboard-form-input" id="miniboard-form-input-${field}" name="${field}"`
             if (constraint.datetime && constraint.datetime.dateOnly) {
-                result += `<input style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='date' placeholder='${field}' name='${field}' />`;
+                result += `<input ${defStyle} type='date' placeholder='${field}' />`;
+            } else if (constraint.datetime) {
+                result += `<input ${defStyle} type='datetime-local' placeholder='${field}' />`;
             } else if(constraint.length && constraint.length.maximum > textAreaThreshold) {
-                result += `<textarea style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='textarea' placeholder='${field}' name='${field}'></textarea>`;
+                result += `<textarea ${defStyle} type='textarea' placeholder='${field}'></textarea>`;
             } else if(custom.options) {
-                result += `<select style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='select' placeholder='${field}' name='${field}'>`;
+                result += `<select ${defStyle} type='select' placeholder='${field}'>`;
+                if (custom.nullable) {
+                    result += `<option disabled selected value>--no-option--</option>`
+                }
                 custom.options.forEach((opt) => {
-                    result += `<option value=${opt}>${opt}</option>`
+                    result += `<option value=${opt}>${opt}</option>`;
                 });
                 result += `</select>`
-            } else {
-                result += `<input style='${extraStyle}' class='miniboard-form-input' id='miniboard-form-input-${field}' type='text' placeholder='${field}' name='${field}' />`;
+            } else if (custom.checklist) {
+                result += `<div class="miniform-form-checkbox">`
+                custom.checklist.forEach((opt) => {
+                    result += `<div class="miniform-form-checkbox-option">`
+                    result += `<label>${opt}</label>`
+                    result += `<input ${defStyle} value="${opt}" type='checkbox'/>`
+                    result += `</div>`
+                });
+                result += `</div>`
+            }
+            else {
+                result += `<input ${defStyle} type='text' placeholder='${field}'/>`;
             }
             result += `</div>` // close form entry.
         });
@@ -190,7 +206,8 @@ class MiniBoard {
         // finalize allows for check of blank input for form.
         // which we normally don't check by default.
         //
-        let inputDom = $(`input[name="${inputName}"], textarea[name="${inputName}"]`);
+        // We don't want to check the checkbox as each checkbox is its own input and can grow unwieldly.
+        let inputDom = $(`input[name="${inputName}"][type!="checkbox"], textarea[name="${inputName}"]`);
         let msgDom = $(`.error-msg[name="${inputName}"]`);
         msgDom.remove();
         inputDom.removeClass("has-error");
@@ -211,6 +228,7 @@ class MiniBoard {
       // validate the form against the constraints
       let curState = this.states[this.states.length - 1];
       let errors = validate(this.curForm, curState._constraints);
+      console.log(errors);
       // then we update the form to reflect the results
       if (!errors) {
         this.updateStatus("Submitting...", false)

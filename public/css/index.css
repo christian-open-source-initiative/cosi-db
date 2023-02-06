@@ -215,11 +215,12 @@ tr:hover td {
 }
 
 #miniboard-form input, #miniboard-form select {
-    padding: 12px 20px;
+    padding: 10px 18px;
     margin: 8px 0;
     box-sizing: border-box;
     border-radius: 4px;
     border: 1px solid #ccc;
+    font-size: 1.2rem;
 }
 
 .miniboard-form-group {
@@ -267,6 +268,18 @@ tr:hover td {
 .has-success {
     border-color: green !important;
     box-shadow: 0 0 5px green;
+}
+
+.miniform-form-checkbox-option {
+    display: inline;
+    padding: 1rem;
+    font-size: 1.1rem;
+}
+
+.miniform-form-checkbox-option input {
+    margin-left: 0.5rem !important;
+    height: 1.3rem;
+    width: 1.3rem;
 }
 
 /*Specific Form Formatting*/
