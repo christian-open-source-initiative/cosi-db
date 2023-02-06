@@ -264,6 +264,37 @@ tr:hover td {
     font-size: 1.2rem;
 }
 
+.miniboard-form-vectorized {
+    display: flex;
+    flex-direction: column;
+}
+
+.miniboard-add-vectorized, .miniboard-sub-vectorized{
+    width: 4rem;
+    color: black;
+    font-style: bold;
+    border-radius: 5px;
+    border-style: none;
+    font-size: 1.5rem;
+    height: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-right: 1rem;
+    margin-top: 1rem;
+}
+
+.miniboard-add-vectorized {
+    background-color: #efd73e;
+}
+
+.miniboard-sub-vectorized {
+    background-color: #ff4a59;
+}
+
+.miniboard-add-vectorized:hover, .miniboard-sub-vectorized:hover {
+    cursor: pointer;
+}
+
 .miniboard-form-group {
     flex: 0 0 100%;
     display: flex;

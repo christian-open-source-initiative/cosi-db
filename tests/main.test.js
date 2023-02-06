@@ -232,12 +232,31 @@ describe("CRUD", () => {
                                         oid: modifyLater[0]["$oid"]
                                     })
                                     .send({
+                                        "nicks": ["one", "two"],
                                         "city": "HOPE",
                                     })
                                     .expect(200);
 
             let jData = JSON.parse(response.text);
-            console.log(jData);
+            // Should of data points affected.
+            expect(jData).toBe(1);
+
+            // Verify data
+            // TODO: Use a specific OID header.
+            const verify = await cosiRequest
+                                    .get("/get_person")
+                                    .query({
+                                        "page": 0,
+                                        "first_name": "mario",
+                                        "middle_name": "plumber",
+                                        "last_name": "フブキ",
+                                    })
+                                    .expect(200);
+            jData = JSON.parse(verify.text);
+
+            expect(jData.total_result).toBe(1);
+            expect(jData.data[0].city).toBe("HOPE");
+            expect(jData.data[0].nicks).toBe(["one", "two"]);
         });
     });
 });

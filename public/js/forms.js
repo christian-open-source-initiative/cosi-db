@@ -68,7 +68,7 @@ let PersonState = FormStruct(
         "nicks": {
             presence: false,
             length: {
-                maximum: 256
+                maximum: 30
             }
         },
         "dob": {
@@ -118,7 +118,7 @@ let PersonState = FormStruct(
     {
      "sex": {options: SEX_OPTIONS},
      "dob": {nullable: true},
-     "nicks": {nullable: true},
+     "nicks": {nullable: true, vectorize: true},
      "home_phone": {nullable: true},
      "work_phone": {nullable: true},
      "mobile_phone": {nullable: true}

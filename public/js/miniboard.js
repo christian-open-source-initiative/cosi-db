@@ -199,8 +199,18 @@ class MiniBoard {
                     result += `</div>`
                 });
                 result += `</div>`
-            }
-            else {
+            } else if (custom.vectorize) {
+                result += `<div class="miniboard-form-vectorized" name="${field}">`
+                let arr = state[field] ? JSON.parse(state[field]): [];
+                arr.forEach((val) => {
+                    result += `<input class="miniboard-form-input miniboard-form-input-vectorized" name="${field}" value="${val}" type="text"/>`
+                })
+                result += `<div>`
+                result += `<button class="miniboard-add-vectorized">+</button>`
+                result += `<button class="miniboard-sub-vectorized">-</button>`
+                result += `</div>`
+                result += `</div>` // close vectorization
+            } else {
                 result += `<input ${defStyle} type='text' placeholder='${field}' ${defValue}/>`;
             }
             result += `</div>` // close form entry.
@@ -262,6 +272,7 @@ class MiniBoard {
             return  dom.val() != "" || !nullable;
         }
         ).serialize();
+        console.log(serializedForm);
 
         $.ajax({
             type: "POST",
@@ -306,11 +317,35 @@ class MiniBoard {
         allInputs.each(function() {
             let input = $(this);
             let name = input.attr("name");
-            input.change(() => {
+            input.on("change", () => {
                 // Sometimes valid returns undefined fully. We need to have valid state for subsequent calls too.
                 let errors = validate(that.curForm, that.states[that.states.length-1]._constraints) || {};
                 that.updateStatusForInput(errors[name], name);
             });
+        });
+
+        // Add plus and minus button listeners for vectorizers
+        $(".miniboard-add-vectorized").each(function() {
+            let dom = $(this);
+            dom.on("click", (ev) => {
+                ev.preventDefault();
+                let name = dom.parent().parent().attr("name");
+                let last = dom.parent().parent().find("div").last();
+                // Empty check.
+                last.before(`<input class="miniboard-form-input miniboard-form-input-vectorized" name="${name}" type="text"/>`)
+                // $(".miniboard-sub-vectorized").show();
+            })
+        });
+
+        $(".miniboard-sub-vectorized").each(function() {
+            let dom = $(this);
+            dom.on("click", (ev) => {
+                ev.preventDefault();
+                let lastEntry = dom.parent().parent().find(".miniboard-form-input-vectorized").last();
+                if (lastEntry) {
+                    lastEntry.remove();
+                }
+            })
         });
     }
 
