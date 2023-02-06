@@ -183,6 +183,16 @@ tr:hover td {
     background-color: #ebeba5;
 }
 
+/* Actiono Row */
+#add-row {
+    border-radius: 5px;
+    border-style: none;
+    font-size: 1rem;
+    height: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: #efd73e;
+}
 
 /* Miniboard */
 #miniboard-render {
