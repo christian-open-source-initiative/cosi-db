@@ -211,6 +211,9 @@ where
     ) -> COSIResult<u64> {
         let col = Self::get_collection(client).await;
         let result = col.update_one(query.clone(), data.clone(), options).await?;
+        println!("{:?}", query);
+        println!("{:?}", data);
+        println!("{:?}", result);
         if result.matched_count == result.modified_count {
             return Ok(result.matched_count);
         } else if let Some(_) = result.upserted_id {

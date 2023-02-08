@@ -127,24 +127,25 @@ macro_rules! generate_pageable_update {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/update_", stringify!([<$T: lower>]), "?<oid>") in {
                     #[post($v_path, data="<update_query>")]
-                    pub async fn [<update_ $T:lower>](_user: User, connect: Connection<COSIMongo>, oid: String, update_query: Form<HashMap<String, String>>) -> Custom<RawJson<String>> {
+                    pub async fn [<update_ $T:lower>](_user: User, connect: Connection<COSIMongo>, oid: String, update_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
                         let client: &Client = &*connect;
-                        // update_query has to be a type of HashMap as we would like the user to update
-                        // to null (thus the form has to be nullable) but we don't want update if the form value is not present
-                        // e.g. the value is not given. As a result, we cannot use FromForm auto-parsing.
-                        let raw_data: HashMap<String, String> = update_query.into_inner();
-                        let bson_data = to_bson(&raw_data).unwrap();
-                        let result: COSIResult<u64> = $T::update_datum(client, &doc!{"_id": ObjectId::from_str(&oid).unwrap()}, &doc!{"$set": bson_data}, None).await;
-                        match result {
-                            Ok(update_count) => {
-                                return Custom(Status::Ok, RawJson(
-                                    serde_json::to_string(&update_count).unwrap()
-                                ));
+                        // We make the following assumption: absence -> null. We do not store empty strings.
+                        // This has to do with HashMap limitations and Rust autocasting behavior.
+                        let data_obj = update_query.into_inner();
+                        let update_convert = $T::convert_form_insert(data_obj);
+                        return match update_convert {
+                            Ok(update_obj) => {
+                                // Query any update_queries
+                                let result = $T::update_datum(client, &doc!{"_id": ObjectId::from_str(&oid).unwrap()}, &doc!{"$set": update_obj}, None).await.unwrap();
+                                Custom(Status::Ok, RawJson(
+                                    serde_json::to_string(&result).unwrap()
+                                ))
+
                             },
-                            Err(_) => {
-                                return Custom(Status::BadRequest, RawJson("{\"err\": \"Invalid id given.\"}".to_string()))
+                            Err(err) => {
+                                Custom(Status::BadRequest, RawJson(format!("{{\"err\": \"{}\"}}", err)))
                             }
-                        }
+                        };
                     }
                 }
             }

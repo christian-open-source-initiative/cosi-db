@@ -175,11 +175,20 @@ describe("CRUD", () => {
 
     // Insert after getters so it doesn't change the get count.
     // Track an instance of inserted jsons for later usage.
-    let modifyLater = []
+
+    let insertPerson_tmp = {
+        "first_name": "mario",
+        "middle_name": "plumber",
+        "last_name": "nani",
+        "dob": "1985-09-13",
+        "sex": "Undefined",
+        "notes": "",
+        "emergency_contact": ""
+    };
+    let insertOid = "";
     describe("Verify Setters", () => {
         let verifyData = (data) => {
             let jData = JSON.parse(data);
-            modifyLater.push(jData);
             expectKeys(jData, ["$oid"]);
         };
 
@@ -188,19 +197,13 @@ describe("CRUD", () => {
             const response = await cosiRequest
                                     .post(`/${endpointPerson}`)
                                     .type("form")
-                                    .send({
-                                        "first_name": "mario",
-                                        "middle_name": "plumber",
-                                        "last_name": "フブキ",
-                                        "dob": "1985-09-13",
-                                        "sex": "Male",
-                                        "notes": "A helpful local plumber who can jump!",
-                                        "emergency_contact": ""
-                                    })
+                                    .send(new URLSearchParams(insertPerson_tmp).toString())
                                     .expect(200)
                                     .expect("Content-Type", /json/)
 
+            insertOid = JSON.parse(response.text)["$oid"];
             verifyData(response.text);
+            console.log(insertOid);
         });
 
         const endpointAddress = "insert_address";
@@ -223,18 +226,16 @@ describe("CRUD", () => {
     });
 
     const updatePerson = "update_person"
+    insertPerson_tmp["middle_name"] = "old";
+    let result = new URLSearchParams(insertPerson_tmp).toString();
+    console.log(result);
     describe("Verify Updaters", () => {
         test(`/${updatePerson} POST`, async () => {
             const response = await cosiRequest
                                     .post(`/${updatePerson}`)
                                     .type("form")
-                                    .query({
-                                        oid: modifyLater[0]["$oid"]
-                                    })
-                                    .send({
-                                        "nicks": ["one", "two"],
-                                        "city": "HOPE",
-                                    })
+                                    .query({oid: insertOid})
+                                    .send("first_name=mario&middle_name=old&last_name=nani&dob=1985-09-13&sex=Undefined&emergency_contact=&notes=")
                                     .expect(200);
 
             let jData = JSON.parse(response.text);
@@ -247,16 +248,14 @@ describe("CRUD", () => {
                                     .get("/get_person")
                                     .query({
                                         "page": 0,
-                                        "first_name": "mario",
-                                        "middle_name": "plumber",
-                                        "last_name": "フブキ",
+                                        "first_name": insertPerson_tmp["first_name"],
                                     })
                                     .expect(200);
             jData = JSON.parse(verify.text);
 
             expect(jData.total_result).toBe(1);
-            expect(jData.data[0].city).toBe("HOPE");
-            expect(jData.data[0].nicks).toBe(["one", "two"]);
+            expect(jData.data[0].first_name).toBe("mario");
+            expect(jData.data[0].middle_name).toBe("old");
         });
     });
 });
