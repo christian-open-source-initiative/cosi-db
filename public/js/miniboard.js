@@ -38,6 +38,8 @@ class MiniBoard {
         this.isVisible = false;
         this.states = [];
         this.curForm = null;
+        // Function that refreshes the table.
+        this.updateTable = null;
 
         this.searchDarkener = searchDarkener;
         this.render = render;
@@ -47,6 +49,10 @@ class MiniBoard {
             this.confirmChanges();
         });
 
+    }
+
+    setUpdateTable(updateTable) {
+        this.updateTable = updateTable;
     }
 
     confirmChanges() {
@@ -279,6 +285,10 @@ class MiniBoard {
             url: this.curForm.attr("action"),
             data: serializedForm,
             success: (response) => {
+                if(this.curForm.attr("action").includes("update") && response == 0) {
+                    this.updateStatus("No updates received.", true);
+                    return;
+                }
                 this.updateStatus("Successfully added new row!", false)
                 this.popState();
             },
@@ -353,5 +363,6 @@ class MiniBoard {
         this.searchDarkener.fadeOut();
         this.render.hide(300);
         this.isVisible = false;
+        this.updateTable();``
     }
 }

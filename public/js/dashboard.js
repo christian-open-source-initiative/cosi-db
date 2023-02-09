@@ -134,6 +134,8 @@ $(document).ready(() => {
         });
     };
 
+    miniBoard.setUpdateTable(updateTable);
+
     let getStateClass = (name) => {
         if (name == "Address") { return AddressState}
         else if (name == "Person") { return PersonState}
@@ -172,6 +174,7 @@ $(document).ready(() => {
     $("#household-select").on("click", () => {
         tableTrack = HOUSEHOLD_TABLE_IDX;
         CURRENT_PAGE = 0;
+        actionToolbar.setState(null);
         updateTable();
     });
 

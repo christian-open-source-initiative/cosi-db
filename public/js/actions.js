@@ -14,11 +14,13 @@ class ActionToolbar {
 
         $("#add-row").click(() => {
             if (!this.displayButtons) { return ;}
+            else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
             this.miniboard.addState(ACTION_INSERT, new this.StateConstructor());
         });
 
         $("#update-row").click(() => {
             if (!this.displayButtons || this.selected.length <= 0) { return ;}
+            else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
 
             let params = {};
             // Assume single selected for now.
@@ -29,9 +31,9 @@ class ActionToolbar {
             });
             // Used for updating the result.
             params._oid = oid;
-            console.log(params);
             this.miniboard.addState(ACTION_UPDATE, new this.StateConstructor(params));
         });
+
     }
 
     setState(state) {
