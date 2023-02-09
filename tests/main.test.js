@@ -176,10 +176,10 @@ describe("CRUD", () => {
     // Insert after getters so it doesn't change the get count.
     // Track an instance of inserted jsons for later usage.
 
-    let insertPerson_tmp = {
+    let insertPerson = {
         "first_name": "mario",
         "middle_name": "plumber",
-        "last_name": "nani",
+        "last_name": "フブキ",
         "dob": "1985-09-13",
         "sex": "Undefined",
         "notes": "",
@@ -192,18 +192,42 @@ describe("CRUD", () => {
             expectKeys(jData, ["$oid"]);
         };
 
-        const endpointPerson = "insert_person";
-        test(`/${endpointPerson} POST`, async () => {
+        test(`person POST and UPDATE`, async () => {
             const response = await cosiRequest
-                                    .post(`/${endpointPerson}`)
+                                    .post(`/insert_person`)
                                     .type("form")
-                                    .send(new URLSearchParams(insertPerson_tmp).toString())
+                                    .send(insertPerson)
                                     .expect(200)
                                     .expect("Content-Type", /json/)
 
             insertOid = JSON.parse(response.text)["$oid"];
             verifyData(response.text);
-            console.log(insertOid);
+
+            insertPerson["middle_name"] = "old";
+            const update = await cosiRequest
+                                    .post(`/update_person`)
+                                    .type("form")
+                                    .query({oid: insertOid})
+                                    .send(insertPerson)
+                                    .expect(200);
+
+            let jData = JSON.parse(update.text);
+            // Should of data points affected.
+            expect(jData).toBe(1);
+
+            // Verify data
+            const verify = await cosiRequest
+                                    .get("/get_person")
+                                    .query({
+                                        "page": 0,
+                                        "first_name": insertPerson["first_name"],
+                                    })
+                                    .expect(200);
+            jData = JSON.parse(verify.text);
+
+            expect(jData.total_result).toBe(1);
+            expect(jData.data[0].first_name).toBe("mario");
+            expect(jData.data[0].middle_name).toBe("old");
         });
 
         const endpointAddress = "insert_address";
@@ -222,40 +246,6 @@ describe("CRUD", () => {
                                     });
 
             verifyData(response.text);
-        });
-    });
-
-    const updatePerson = "update_person"
-    insertPerson_tmp["middle_name"] = "old";
-    let result = new URLSearchParams(insertPerson_tmp).toString();
-    console.log(result);
-    describe("Verify Updaters", () => {
-        test(`/${updatePerson} POST`, async () => {
-            const response = await cosiRequest
-                                    .post(`/${updatePerson}`)
-                                    .type("form")
-                                    .query({oid: insertOid})
-                                    .send("first_name=mario&middle_name=old&last_name=nani&dob=1985-09-13&sex=Undefined&emergency_contact=&notes=")
-                                    .expect(200);
-
-            let jData = JSON.parse(response.text);
-            // Should of data points affected.
-            expect(jData).toBe(1);
-
-            // Verify data
-            // TODO: Use a specific OID header.
-            const verify = await cosiRequest
-                                    .get("/get_person")
-                                    .query({
-                                        "page": 0,
-                                        "first_name": insertPerson_tmp["first_name"],
-                                    })
-                                    .expect(200);
-            jData = JSON.parse(verify.text);
-
-            expect(jData.total_result).toBe(1);
-            expect(jData.data[0].first_name).toBe("mario");
-            expect(jData.data[0].middle_name).toBe("old");
         });
     });
 });
