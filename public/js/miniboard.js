@@ -198,10 +198,12 @@ class MiniBoard {
             } else if (custom.checklist) {
                 // Checklist expansion.
                 result += `<div class="miniform-form-checkbox">`
+                let arr = state[field] ? JSON.parse(state[field]) : [];
                 custom.checklist.forEach((opt) => {
                     result += `<div class="miniform-form-checkbox-option">`
                     result += `<label>${opt}</label>`
-                    result += `<input ${defStyle} value="${opt}" type='checkbox'/>`
+                    let checkedSetting = arr.includes(opt) ? "checked" : "";
+                    result += `<input ${defStyle} value="${opt}" type='checkbox' ${checkedSetting}/>`
                     result += `</div>`
                 });
                 result += `</div>`
