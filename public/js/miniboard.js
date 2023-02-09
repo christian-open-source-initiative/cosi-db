@@ -63,7 +63,20 @@ class MiniBoard {
         $("#miniboard-form input[type='text'], #miniboard-form textarea").each(function() {
             let dom = $(this);
             hasAllEmpty &= dom.val() == "";
-            allSameToOriginal &= dom.val() == curState[dom.attr("name")];
+
+            // Multi part forms will
+            let defVal = curState[dom.attr("name")];
+            let checkVal = defVal;
+            try {
+                checkVal = JSON.parse(defVal);
+            } catch {}
+            // Could be possible for us to store a value that is JSON-like.
+            // Minor inconvenience, however.
+            if (Array.isArray(checkVal)) {
+                allSameToOriginal &= checkVal.includes(dom.val());
+            } else {
+                allSameToOriginal &= defVal == dom.val();
+            }
         });
 
         if(hasAllEmpty || allSameToOriginal || confirm("You have unsaved changes. Do you wish to discard?")) {
