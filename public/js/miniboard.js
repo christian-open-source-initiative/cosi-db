@@ -3,9 +3,11 @@
 */
 const ACTION_UPDATE = "update";
 const ACTION_INSERT = "insert";
+const ACTION_CAT = "cat";
 const ACTIONS = [
     ACTION_INSERT,
-    ACTION_UPDATE
+    ACTION_UPDATE,
+    ACTION_CAT
 ];
 
 validate.extend(validate.validators.datetime, {
@@ -139,10 +141,29 @@ class MiniBoard {
         }
     }
 
+    _catState() {
+        let result = "<h1>This Function Isn't Supported at the Moment...</h1>"
+        result += "<br />"
+        result += "Here is a random cat instead. Cheers. <br /> <br />"
+        result += "<div id='miniboard-cat-div'></div>"
+        $.get(
+            "https://api.thecatapi.com/v1/images/search", function(data) {
+                console.log(data);
+                $("#miniboard-cat-div").html(`<img src="${data[0]["url"]}"  />`)
+            }
+        );
+        return result;
+    }
+
     getStateRender(state) {
         // Debug for creating default template.
         let formName = state._stateName.toLowerCase();
         let action = state._action;
+
+        if (action == ACTION_CAT) {
+            return this._catState();
+        }
+
         let result = "";
         if (action == "insert") {
             result += `<form id='miniboard-form' action='/insert_${formName}' method='post' novalidate>`;

@@ -34,6 +34,21 @@ class ActionToolbar {
             this.miniboard.addState(ACTION_UPDATE, new this.StateConstructor(params));
         });
 
+        $("#delete-row").click(()=> {
+            if (!this.displayButtons || this.selected.length <= 0) { return ;}
+            else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
+
+            let params = {};
+            // Assume single selected for now.
+            let oid = this.selected[0];
+            $(`[oid=${oid}] td`).each(function() {
+                let dom = $(this);
+                params[dom.attr("entry-name")] = dom.text();
+            });
+            // Used for updating the result.
+            params._oid = oid;
+            this.miniboard.addState(ACTION_CAT, new this.StateConstructor(params));
+        })
     }
 
     setState(state) {
