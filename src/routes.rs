@@ -24,6 +24,7 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             get_address,
             insert_address,
             drop_address,
+            update_address,
             // Household
             gen_household,
             get_household,
@@ -34,6 +35,7 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             get_event,
             insert_event,
             drop_event,
+            update_event,
             // Event Registration
             gen_eventregistration,
             get_eventregistration,
@@ -44,6 +46,7 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             get_group,
             insert_group,
             drop_group,
+            update_group,
             // Group Relation
             gen_grouprelation,
             get_grouprelation,

@@ -3,16 +3,10 @@
 function FormStruct(stateName, constraints, custom={}, groups=null, prefixHtml="") {
     var fields = Object.keys(constraints);
     var count = fields.length;
-    function constructor() {
-        for (var i = 0; i < count; ++i) {
-            if (i < arguments.length) {
-                this[fields[i]] = arguments[i];
-            }
-            else {
-                // Set default argument value instead.
-                this[fields[i]] = ""
-            }
-        }
+    function constructor(params = {}) {
+        $.each(params, (key, val) => {
+            this[key] = val;
+        });
         // internal field names tracker.
         this._fieldNames = fields;
         this._stateName = stateName;
@@ -124,7 +118,7 @@ let PersonState = FormStruct(
     {
      "sex": {options: SEX_OPTIONS},
      "dob": {nullable: true},
-     "nicks": {nullable: true},
+     "nicks": {nullable: true, vectorize: true},
      "home_phone": {nullable: true},
      "work_phone": {nullable: true},
      "mobile_phone": {nullable: true}

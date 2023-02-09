@@ -36,6 +36,7 @@ generate_generators! { Address }
 generate_pageable_getter! { Address }
 generate_pageable_inserter! { Address }
 generate_dropper! { Address }
+generate_pageable_update! { Address }
 
 // Person
 use crate::cosi_db::model::person::{Person, PersonImpl, PersonOptional};
@@ -58,6 +59,7 @@ generate_generators! { Event }
 generate_pageable_getter! { Event }
 generate_pageable_inserter! { Event }
 generate_dropper! { Event }
+generate_pageable_update! { Event }
 
 // Event Registration
 use crate::cosi_db::model::event::{
@@ -74,6 +76,7 @@ generate_generators! { Group }
 generate_pageable_getter! { Group }
 generate_pageable_inserter! { Group }
 generate_dropper! { Group }
+generate_pageable_update! { Group }
 
 // Group Relation
 use crate::cosi_db::model::group::{GroupRelation, GroupRelationImpl, GroupRelationOptional};

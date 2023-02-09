@@ -30,6 +30,10 @@
     background-color: #534261;
 }
 
+button:hover input[type="submit"]:hover{
+    cursor: pointer;
+}
+
 th:first-child { border-top-left-radius: 10px; }
 th:last-child { border-top-right-radius: 10px; }
 
@@ -183,15 +187,42 @@ tr:hover td {
     background-color: #ebeba5;
 }
 
-/* Actiono Row */
-#add-row {
+/* Action Row */
+.action-button {
     border-radius: 5px;
     border-style: none;
     font-size: 1rem;
     height: 2rem;
     padding-left: 1rem;
     padding-right: 1rem;
+}
+
+#action-toolbar {
+    display: none;
+}
+
+#add-row {
     background-color: #efd73e;
+}
+
+#update-row {
+    background-color: #6cb8ff;
+}
+
+#delete-row {
+    background-color:#ff4a59;
+}
+
+#action-toolbar-more {
+    display: inline;
+    display: none;
+}
+
+#action-toolbar-message {
+    display: inline;
+    font-style: italic;
+    padding-left: 1.2rem;
+    padding-right: 0.5rem;
 }
 
 /* Miniboard */
@@ -231,6 +262,37 @@ tr:hover td {
     border-radius: 4px;
     border: 1px solid #ccc;
     font-size: 1.2rem;
+}
+
+.miniboard-form-vectorized {
+    display: flex;
+    flex-direction: column;
+}
+
+.miniboard-add-vectorized, .miniboard-sub-vectorized{
+    width: 4rem;
+    color: black;
+    font-style: bold;
+    border-radius: 5px;
+    border-style: none;
+    font-size: 1.5rem;
+    height: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-right: 1rem;
+    margin-top: 1rem;
+}
+
+.miniboard-add-vectorized {
+    background-color: #efd73e;
+}
+
+.miniboard-sub-vectorized {
+    background-color: #ff4a59;
+}
+
+.miniboard-add-vectorized:hover, .miniboard-sub-vectorized:hover {
+    cursor: pointer;
 }
 
 .miniboard-form-group {
