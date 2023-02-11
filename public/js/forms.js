@@ -103,7 +103,6 @@ let PersonState = FormStruct(
         },
         "emergency_contact": {
             presence: false,
-            numericality: true,
             length: {
                 maximum: 25
             }

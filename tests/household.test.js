@@ -6,7 +6,7 @@ import { ALL_PAGEABLE_ENDPOINTS, ALL_GEN_ENDPOINTS } from "./endpoints.js";
 function cosiRequest() {
     return request("127.0.0.1:8000");
 }
-const endpoint = "get_household";
+const endpoint = "find_household";
 
 // Testing
 describe("Test Root", () => {

@@ -10,7 +10,7 @@ const TABLE_NAMES = [
 
 let ALL_PAGEABLE_ENDPOINTS = [];
 for (const v of TABLE_NAMES) {
-    ALL_PAGEABLE_ENDPOINTS.push(`get_${v.toLowerCase()}`);
+    ALL_PAGEABLE_ENDPOINTS.push(`find_${v.toLowerCase()}`);
 }
 
 // Should be in order of least-dependent.

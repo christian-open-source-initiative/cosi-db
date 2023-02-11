@@ -4,7 +4,7 @@ use rocket::data::ToByteUnit;
 use rocket::form::{DataField, FromFormField, ValueField};
 use std::str::FromStr;
 
-use mongodb::bson::{oid::ObjectId, to_document, Bson, Document};
+use mongodb::bson::{doc, oid::ObjectId, to_document, Bson, Document};
 use mongodb::{Client, Collection, Cursor};
 
 use futures::stream::{StreamExt, TryStreamExt};
@@ -173,6 +173,17 @@ where
     ) -> COSIResult<Vec<T>> {
         let col = Self::get_collection(client).await;
         let cursor: Cursor<I> = col.find(filter, options).await?;
+        let results = cursor.try_collect().await?;
+        return Ok(Self::to_orm(client, &results).await?);
+    }
+
+    async fn find_by_oids(
+        client: &Client,
+        oids: Vec<Document>,
+        options: Option<FindOptions>,
+    ) -> COSIResult<Vec<T>> {
+        let col = Self::get_collection(client).await;
+        let cursor: Cursor<I> = col.find(doc! {"_id": {"$in": oids}}, options).await?;
         let results = cursor.try_collect().await?;
         return Ok(Self::to_orm(client, &results).await?);
     }

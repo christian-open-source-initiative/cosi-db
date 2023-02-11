@@ -36,7 +36,7 @@ beforeAll(async ()=> {
         expectKeys(jsonData, ["dropped"]);
         expect(jsonData["dropped"]).toBe(true);
 
-        let findResponse = await cosiRequest.get(`/get_${tn.toLowerCase()}`)
+        let findResponse = await cosiRequest.get(`/find_${tn.toLowerCase()}`)
                                             .query({page: 0})
                                             .expect(200)
                                             .expect("Content-Type", /json/);
@@ -157,9 +157,9 @@ describe("CRUD", () => {
             });
         }
 
-        test("/get_eventregistration Check key_type", async() => {
+        test("/find_eventregistration Check key_type", async() => {
             // Checks that key_type implies only one foreign key is set.
-            const response = await cosiRequest.get(`/get_eventregistration`).query({page: 0});
+            const response = await cosiRequest.get(`/find_eventregistration`).query({page: 0});
             let jsonData = JSON.parse(response.text);
             let d = jsonData["data"];
             const keys = ["Person", "Group", "Household"];
@@ -217,7 +217,7 @@ describe("CRUD", () => {
 
             // Verify data
             const verify = await cosiRequest
-                                    .get("/get_person")
+                                    .get("/find_person")
                                     .query({
                                         "page": 0,
                                         "first_name": insertPerson["first_name"],

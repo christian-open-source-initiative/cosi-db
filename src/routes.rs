@@ -13,7 +13,7 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             index_redirect,
             // Person
             gen_person,
-            get_person,
+            find_person,
             insert_person,
             drop_person,
             update_person,
@@ -21,35 +21,35 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             person_redirect,
             // Address
             gen_address,
-            get_address,
+            find_address,
             insert_address,
             drop_address,
             update_address,
             // Household
             gen_household,
-            get_household,
+            find_household,
             insert_household,
             drop_household,
             // Event
             gen_event,
-            get_event,
+            find_event,
             insert_event,
             drop_event,
             update_event,
             // Event Registration
             gen_eventregistration,
-            get_eventregistration,
+            find_eventregistration,
             insert_eventregistration,
             drop_eventregistration,
             // Group
             gen_group,
-            get_group,
+            find_group,
             insert_group,
             drop_group,
             update_group,
             // Group Relation
             gen_grouprelation,
-            get_grouprelation,
+            find_grouprelation,
             insert_grouprelation,
             drop_grouprelation,
             // Search

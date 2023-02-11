@@ -44,13 +44,13 @@ macro_rules! generate_generators {
 
 // GETTERS
 #[macro_export]
-macro_rules! generate_pageable_getter {
+macro_rules! generate_pageable_find {
     ($T:ident) => {
         $crate::paste::paste! {
             $crate::with_builtin_macros::with_builtin!{
-                let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>&<search_query..>") in {
+                let $v_path = concat!("/find_", stringify!([<$T: lower>]), "?<page>&<search_query..>") in {
                     #[get($v_path)]
-                    pub async fn [<get_ $T:lower>](_user: User, connect: Connection<COSIMongo>, page: Option<u64>, search_query: [<$T Optional>]) -> RawJson<String> {
+                    pub async fn [<find_ $T:lower>](_user: User, connect: Connection<COSIMongo>, page: Option<u64>, search_query: [<$T Optional>]) -> RawJson<String> {
                         let client: &Client = &*connect;
                         let page = page.unwrap_or(0);
 
@@ -79,6 +79,39 @@ macro_rules! generate_pageable_getter {
                                 page: page,
                                 total_pages: total_pages,
                                 total_result: total_result,
+                                data: data
+                            }).unwrap()
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! generate_pageable_multi_getter {
+    ($T:ident) => {
+        $crate::paste::paste! {
+            $crate::with_builtin_macros::with_builtin!{
+                let $v_path = concat!("/get_multi_", stringify!([<$T: lower>]), "?<page>&<oids>") in {
+                    #[get($v_path)]
+                    pub async fn [<get_ $T:lower>](_user: User, connect: Connection<COSIMongo>, page: Option<u64>, oids: [String]) -> RawJson<String> {
+                        let client: &Client = &*connect;
+                        let page = page.unwrap_or(0);
+
+                        let col = $T::get_collection(client).await;
+
+                        // Fetch all the oids
+                        let converted_oid: Vec<Document> = vec![];
+                        for oid in oids {
+                            converted_oid.insert(doc!{oid});
+                        }
+
+                        // Query any search_queries
+                        let data: Vec<T> = $T::find_by_oids(client, converted_oid, Some(find_options)).await.unwrap();
+                        RawJson(
+                            serde_json::to_string(&PaginateData {
                                 data: data
                             }).unwrap()
                         )
