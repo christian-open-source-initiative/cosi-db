@@ -226,7 +226,13 @@ let HouseholdState = FormStruct(
     },
     {
         "address": {
-            "custom_render": new DisabledFormEntry()
+            "disabled": true
+        },
+        "persons": {
+            "disabled": true
+        },
+        "relations": {
+            "disabled": true
         }
     },
     [1, 4]

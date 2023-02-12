@@ -5,6 +5,21 @@ class DataRenderer {
         return this;
     }
 
+    setDefCSSPrefix(c) {
+        this.defCSSPrefix = c;
+        return this;
+    }
+
+    // Helper for generating cssAttr by the form's standard name.
+    cssAttr() {
+        // Arguments keywords are not Arrays and require conversion.
+        let args = [];
+        for (let i = 0; i < arguments.length; ++i) {
+            args.push(arguments[i]);
+        }
+        return this.defCSSPrefix + "-" + args.join("-");
+    }
+
     render(cb, fcb) {
         console.assert("Not yet implemented.")
     }
@@ -18,7 +33,16 @@ class CustomTableRender extends DataRenderer {
     }
 }
 
-// Basic Renderer that Disables Forms
-class DisabledFormEntry extends DataRenderer {
+class CustomFormEntryRender extends DataRenderer {
+    setField(f) {
+        this.field = f;
+        return this;
+    }
+}
 
+// Basic Renderer that Disables Forms
+class DisabledFormEntry extends CustomFormEntryRender {
+    render(cb, fcb) {
+        // TODO: Use callback architecture instead.
+    }
 }

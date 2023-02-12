@@ -342,13 +342,13 @@ tr:hover td {
     box-shadow: 0 0 5px green;
 }
 
-.miniform-form-checkbox-option {
+.miniboard-form-checkbox-option {
     display: inline;
     padding: 1rem;
     font-size: 1.1rem;
 }
 
-.miniform-form-checkbox-option input {
+.miniboard-form-checkbox-option input {
     margin-left: 0.5rem !important;
     height: 1.3rem;
     width: 1.3rem;

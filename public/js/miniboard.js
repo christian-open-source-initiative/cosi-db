@@ -45,18 +45,25 @@ class CoreFormRender extends DataRenderer {
     }
 
     renderEntry(field) {
+        // Custom fields defined by us.
+        let custom = this.data._custom[field] || {};
+        // Check if entry has a special renderer, if so, use that instead.
+        if (custom.customRender) {
+            // CustomFormEntryRender
+            return custom.customRender.setData(this.data).setField(field).render();
+        }
+
         // Renders a single form entry. Name of the field + index of the field in form.
         let result = "";
         let constraint = this.data._constraints[field];
-        let custom = this.data._custom[field] || {};
         const textAreaThreshold = 256;
 
         // Used for unique css labeled by state name and then field.
-        result += `<div class='miniboard-form-entry' id='miniboard-form-entry-${this.formName}-${field}'>`
+        result += `<div class='${this.cssAttr("entry")}' id='${this.cssAttr("entry", this.formName, field)}'>`
         // Required check
-        result += `<h2 class='miniboard-form-entry-name'>${field}`;
+        result += `<h2 class='${this.cssAttr("entry", "name")}'>${field}`;
         if (this.data._constraints[field].presence) {
-            result += "<div class='miniboard-form-required-asterisk'> *</div>";
+            result += `<div class='${this.cssAttr("required", "asterisk")}'> *</div>`;
         }
         result += "</h2>"
 
@@ -70,7 +77,10 @@ class CoreFormRender extends DataRenderer {
         }
 
         // Different inputs for each validator.
-        let defStyle = `style="${extraStyle}" class="miniboard-form-input" id="miniboard-form-input-${field}" name="${field}"`;
+        let defStyle = `style="${extraStyle}" class="${this.cssAttr("input")}" id="${this.cssAttr("input", field)}" name="${field}"`;
+        if(custom.disabled) {
+            defStyle += "disabled";
+        }
         let defValue = "";
         if (this.data[field]) {
             defValue = `value="${escapeHtml(this.data[field])}"`;
@@ -94,10 +104,10 @@ class CoreFormRender extends DataRenderer {
             result += `</select>`
         } else if (custom.checklist) {
             // Checklist expansion.
-            result += `<div class="miniform-form-checkbox">`
+            result += `<div class="${this.cssAttr("checkbox")}">`
             let arr = this.data[field] ? JSON.parse(this.data[field]) : [];
             custom.checklist.forEach((opt) => {
-                result += `<div class="miniform-form-checkbox-option">`
+                result += `<div class="${this.cssAttr("checkbox", "option")}">`
                 result += `<label>${opt}</label>`
                 let checkedSetting = arr.includes(opt) ? "checked" : "";
                 result += `<input ${defStyle} value="${opt}" type='checkbox' ${checkedSetting}/>`
@@ -105,10 +115,10 @@ class CoreFormRender extends DataRenderer {
             });
             result += `</div>`
         } else if (custom.vectorize) {
-            result += `<div class="miniboard-form-vectorized" name="${field}">`
+            result += `<div class="${this.cssAttr("vectorized")}" name="${field}">`
             let arr = this.data[field] ? JSON.parse(this.data[field]): [];
             arr.forEach((val) => {
-                result += `<input class="miniboard-form-input miniboard-form-input-vectorized" name="${field}" value="${val}" type="text"/>`
+                result += `<input class="${this.cssAttr("input")} ${this.cssAttr("input","vectorized")}" name="${field}" value="${val}" type="text"/>`
             })
             result += `<div>`
             result += `<button class="miniboard-add-vectorized">+</button>`
@@ -291,7 +301,7 @@ class MiniBoard {
 
     getStateRender(state) {
         let renderer = new CoreFormRender();
-        return renderer.setData(state).render();
+        return renderer.setData(state).setDefCSSPrefix("miniboard-form").render();
     }
 
     updateAllStatusForInput(errors) {
