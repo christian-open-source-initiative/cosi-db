@@ -1,11 +1,3 @@
-// Certain tables have foreign key references that need rendering.
-// The displays have special relationships with them that allow you to
-let FOREIGN = {};
-FOREIGN["household"] = {
-    "persons": ["first_name", "last_name"],
-    "address": ["line_one", "line_two", "line_three"]
-};
-
 // Special header renames to make things easier to read.
 let RENAME = {
     "emergency_contact": "emergency",
@@ -169,9 +161,9 @@ class Table {
                     let cb = (renderHtml) => {
                         newCellRef.html(renderHtml).attr("entry-name", k);
                     }
-                    let finalRender = renderer.setData(value)
-                                              .setColumn(k)
-                                              .render(cb, () => {newCellRef.html("Error fetching data.")});
+                    renderer.setData(value)
+                            .setColumn(k)
+                            .render(cb, () => {newCellRef.html("Error fetching data.")});
                 } else {
                     if (Array.isArray(value)) {
                         $(row.insertCell(-1)).html(JSON.stringify(value)).attr("entry-name", k);
