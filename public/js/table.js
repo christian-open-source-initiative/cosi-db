@@ -48,7 +48,7 @@ class BasicForeignRender extends CustomTableRender {
         return result;
     }
 
-    render() {
+    render(cb, fcb) {
         // For multiple relations.
         if (Array.isArray(this.data)) {
             let results = [];
@@ -59,13 +59,48 @@ class BasicForeignRender extends CustomTableRender {
             return results.join(", ");
         }
 
-        return this.getKeysAsArray(this.keys, this.data).join(", ");
+        cb(this.getKeysAsArray(this.keys, this.data).join(", "));
     }
 }
 
-class HouseRelationTable extends CustomTableRender {
-    render() {
+class HouseRelationRender extends CustomTableRender {
+    render(cb, fcb) {
+        // Serialize each request to a single call.
+        // Ordering is guaranteed by the API so we easily deserialize later.
+        let oids = [];
+        let relations = [];
+        console.log(this.data);
+        this.data.forEach(d => {
+            oids.push(d["person_a"]["$oid"]);
+            oids.push(d["person_b"]["$oid"]);
+            relations.push(d["relation"])
+        });
+        console.assert(relations.length * 2 == oids.length);
+        console.log(oids);
 
+        $.ajax({
+            url: `/get_person`,
+            data: {oids: oids},
+            success: function(result) {
+                /// TODO: Error handling.
+                let results = [];
+                relations.forEach((r, idx) => {
+                    let personA = result[idx * 2].first_name;
+                    // Same person means it is a global role.
+                    let s = null;
+                    if (result.length == 1) {
+                        s = `(${personA}, ${r})`;
+                    } else if (result.length == 2) {
+                        let personB = result[idx * 2 + 1].first_name;
+                        s = `(${personA}, ${personB}, ${r})`;
+                    }
+
+                    results.push(s);
+                });
+
+                cb(results.join(", "));
+            }
+        }).fail(fcb);
     }
 }
 
@@ -73,7 +108,8 @@ class HouseRelationTable extends CustomTableRender {
 let SPECIAL_RENDER = {};
 SPECIAL_RENDER["household"] = {
     "persons": new BasicForeignRender(["first_name", "last_name"]),
-    "address": new BasicForeignRender(["line_one", "line_two", "line_three"])
+    "address": new BasicForeignRender(["line_one", "line_two", "line_three"]),
+    "relations": new HouseRelationRender()
 }
 
 
@@ -128,8 +164,14 @@ class Table {
                     continue;
                 } else if (k in specialKeys) {
                     let renderer = specialKeys[k];
-                    let finalRender = renderer.setData(value).setColumn(k).render();
-                    $(row.insertCell(-1)).html(finalRender).attr("entry-name", k);
+                    // Due to non-block, we want to create the cell in advance.
+                    let newCellRef = $(row.insertCell(-1));
+                    let cb = (renderHtml) => {
+                        newCellRef.html(renderHtml).attr("entry-name", k);
+                    }
+                    let finalRender = renderer.setData(value)
+                                              .setColumn(k)
+                                              .render(cb, () => {newCellRef.html("Error fetching data.")});
                 } else {
                     if (Array.isArray(value)) {
                         $(row.insertCell(-1)).html(JSON.stringify(value)).attr("entry-name", k);

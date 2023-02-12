@@ -196,8 +196,9 @@ describe("CRUD", () => {
                                         .expect(200)
                                         .expect("Content-Type", /json/);
             let getResult = JSON.parse(getResponse.text);
-            getResult.forEach((elem) => {
-                expect(persons.find(fElem => _.isEqual(fElem, elem)));
+            // Enforce ordering
+            getResult.forEach((elem, idx) => {
+                expect(_.isEqual(persons[idx], elem));
             });
         });
     });
