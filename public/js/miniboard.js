@@ -33,6 +33,154 @@ function escapeHtml(unsafe)
          .replace(/'/g, "&#039;");
  }
 
+// Default renderer that renders the entirety of the form when given state data
+// created from FormStruct.
+class CoreFormRender extends DataRenderer {
+    setData(d) {
+        // Override default behavior of setData in order to extrapolate helpful variables.
+        this.data = d;
+        this.formName = this.data._stateName.toLowerCase();
+        this.action = this.data._action;
+        return this;
+    }
+
+    renderEntry(field) {
+        // Renders a single form entry. Name of the field + index of the field in form.
+        let result = "";
+        let constraint = this.data._constraints[field];
+        let custom = this.data._custom[field] || {};
+        const textAreaThreshold = 256;
+
+        // Used for unique css labeled by state name and then field.
+        result += `<div class='miniboard-form-entry' id='miniboard-form-entry-${this.formName}-${field}'>`
+        // Required check
+        result += `<h2 class='miniboard-form-entry-name'>${field}`;
+        if (this.data._constraints[field].presence) {
+            result += "<div class='miniboard-form-required-asterisk'> *</div>";
+        }
+        result += "</h2>"
+
+        let extraStyle = "";
+        let lengthMeta = constraint.length;
+        if (lengthMeta != null) {
+            let maxLength = lengthMeta.maximum ? Math.min(lengthMeta.maximum, 50) : 20;
+            if (maxLength <= textAreaThreshold) {
+                extraStyle += `width: ${maxLength * 0.75}rem;`;
+            }
+        }
+
+        // Different inputs for each validator.
+        let defStyle = `style="${extraStyle}" class="miniboard-form-input" id="miniboard-form-input-${field}" name="${field}"`;
+        let defValue = "";
+        if (this.data[field]) {
+            defValue = `value="${escapeHtml(this.data[field])}"`;
+        }
+
+        if (constraint.datetime && constraint.datetime.dateOnly) {
+            result += `<input ${defStyle} type='date' placeholder='${field}' ${defValue}/>`;
+        } else if (constraint.datetime) {
+            result += `<input ${defStyle} type='datetime-local' placeholder='${field}' ${defValue} />`;
+        } else if(constraint.length && constraint.length.maximum > textAreaThreshold) {
+            result += `<textarea ${defStyle} type='textarea' placeholder='${field}' ${defValue}></textarea>`;
+        } else if(custom.options) {
+            // Options expansion.
+            result += `<select ${defStyle} type='select' placeholder='${field}'>`;
+            if (custom.nullable) {
+                result += `<option disabled selected value>--no-option--</option>`
+            }
+            custom.options.forEach((opt) => {
+                result += `<option value=${opt}>${opt}</option>`;
+            });
+            result += `</select>`
+        } else if (custom.checklist) {
+            // Checklist expansion.
+            result += `<div class="miniform-form-checkbox">`
+            let arr = this.data[field] ? JSON.parse(this.data[field]) : [];
+            custom.checklist.forEach((opt) => {
+                result += `<div class="miniform-form-checkbox-option">`
+                result += `<label>${opt}</label>`
+                let checkedSetting = arr.includes(opt) ? "checked" : "";
+                result += `<input ${defStyle} value="${opt}" type='checkbox' ${checkedSetting}/>`
+                result += `</div>`
+            });
+            result += `</div>`
+        } else if (custom.vectorize) {
+            result += `<div class="miniboard-form-vectorized" name="${field}">`
+            let arr = this.data[field] ? JSON.parse(this.data[field]): [];
+            arr.forEach((val) => {
+                result += `<input class="miniboard-form-input miniboard-form-input-vectorized" name="${field}" value="${val}" type="text"/>`
+            })
+            result += `<div>`
+            result += `<button class="miniboard-add-vectorized">+</button>`
+            result += `<button class="miniboard-sub-vectorized">-</button>`
+            result += `</div>`
+            result += `</div>` // close vectorization
+        } else {
+            result += `<input ${defStyle} type='text' placeholder='${field}' ${defValue}/>`;
+        }
+        result += `</div>` // close form entry.
+        return result;
+    }
+
+    _catState() {
+        let result = "<h1>This Function Isn't Supported at the Moment...</h1>"
+        result += "<br />"
+        result += "Here is a random cat instead. Cheers. <br /> <br />"
+        result += "<div id='miniboard-cat-div'></div>"
+        $.get(
+            "https://api.thecatapi.com/v1/images/search", function(data) {
+                console.log(data);
+                $("#miniboard-cat-div").html(`<img src="${data[0]["url"]}"  />`)
+            }
+        );
+        return result;
+    }
+
+    render() {
+        if (this.action == ACTION_CAT) {
+            return this._catState();
+        }
+
+        let result = "";
+        if (this.action == "insert") {
+            result += `<form id='miniboard-form' action='/insert_${this.formName}' method='post' novalidate>`;
+            result += `<h1 id='miniboard-form-title'>Add New ${this.data._stateName}</h1>`
+        } else {
+            result += `<form id='miniboard-form' action='/update_${this.formName}?oid=${this.data._oid}' method='post' novalidate>`;
+            result += `<h1 id='miniboard-form-title'>Update ${this.data._stateName}</h1>`
+        }
+        result += "<div id='miniboard-form-body'>";
+
+        let groupTrack = 0;
+        result += `<div id='miniboard-form-group-${this.formName}-${groupTrack}' class='miniboard-form-group'>`;
+
+        this.data._fieldNames.forEach((field, idx) => {
+
+            // For deciding when to inject a div.
+            let g = this.data._groups[groupTrack];
+            if (idx >= g) {
+                groupTrack += 1;
+                result += `</div>`; // close form group
+                result += `<div id='miniboard-form-group-${this.formName}-${groupTrack}' class='miniboard-form-group'>`;
+            }
+
+            // Render Default Entry
+            result += this.renderEntry(field);
+        });
+
+        result += "</div>"; // close form group
+        result += "</div>"; // close form body
+        result += "<div id='miniboard-form-status'></div>"
+        if (this.action == "insert") {
+            result += "<input type='submit' value='Add'/>"
+        } else {
+            result += "<input type='submit' value='Update'/>"
+        }
+        result += "</form>"; // close form
+        return result;
+    }
+}
+
 // Mini board consists of the render itself
 // as well as the state bar at the top.
 class MiniBoard {
@@ -141,133 +289,9 @@ class MiniBoard {
         }
     }
 
-    _catState() {
-        let result = "<h1>This Function Isn't Supported at the Moment...</h1>"
-        result += "<br />"
-        result += "Here is a random cat instead. Cheers. <br /> <br />"
-        result += "<div id='miniboard-cat-div'></div>"
-        $.get(
-            "https://api.thecatapi.com/v1/images/search", function(data) {
-                console.log(data);
-                $("#miniboard-cat-div").html(`<img src="${data[0]["url"]}"  />`)
-            }
-        );
-        return result;
-    }
-
     getStateRender(state) {
-        // Debug for creating default template.
-        let formName = state._stateName.toLowerCase();
-        let action = state._action;
-
-        if (action == ACTION_CAT) {
-            return this._catState();
-        }
-
-        let result = "";
-        if (action == "insert") {
-            result += `<form id='miniboard-form' action='/insert_${formName}' method='post' novalidate>`;
-            result += `<h1 id='miniboard-form-title'>Add New ${state._stateName}</h1>`
-        } else {
-            result += `<form id='miniboard-form' action='/update_${formName}?oid=${state._oid}' method='post' novalidate>`;
-            result += `<h1 id='miniboard-form-title'>Update ${state._stateName}</h1>`
-        }
-        result += "<div id='miniboard-form-body'>";
-
-        let groupTrack = 0;
-        const textAreaThreshold = 256;
-        result += `<div id='miniboard-form-group-${formName}-${groupTrack}' class='miniboard-form-group'>`;
-
-        state._fieldNames.forEach((field, idx) => {
-            let constraint = state._constraints[field];
-            let custom = state._custom[field] || {};
-            let g = state._groups[groupTrack];
-            if (idx >= g) {
-                groupTrack += 1;
-                result += `</div>`; // close form group
-                result += `<div id='miniboard-form-group-${formName}-${groupTrack}' class='miniboard-form-group'>`;
-            }
-
-            // Used for unique css labeled by state name and then field.
-            result += `<div class='miniboard-form-entry' id='miniboard-form-entry-${formName}-${field}'>`
-            // Required check
-            result += `<h2 class='miniboard-form-entry-name'>${field}`;
-            if (state._constraints[field].presence) {
-                result += "<div class='miniboard-form-required-asterisk'> *</div>";
-            }
-            result += "</h2>"
-
-            let extraStyle = "";
-            let lengthMeta = constraint.length;
-            if (lengthMeta != null) {
-                let maxLength = lengthMeta.maximum ? Math.min(lengthMeta.maximum, 50) : 20;
-                if (maxLength <= textAreaThreshold) {
-                    extraStyle += `width: ${maxLength * 0.75}rem;`;
-                }
-            }
-
-            // Different inputs for each validator.
-            let defStyle = `style="${extraStyle}" class="miniboard-form-input" id="miniboard-form-input-${field}" name="${field}"`;
-            let defValue = "";
-            if (state[field]) {
-                defValue = `value="${escapeHtml(state[field])}"`;
-            }
-
-            if (constraint.datetime && constraint.datetime.dateOnly) {
-                result += `<input ${defStyle} type='date' placeholder='${field}' ${defValue}/>`;
-            } else if (constraint.datetime) {
-                result += `<input ${defStyle} type='datetime-local' placeholder='${field}' ${defValue} />`;
-            } else if(constraint.length && constraint.length.maximum > textAreaThreshold) {
-                result += `<textarea ${defStyle} type='textarea' placeholder='${field}' ${defValue}></textarea>`;
-            } else if(custom.options) {
-                // Options expansion.
-                result += `<select ${defStyle} type='select' placeholder='${field}'>`;
-                if (custom.nullable) {
-                    result += `<option disabled selected value>--no-option--</option>`
-                }
-                custom.options.forEach((opt) => {
-                    result += `<option value=${opt}>${opt}</option>`;
-                });
-                result += `</select>`
-            } else if (custom.checklist) {
-                // Checklist expansion.
-                result += `<div class="miniform-form-checkbox">`
-                let arr = state[field] ? JSON.parse(state[field]) : [];
-                custom.checklist.forEach((opt) => {
-                    result += `<div class="miniform-form-checkbox-option">`
-                    result += `<label>${opt}</label>`
-                    let checkedSetting = arr.includes(opt) ? "checked" : "";
-                    result += `<input ${defStyle} value="${opt}" type='checkbox' ${checkedSetting}/>`
-                    result += `</div>`
-                });
-                result += `</div>`
-            } else if (custom.vectorize) {
-                result += `<div class="miniboard-form-vectorized" name="${field}">`
-                let arr = state[field] ? JSON.parse(state[field]): [];
-                arr.forEach((val) => {
-                    result += `<input class="miniboard-form-input miniboard-form-input-vectorized" name="${field}" value="${val}" type="text"/>`
-                })
-                result += `<div>`
-                result += `<button class="miniboard-add-vectorized">+</button>`
-                result += `<button class="miniboard-sub-vectorized">-</button>`
-                result += `</div>`
-                result += `</div>` // close vectorization
-            } else {
-                result += `<input ${defStyle} type='text' placeholder='${field}' ${defValue}/>`;
-            }
-            result += `</div>` // close form entry.
-        });
-
-        result += "</div>"; // close form group
-        result += "</div>"; // close form body
-        result += "<div id='miniboard-form-status'></div>"
-        if (action == "insert") {
-            result += "<input type='submit' value='Add'/>"
-        } else {
-            result += "<input type='submit' value='Update'/>"
-        }
-        result += "</form>"; // close form
-        return result;
+        let renderer = new CoreFormRender();
+        return renderer.setData(state).render();
     }
 
     updateAllStatusForInput(errors) {
@@ -303,7 +327,7 @@ class MiniBoard {
       // validate the form against the constraints
       let curState = this.states[this.states.length - 1];
       let errors = validate(this.curForm, curState._constraints);
-      console.log(errors);
+
       // then we update the form to reflect the results
       if (!errors) {
         this.updateStatus("Submitting...", false)
@@ -314,7 +338,6 @@ class MiniBoard {
             return  dom.val() != "" || !nullable;
         }
         ).serialize();
-        console.log(serializedForm);
 
         $.ajax({
             type: "POST",
@@ -337,6 +360,7 @@ class MiniBoard {
             }
         });
       } else {
+        console.error(errors);
         this.updateStatus("Invalid input detected.", true)
         this.updateAllStatusForInput(errors);
       }

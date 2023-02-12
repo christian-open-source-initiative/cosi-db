@@ -208,3 +208,26 @@ let EventState = FormStruct(
     },
     [1, 4, 6]
 );
+
+let HouseholdState = FormStruct(
+    "Household",
+    {
+        "house_name": {
+            length: {
+                maximum: 64
+            }
+        },
+        "address": {
+        },
+        "persons": {
+        },
+        "relations": {
+        }
+    },
+    {
+        "address": {
+            "custom_render": new DisabledFormEntry()
+        }
+    },
+    [1, 4]
+);

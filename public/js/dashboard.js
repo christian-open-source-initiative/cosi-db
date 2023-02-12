@@ -141,7 +141,7 @@ $(document).ready(() => {
         else if (name == "Person") { return PersonState}
         else if (name == "Group") { return GroupState}
         else if (name == "Event") { return EventState}
-        // else if ("Household") { return new HouseholdState(param)}
+        else if ("Household") { return HouseholdState}
     }
 
     // Register callbacks.
@@ -174,7 +174,7 @@ $(document).ready(() => {
     $("#household-select").on("click", () => {
         tableTrack = HOUSEHOLD_TABLE_IDX;
         CURRENT_PAGE = 0;
-        actionToolbar.setState(null);
+        actionToolbar.setState(getStateClass("Household"));
         updateTable();
     });
 

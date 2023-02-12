@@ -5,7 +5,7 @@ class DataRenderer {
         return this;
     }
 
-    render() {
+    render(cb, fcb) {
         console.assert("Not yet implemented.")
     }
 }
@@ -16,4 +16,9 @@ class CustomTableRender extends DataRenderer {
         this.column = c;
         return this;
     }
+}
+
+// Basic Renderer that Disables Forms
+class DisabledFormEntry extends DataRenderer {
+
 }
