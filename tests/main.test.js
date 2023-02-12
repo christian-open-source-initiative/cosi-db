@@ -1,6 +1,7 @@
 import session from "supertest-session";
-import {jest} from "@jest/globals";
+import {jest, expect} from "@jest/globals";
 import { ALL_PAGEABLE_ENDPOINTS, ALL_GEN_ENDPOINTS, TABLE_NAMES } from "./endpoints.js";
+import _ from "lodash";
 
 jest.setTimeout(10000);
 var totalDatapointsPerTable = 200;
@@ -64,9 +65,9 @@ describe("Test Root", () => {
 });
 
 describe("CRUD", () => {
-    // Check all basic GET endpoints.
+    // Verify getters.
     // Each get page should have max 100 datapoints.
-    describe("Verify Getters", () => {
+    describe("Verify GET", () => {
         const maxDatapoints = 100;
         const returnKeys = [
             "page",
@@ -170,6 +171,34 @@ describe("CRUD", () => {
                     expect((v["key_type"] == k && v[lo] != "null") || (v["key_type"] != k && v[lo] == "null"))
                 }
             }
+        });
+
+        test("/get_person", async () => {
+            // Grab a bunch of person data points.
+            const response = await cosiRequest
+                                    .get(`/find_person`)
+                                    .query({page: 0})
+                                    .expect(200)
+                                    .expect("Content-Type", /json/);
+
+            let persons = JSON.parse(response.text).data;
+
+            let oids = [];
+            persons.forEach((elem) => {
+                oids.push(elem["_id"]["$oid"]);
+                delete persons["_id"];
+            });
+
+            // Check that our other endpoints return similar data.
+            const getResponse = await cosiRequest
+                                        .get(`/get_person`)
+                                        .query({oids: oids})
+                                        .expect(200)
+                                        .expect("Content-Type", /json/);
+            let getResult = JSON.parse(getResponse.text);
+            getResult.forEach((elem) => {
+                expect(persons.find(fElem => _.isEqual(fElem, elem)));
+            });
         });
     });
 

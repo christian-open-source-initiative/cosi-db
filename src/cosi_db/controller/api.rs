@@ -26,8 +26,8 @@ use crate::cosi_db::model::auth::User;
 use crate::cosi_db::model::common::{COSICollection, Generator};
 
 use crate::{
-    generate_dropper, generate_generators, generate_pageable_find, generate_pageable_inserter,
-    generate_pageable_update,
+    generate_dropper, generate_generators, generate_pageable_find, generate_pageable_getter,
+    generate_pageable_inserter, generate_pageable_update,
 };
 
 // Address
@@ -42,6 +42,7 @@ generate_pageable_update! { Address }
 use crate::cosi_db::model::person::{Person, PersonImpl, PersonOptional};
 generate_generators! { Person }
 generate_pageable_find! { Person }
+generate_pageable_getter! { Person }
 generate_pageable_inserter! { Person }
 generate_dropper! { Person }
 generate_pageable_update! { Person }

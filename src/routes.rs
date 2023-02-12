@@ -3,7 +3,6 @@ use rocket::{fs::FileServer, Build, Rocket};
 use super::cosi_db::controller::api::*;
 use super::cosi_db::controller::auth::*;
 use super::cosi_db::controller::dashboard::*;
-
 pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
     rb.mount("/public", FileServer::from("public")).mount(
         "/",
@@ -14,6 +13,7 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             // Person
             gen_person,
             find_person,
+            get_person,
             insert_person,
             drop_person,
             update_person,

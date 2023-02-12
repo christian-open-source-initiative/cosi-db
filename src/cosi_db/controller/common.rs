@@ -90,31 +90,21 @@ macro_rules! generate_pageable_find {
 }
 
 #[macro_export]
-macro_rules! generate_pageable_multi_getter {
+macro_rules! generate_pageable_getter {
     ($T:ident) => {
         $crate::paste::paste! {
             $crate::with_builtin_macros::with_builtin!{
-                let $v_path = concat!("/get_multi_", stringify!([<$T: lower>]), "?<page>&<oids>") in {
+                let $v_path = concat!("/get_", stringify!([<$T: lower>]), "?<page>&<oids>") in {
                     #[get($v_path)]
-                    pub async fn [<get_ $T:lower>](_user: User, connect: Connection<COSIMongo>, page: Option<u64>, oids: [String]) -> RawJson<String> {
+                    pub async fn [<get_ $T:lower>](_user: User, connect: Connection<COSIMongo>, page: Option<u64>, oids: Vec<String>) -> RawJson<String> {
                         let client: &Client = &*connect;
                         let page = page.unwrap_or(0);
 
-                        let col = $T::get_collection(client).await;
-
-                        // Fetch all the oids
-                        let converted_oid: Vec<Document> = vec![];
-                        for oid in oids {
-                            converted_oid.insert(doc!{oid});
-                        }
-
                         // Query any search_queries
-                        let data: Vec<T> = $T::find_by_oids(client, converted_oid, Some(find_options)).await.unwrap();
-                        RawJson(
-                            serde_json::to_string(&PaginateData {
-                                data: data
-                            }).unwrap()
-                        )
+                        let data: Vec<$T> = $T::find_by_oids(client, oids, None).await.unwrap();
+                        return RawJson(
+                            serde_json::to_string(&data).unwrap()
+                        );
                     }
                 }
             }

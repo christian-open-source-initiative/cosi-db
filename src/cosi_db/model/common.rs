@@ -179,11 +179,15 @@ where
 
     async fn find_by_oids(
         client: &Client,
-        oids: Vec<Document>,
+        oids: Vec<String>,
         options: Option<FindOptions>,
     ) -> COSIResult<Vec<T>> {
         let col = Self::get_collection(client).await;
-        let cursor: Cursor<I> = col.find(doc! {"_id": {"$in": oids}}, options).await?;
+        let mut object_ids = vec![];
+        for oid in oids {
+            object_ids.push(ObjectId::from_str(&oid)?);
+        }
+        let cursor: Cursor<I> = col.find(doc! {"_id": {"$in": object_ids}}, options).await?;
         let results = cursor.try_collect().await?;
         return Ok(Self::to_orm(client, &results).await?);
     }
