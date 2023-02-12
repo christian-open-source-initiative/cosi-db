@@ -10,21 +10,7 @@ let RENAME = {
 }
 
 // Foreign keys require special render constraints.
-class CustomTableRender {
-    setColumn(c) {
-        this.column = c;
-        return this;
-    }
 
-    setData(d) {
-        this.data = d;
-        return this;
-    }
-
-    render() {
-        console.assert("No implemented err.")
-    }
-}
 
 class BasicForeignRender extends CustomTableRender {
     constructor(externalKeyNames) {
@@ -61,20 +47,18 @@ class HouseRelationRender extends CustomTableRender {
         // Ordering is guaranteed by the API so we easily deserialize later.
         let oids = [];
         let relations = [];
-        console.log(this.data);
         this.data.forEach(d => {
             oids.push(d["person_a"]["$oid"]);
             oids.push(d["person_b"]["$oid"]);
             relations.push(d["relation"])
         });
         console.assert(relations.length * 2 == oids.length);
-        console.log(oids);
 
         $.ajax({
             url: `/get_person`,
             data: {oids: oids},
             success: function(result) {
-                /// TODO: Error handling.
+                // TODO: Error handling.
                 let results = [];
                 relations.forEach((r, idx) => {
                     let personA = result[idx * 2].first_name;

@@ -10,12 +10,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
   <script src="public/js/jquery.js" charset="utf-8" ></script>
+  <script src="public/js/moment.locales.min.js" charset="utf-8"></script>
+  <script src="public/js/validate.min.js" charset="utf-8"></script>
+
+  <script src="public/js/common.js" charset="utf-8"></script>
   <script src="public/js/searchmanager.js" charset="utf-8"></script>
   <script src="public/js/table.js" charset="utf-8"></script>
   <script src="public/js/actions.js" charset="utf-8"></script>
+  <script src="public/js/views/person.js" charset="utf-8"></script>
 
-  <script src="public/js/moment.locales.min.js" charset="utf-8"></script>
-  <script src="public/js/validate.min.js" charset="utf-8"></script>
   <script src="public/js/forms.js" charset="utf-8"></script>
   <script src="public/js/miniboard.js" charset="utf-8"></script>
 
