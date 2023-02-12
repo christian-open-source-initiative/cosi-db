@@ -1,5 +1,5 @@
 // Certain tables have foreign key references that need rendering.
-// This tracks what to display as clickable in those values.
+// The displays have special relationships with them that allow you to
 let FOREIGN = {};
 FOREIGN["household"] = {
     "persons": ["first_name", "last_name"],
@@ -16,6 +16,66 @@ let RENAME = {
     "work_phone": "work",
     "mobile_phone": "mobile"
 }
+
+// Foreign keys require special render constraints.
+class CustomTableRender {
+    setColumn(c) {
+        this.column = c;
+        return this;
+    }
+
+    setData(d) {
+        this.data = d;
+        return this;
+    }
+
+    render() {
+        console.assert("No implemented err.")
+    }
+}
+
+class BasicForeignRender extends CustomTableRender {
+    constructor(externalKeyNames) {
+        super();
+        // Keys we want to render for foreign entry.
+        this.keys = externalKeyNames;
+        console.assert(Array.isArray(this.keys));
+    }
+
+    getKeysAsArray(keys, data) {
+        let result = [];
+        keys.forEach(k => result.push(data[k]));
+        return result;
+    }
+
+    render() {
+        // For multiple relations.
+        if (Array.isArray(this.data)) {
+            let results = [];
+            this.data.forEach(datum => {
+                let s = this.getKeysAsArray(this.keys, datum).join(", ");
+                results.push(s)
+            });
+            return results.join(", ");
+        }
+
+        return this.getKeysAsArray(this.keys, this.data).join(", ");
+    }
+}
+
+class HouseRelationTable extends CustomTableRender {
+    render() {
+
+    }
+}
+
+// We provide special ways to render for these entries.
+let SPECIAL_RENDER = {};
+SPECIAL_RENDER["household"] = {
+    "persons": new BasicForeignRender(["first_name", "last_name"]),
+    "address": new BasicForeignRender(["line_one", "line_two", "line_three"])
+}
+
 
 class Table {
     constructor(actionToolbar, tableDiv) {
@@ -55,7 +115,7 @@ class Table {
         }
 
         // Body generate.
-        let foreignKeys = tableName in FOREIGN ? FOREIGN[tableName]: {}; // Can be undefined.
+        let specialKeys = tableName in SPECIAL_RENDER ? SPECIAL_RENDER[tableName]: {};
         for (let i = 0; i < data.length; ++i) {
             let row = this.tableDiv[0].insertRow(-1);
             let oid = undefined;
@@ -66,29 +126,9 @@ class Table {
                 if (k == "_id") {
                     oid = value["$oid"];
                     continue;
-                } else if (k in foreignKeys) {
-                    let externalKeys = foreignKeys[k]
-                    let extValue = value;
-
-                    let retrieve = (keys, d) => {
-                        let result = [];
-                        for (let k of keys) {
-                            result.push(d[k])
-                        }
-                        return result.join(" ");
-                    };
-
-                    let finalRender = "";
-                    if (Array.isArray(extValue)) {
-                        let results = [];
-                        for (let ev of extValue) {
-                            results.push(retrieve(externalKeys, ev));
-                        }
-                        finalRender = results.join(", ");
-                    } else {
-                        finalRender = retrieve(externalKeys, extValue);
-                    }
-
+                } else if (k in specialKeys) {
+                    let renderer = specialKeys[k];
+                    let finalRender = renderer.setData(value).setColumn(k).render();
                     $(row.insertCell(-1)).html(finalRender).attr("entry-name", k);
                 } else {
                     if (Array.isArray(value)) {

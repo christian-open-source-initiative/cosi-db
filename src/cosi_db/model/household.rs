@@ -22,6 +22,8 @@ pub enum HouseRelationStatus {
     Husband,
     Wife,
     Child,
+    Guardian,
+    Other,
 }
 
 #[derive(Clone, Debug, FromForm, Serialize, Deserialize)]
