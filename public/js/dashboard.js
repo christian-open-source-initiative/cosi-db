@@ -31,7 +31,7 @@ for (let k in ENDPOINT) {
 let GEN_ENDPOINT_LOOKUP = {};
 let GET_ENDPOINT_LOOKUP = {};
 for (const idx of TABLE_IDX) {
-    GET_ENDPOINT_LOOKUP[idx] = "get_" + ENDPOINT[idx];
+    GET_ENDPOINT_LOOKUP[idx] = "find_" + ENDPOINT[idx];
     GEN_ENDPOINT_LOOKUP[idx] = "gen_" + ENDPOINT[idx];
 }
 
