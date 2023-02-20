@@ -15,7 +15,9 @@ class DataRenderer {
         // Arguments keywords are not Arrays and require conversion.
         let args = [];
         for (let i = 0; i < arguments.length; ++i) {
-            args.push(arguments[i]);
+            if (arguments[i] != null) {
+                args.push(arguments[i]);
+            }
         }
         return this.defCSSPrefix + "-" + args.join("-");
     }

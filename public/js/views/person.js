@@ -1,10 +1,8 @@
 // In charge of rendering the expanded data view.
 class PersonExpanded extends DataRenderer {
     div(cls, inner) {
-        if (cls == null)  {cls = ""; }
-        else { cls = "-" + cls; }
         return `
-            <div class="${this.defCSSPrefix}-person${cls}">
+            <div class="${this.cssAttr("person", cls)}">
                 ${inner}
             </div>
         `;
