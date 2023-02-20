@@ -95,7 +95,7 @@
           <button type="button" id="add-row" class="action-button">Add New</button>
           <div id="action-toolbar-more">
             <div id="action-toolbar-message"></div>
-            <button type="button" id="update-row" class="action-button">Update</button>
+            <button type="button" id="update-row" class="action-button">Edit</button>
             <button type="button" id="delete-row" class="action-button">Delete</button>
           </div>
         </div>

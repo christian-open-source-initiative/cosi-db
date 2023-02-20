@@ -157,7 +157,7 @@ class CoreFormRender extends DataRenderer {
             result += `<h1 id='miniboard-form-title'>Add New ${this.data._stateName}</h1>`
         } else {
             result += `<form id='miniboard-form' action='/update_${this.formName}?oid=${this.data._oid}' method='post' novalidate>`;
-            result += `<h1 id='miniboard-form-title'>Update ${this.data._stateName}</h1>`
+            result += `<h1 id='miniboard-form-title'>Edit ${this.data._stateName}</h1>`
         }
         result += "<div id='miniboard-form-body'>";
 
@@ -433,6 +433,6 @@ class MiniBoard {
         this.searchDarkener.fadeOut();
         this.render.hide(300);
         this.isVisible = false;
-        this.updateTable();``
+        this.updateTable();
     }
 }

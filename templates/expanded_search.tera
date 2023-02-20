@@ -9,8 +9,11 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="public/js/jquery.js" charset="utf-8" ></script>
-  <script src="public/js/searchmanager.js" charset="utf-8"></script>
-  <script src="public/js/person.js" charset="utf-8"></script>
+
+  <script src="public/js/common.js" charset="utf-8"></script>
+  <script src="public/js/views/person.js" charset="utf-8"></script>
+
+  <script src="public/js/expanded_search.js" charset="utf-8"></script>
 </head>
 <body>
     <div class="cover-entire-screen"></div>
@@ -36,5 +39,19 @@
     </nav>
 
     <!-- out-div necessary for cover-entire-screen -->
+    <div id="outer-div">
+      <div class="center-content">
+        <h1>Search</h1>
+        <br />
+        <div id="search-bar-div">
+          <input type="search" id="main-search-bar" class="search-bar-general" placeholder="Type something such as name, address, or event." />
+          <button type="submit" id="main-search-bar-submit" class="search-bar-general"><i class="fa fa-search"></i></button>
+        </div>
+        <br /> <br />
+      </div>
+    </div>
+
+    <div id="extended-search-render">
+    </div>
 </body>
 </html>

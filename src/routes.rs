@@ -17,8 +17,6 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             insert_person,
             drop_person,
             update_person,
-            person,
-            person_redirect,
             // Address
             gen_address,
             find_address,
@@ -54,6 +52,8 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             drop_grouprelation,
             // Search
             search,
+            expanded_search,
+            expanded_search_redirect,
             // Auth
             login,
             login_logged,

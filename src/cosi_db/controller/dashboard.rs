@@ -34,14 +34,15 @@ struct SearchTable<T> {
     entry_match: String,
 }
 
-#[get("/person", rank = 2)]
-pub async fn person(_user: User) -> RawHtml<Template> {
-    RawHtml(Template::render("person", context! {}))
+// Page search
+#[get("/expanded_search", rank = 2)]
+pub async fn expanded_search(_user: User) -> RawHtml<Template> {
+    RawHtml(Template::render("expanded_search", context! {}))
 }
 
-#[get("/person", rank = 3)]
-pub fn person_redirect() -> Flash<Redirect> {
-    Flash::success(Redirect::to("/person"), "User needs to be logged in.")
+#[get("/expanded_search", rank = 3)]
+pub async fn expanded_search_redirect() -> Flash<Redirect> {
+    Flash::success(Redirect::to("/login"), "User needs to be logged in.")
 }
 
 #[get("/search?<query>")]

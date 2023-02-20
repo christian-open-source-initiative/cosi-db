@@ -145,8 +145,8 @@ $(document).ready(() => {
     }
 
     // Register callbacks.
-    // TODO: Not sure how to encapsulate this when ownership of table state is elsewhere.
     // Reaction to clicking search suggestions.
+    // Good to have outside of SearchManager as we want to override default behavior.
     $("#search-suggestions").on("click", ".search-suggestion-entry", function() {
         // TODO: Placeholder for now until we can scroll to result. Regenerate table.
         let fullMatch = $(this).children(".search-suggestion-result").attr("data");
