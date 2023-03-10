@@ -59,7 +59,9 @@ pub fn register_route(rb: Rocket<Build>) -> Rocket<Build> {
             login_logged,
             login_submit,
             logout,
-            gen_login
+            gen_login,
+            get_permissions_maintainer,
+            get_permissions_user
         ],
     )
 }

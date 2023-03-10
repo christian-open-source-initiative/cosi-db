@@ -95,7 +95,7 @@ def import_address(people_df, person_oid_track, session):
             continue
 
         # Check if db already exists this value
-        res = cosi_get("get_address", session=session, params=a)
+        res = cosi_get("find_address", session=session, params=a)
         address_oid = None
         if len(res["data"]) == 0:
             res = cosi_post("insert_address", session=session, params=a)
@@ -160,7 +160,7 @@ def main():
         for k in [t.lower() for t in TABLE_NAMES]:
             cosi_get(f"drop_{k}", session=session)
             # Double check all data is wiped
-            result = cosi_get(f"get_{k}", session=session, params={"page": 0})
+            result = cosi_get(f"find_{k}", session=session, params={"page": 0})
             assert len(result["data"]) == 0
             print(f"Dropped: {k}")
         print()

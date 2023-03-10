@@ -43,9 +43,9 @@ pub fn get_permissions_maintainer(_user: Maintainer) -> RawJson<String> {
     RawJson("{\"is_maintainer\": true}".to_string())
 }
 
-#[get("/permissions", rank = 2)]
-pub fn get_permissions_user(_user: Maintainer) -> RawJson<String> {
-    RawJson("{\"is_mantainer\": false}".to_string())
+#[get("/permissions", rank = 3)]
+pub fn get_permissions_user(_user: User) -> RawJson<String> {
+    RawJson("{\"is_maintainer\": false}".to_string())
 }
 
 #[get("/login", rank = 2)]

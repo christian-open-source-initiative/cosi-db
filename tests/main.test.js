@@ -65,6 +65,15 @@ describe("Test Root", () => {
 });
 
 describe("CRUD", () => {
+    // Check permissions page.
+    test("/permissions GET", async () => {
+        const response = await cosiRequest
+                                .get("/permissions")
+                                .expect(200)
+                                .expect("Content-Type", /json/);
+        expect(JSON.parse(response.text)["is_maintainer"]).toBe(true);
+    });
+
     // Verify getters.
     // Each get page should have max 100 datapoints.
     describe("Verify GET", () => {

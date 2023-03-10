@@ -12,43 +12,52 @@ class ActionToolbar {
         // Should be an instance of FormStruct
         this.StateConstructor = null;
 
-        $("#add-row").click(() => {
-            if (!this.displayButtons) { return ;}
-            else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
-            this.miniboard.addState(ACTION_INSERT, new this.StateConstructor());
-        });
+        // Check current maintainer role.
+        // TODO: Perhaps we can amortize this in cookies.
+        $.get('/permissions', (result) => {
+            if (result["is_maintainer"]) {
+                $("#add-row").click(() => {
+                    if (!this.displayButtons) { return ;}
+                    else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
+                    this.miniboard.addState(ACTION_INSERT, new this.StateConstructor());
+                });
 
-        $("#update-row").click(() => {
-            if (!this.displayButtons || this.selected.length <= 0) { return ;}
-            else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
+                $("#update-row").click(() => {
+                    if (!this.displayButtons || this.selected.length <= 0) { return ;}
+                    else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
 
-            let params = {};
-            // Assume single selected for now.
-            let oid = this.selected[0];
-            $(`[oid=${oid}] td`).each(function() {
-                let dom = $(this);
-                params[dom.attr("entry-name")] = dom.text();
-            });
-            // Used for updating the result.
-            params._oid = oid;
-            this.miniboard.addState(ACTION_UPDATE, new this.StateConstructor(params));
-        });
+                    let params = {};
+                    // Assume single selected for now.
+                    let oid = this.selected[0];
+                    $(`[oid=${oid}] td`).each(function() {
+                        let dom = $(this);
+                        params[dom.attr("entry-name")] = dom.text();
+                    });
+                    // Used for updating the result.
+                    params._oid = oid;
+                    this.miniboard.addState(ACTION_UPDATE, new this.StateConstructor(params));
+                });
 
-        $("#delete-row").click(()=> {
-            if (!this.displayButtons || this.selected.length <= 0) { return ;}
-            else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
+                $("#delete-row").click(()=> {
+                    if (!this.displayButtons || this.selected.length <= 0) { return ;}
+                    else if (this.StateConstructor == null ) { alert("Operator not yet supported for this table."); return; }
 
-            let params = {};
-            // Assume single selected for now.
-            let oid = this.selected[0];
-            $(`[oid=${oid}] td`).each(function() {
-                let dom = $(this);
-                params[dom.attr("entry-name")] = dom.text();
-            });
-            // Used for updating the result.
-            params._oid = oid;
-            this.miniboard.addState(ACTION_CAT, new this.StateConstructor(params));
+                    let params = {};
+                    // Assume single selected for now.
+                    let oid = this.selected[0];
+                    $(`[oid=${oid}] td`).each(function() {
+                        let dom = $(this);
+                        params[dom.attr("entry-name")] = dom.text();
+                    });
+                    // Used for updating the result.
+                    params._oid = oid;
+                    this.miniboard.addState(ACTION_CAT, new this.StateConstructor(params));
+                })
+            } else {
+                this.actionDom.html("");
+            }
         })
+
     }
 
     setState(state) {

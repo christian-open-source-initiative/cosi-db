@@ -13,7 +13,6 @@
   <script src="public/js/moment.locales.min.js" charset="utf-8"></script>
   <script src="public/js/validate.min.js" charset="utf-8"></script>
 
-  <script src="public/js/views/person.js" charset="utf-8"></script>
   <script src="public/js/views/house_relation.js" charset="utf-8"></script>
 
   <script src="public/js/common.js" charset="utf-8"></script>

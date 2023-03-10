@@ -18,7 +18,7 @@ macro_rules! generate_generators {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/gen_", stringify!([<$T: lower>]),  "/<total>") in {
                     #[get($v_path)]
-                    pub async fn [<gen_ $T:lower>](_user: User, connect: Connection<COSIMongo>, total: u8) -> RawJson<String> {
+                    pub async fn [<gen_ $T:lower>](_user: Maintainer, connect: Connection<COSIMongo>, total: u8) -> RawJson<String> {
                         #[cfg(debug_assertions)]
                         {
                             let client: &Client = &*connect;
@@ -120,7 +120,7 @@ macro_rules! generate_pageable_inserter {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/insert_", stringify!([<$T: lower>])) in {
                     #[post($v_path, data="<insert_query>")]
-                    pub async fn [<insert_ $T:lower>](_user: User, connect: Connection<COSIMongo>, insert_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
+                    pub async fn [<insert_ $T:lower>](_user: Maintainer, connect: Connection<COSIMongo>, insert_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
                         let client: &Client = &*connect;
                         let insert_query_obj = insert_query.into_inner();
                         let search_convert = $T::convert_form_insert(insert_query_obj);
@@ -150,7 +150,7 @@ macro_rules! generate_pageable_update {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/update_", stringify!([<$T: lower>]), "?<oid>") in {
                     #[post($v_path, data="<update_query>")]
-                    pub async fn [<update_ $T:lower>](_user: User, connect: Connection<COSIMongo>, oid: String, update_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
+                    pub async fn [<update_ $T:lower>](_user: Maintainer, connect: Connection<COSIMongo>, oid: String, update_query: Form<[<$T Impl>]>) -> Custom<RawJson<String>> {
                         let client: &Client = &*connect;
                         // We make the following assumption: absence -> null. We do not store empty strings.
                         // This has to do with HashMap limitations and Rust autocasting behavior.
@@ -184,7 +184,7 @@ macro_rules! generate_dropper {
             $crate::with_builtin_macros::with_builtin!{
                 let $v_path = concat!("/drop_", stringify!([<$T: lower>])) in {
                     #[get($v_path)]
-                    pub async fn [<drop_ $T:lower>](_user:User, connect: Connection<COSIMongo>) -> RawJson<String> {
+                    pub async fn [<drop_ $T:lower>](_user:Maintainer, connect: Connection<COSIMongo>) -> RawJson<String> {
                         #[cfg(debug_assertions)]
                         {
                             let client: &Client = &*connect;
