@@ -13,7 +13,7 @@ use rocket::response::{Flash, Redirect};
 // cosi_db
 use crate::cosi_db::connection::COSIMongo;
 use crate::cosi_db::model::address::Address;
-use crate::cosi_db::model::auth::User;
+use crate::cosi_db::model::auth::{Maintainer, User};
 use crate::cosi_db::model::common::COSICollection;
 use crate::cosi_db::model::household::Household;
 use crate::cosi_db::model::person::Person;
@@ -23,7 +23,7 @@ pub fn index(_user: User) -> RawHtml<Template> {
     RawHtml(Template::render("dashboard", context! {}))
 }
 
-#[get("/", rank = 3)]
+#[get("/", rank = 4)]
 pub fn index_redirect() -> Flash<Redirect> {
     Flash::success(Redirect::to("/login"), "User needs to be logged in.")
 }

@@ -1,5 +1,5 @@
 body, * {
-    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-family: 'Roboto', sans-serif;
 }
 
 html, body, h1 {
@@ -64,6 +64,7 @@ nav #logo-text {
 }
 
 nav #logo-text a {
+    font-family: Georgia, 'Times New Roman', Times, serif;
     padding-left: 0;
 }
 

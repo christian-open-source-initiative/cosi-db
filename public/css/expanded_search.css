@@ -1,0 +1,10 @@
+#extended-search-render {
+    display: block;
+    align-items: center;
+    justify-content: center;
+}
+
+.esearch-result {
+    width: 50%;
+    margin: 0 auto;
+}

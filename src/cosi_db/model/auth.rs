@@ -36,6 +36,20 @@ impl COSICollection<'_, User, User, UserForm> for User {
     }
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Maintainer {
+    pub username: String,
+    pub email: String,
+    pub token: String,
+}
+
+impl COSIForm for Maintainer {}
+impl COSICollection<'_, Maintainer, Maintainer, UserForm> for Maintainer {
+    fn get_table_name() -> String {
+        return "maintainer".to_string();
+    }
+}
+
 // For security, logging items are in a separate table.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct UserLogin {
@@ -80,6 +94,67 @@ impl<'r> FromRequest<'r> for User {
                         });
                         // TODO: Connection error handling.
                         User::find_data(client, search_doc, None).await.unwrap()
+                    }
+                }
+            })
+            .await;
+
+        if docs.len() == 0 {
+            // User did not work. Try maintainer instead.
+            let outcome = Maintainer::from_request(request).await;
+            if let Outcome::Success(maintainer) = outcome {
+                return Outcome::Success(User {
+                    username: maintainer.username,
+                    email: maintainer.email,
+                    token: maintainer.token,
+                });
+            }
+
+            // Technically we didn't forward this properly as maintainer could return server error and we
+            // would be silent.
+            Outcome::Forward(())
+        } else if docs.len() > 1 {
+            Outcome::Failure((
+                Status::InternalServerError,
+                COSIError::msg("Invalid login detected."),
+            ))
+        } else {
+            Outcome::Success(docs[0].clone())
+        }
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Maintainer {
+    type Error = COSIError;
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Maintainer, COSIError> {
+        // Example from docs
+        // https://api.rocket.rs/v0.5-rc/rocket/request/trait.FromRequest.html
+        let docs: &Vec<Maintainer> = request
+            .local_cache_async(async {
+                let connect = request.guard::<&COSIMongo>().await.succeeded().unwrap();
+                let client = &*connect;
+                let uid: Option<String> = request
+                    .cookies()
+                    .get_private("user_id")
+                    .and_then(|cookie| cookie.value().parse().ok());
+                let token: String = request
+                    .cookies()
+                    .get_private("user_token")
+                    .and_then(|cookie| cookie.value().parse().ok())
+                    .unwrap_or("".to_string());
+                match uid {
+                    None => Vec::new(),
+                    Some(ref v) => {
+                        let search_doc = Some(doc! {
+                            "_id": ObjectId::parse_str(&v).unwrap(),
+                            "token": token
+                        });
+                        // TODO: Connection error handling.
+                        Maintainer::find_data(client, search_doc, None)
+                            .await
+                            .unwrap()
                     }
                 }
             })

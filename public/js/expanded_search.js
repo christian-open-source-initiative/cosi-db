@@ -45,7 +45,7 @@ class ExpandedSearch {
                     let entryMatch = r["entry_match"];
 
                     // Dispatch to each unique renderer.
-                    let newResult = $("<div></div>");
+                    let newResult = $("<div class='esearch-result'></div>");
                     this.render.append(newResult);
                     let result = new RenderClass()
                                         .setData(d)

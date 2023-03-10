@@ -1,0 +1,51 @@
+.esearch-person {
+    background-color: rgb(43, 43, 43);
+    width: 100%;
+    margin: 1rem 0;
+    padding: 1rem 1rem;
+}
+
+.esearch-person * {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+}
+
+.esearch-person-general-info {
+    display: inline-block;
+}
+
+.esearch-person-main-section * {
+    margin-bottom: 1rem;
+}
+
+.esearch-person-name {
+    font-size: 1.8rem;
+    display: inline-block;
+}
+
+@media screen and (min-width: 800px) {
+    .esearch-person {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    .esearch-person-name {
+        transform: translate(0, -16px);
+        padding-left: 0.5rem;
+    }
+}
+
+.esearch-person-profile {
+    width: 64px;
+    display: inline-block;
+}
+
+.esearch-person-profile-pic {
+    width: 64px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.esearch-person-main-section {
+    padding: 1rem;
+}
